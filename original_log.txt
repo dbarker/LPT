@@ -1,0 +1,1396 @@
+commit d268d9aea475382acb6c2abfcdb53ffac7f1323d
+Author: Douglas Barker <doug.barker@energid.com>
+Date:   Sat Mar 16 23:54:56 2013 -0400
+
+     updated file paths in tests
+
+commit 9256a03dd1cd7b8c11c325f2561cab96eae3a1c6
+Author: Douglas Barker <doug.barker@gmail.com>
+Date:   Sat Mar 16 23:00:38 2013 -0400
+
+    removed unneeded files from being tracked in repo, added testes
+
+commit 32dafc166313a5ae6ae977fcecd9ca486e703f6f
+Author: Douglas Barker <doug.barker@gmail.com>
+Date:   Sat Mar 16 20:49:22 2013 -0400
+
+    minor updates
+
+commit c35208d45f230c33a00aecb5dad370d223b0ca8d
+Author: Douglas Barker <doug.barker@gmail.com>
+Date:   Sat Mar 16 20:28:48 2013 -0400
+
+    more updates to repo structure
+
+commit f9cdd3ef10a1250525fa2609a61f28d49e480def
+Author: Douglas Barker <doug.barker@gmail.com>
+Date:   Sat Mar 16 17:32:28 2013 -0400
+
+    updated structure and changed to lpt
+
+commit c9921303469c87b25dbb453c923ef21e013d4460
+Author: Doug Barker <doug.barker@energid.com>
+Date:   Tue Oct 23 22:14:44 2012 -0400
+
+    changed file paths to be platform independent, minor cleanups
+
+commit 6c55b3a716ce7f2b57a87bdfa4cf6163dee379d1
+Author: Doug Barker (ACER Aspire) <doug.barker@gmail.com>
+Date:   Fri Sep 28 01:42:54 2012 -0400
+
+    added application to calculate particle postion standard uncertainties
+
+commit e4768a1779974c5816c7832ff4ae06ec6bd236c3
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Aug 30 10:40:53 2012 -0500
+
+    reduced queue size in virtual cameras app
+
+commit f7101c457e6bacdb95614904174bb94b6fab3b87
+Author: Doug Barker (ACER Aspire) <doug.barker@gmail.com>
+Date:   Thu Aug 30 10:29:04 2012 -0500
+
+    minor changes to cmake main file
+
+commit 4cc55e9a9568d74d945143b78e9d64d9dde2f91b
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Aug 30 10:07:24 2012 -0500
+
+    fixed bugs
+
+commit 01fb71358700e90fd2f3f0bfb503d86a6385b8b9
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Aug 24 21:22:30 2012 -0500
+
+    changed input and output file location, added comments to data acquisition and cleaned up that module
+
+commit 0863c89f132a57650bdf62f2e0707d131c1a7ff8
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Aug 15 17:08:15 2012 -0500
+
+    modified visualizer to allow setting of grid dimensions at main cpp file
+
+commit c2c259ef97eec9a3109ea8f3f712398df3c9252a
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Aug 15 15:31:36 2012 -0500
+
+    major clean up of source tree. Streaming pipeline class created to provide clearer structure
+
+commit e31935826cafa252c5af3cb5516d2c46eaf6d48a
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Aug 8 15:06:04 2012 -0500
+
+    moved visualization implimentation code to src cpp file from header
+
+commit 6e15b199263e826c3862341b10e20f2e34f1a611
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Jul 18 19:11:25 2012 -0500
+
+    cleaned up tracker and removed template code
+
+commit d7c04e18db2564b7a87214f8247b15864a605a4f
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Jul 18 16:35:17 2012 -0500
+
+    cleaning up samples
+
+commit 12e8aa6e8fb2a2abd468fc76fa2d05c3f4e9eb1c
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Jul 6 02:07:18 2012 -0500
+
+    updated virtual cams, timing fragments, tracking test
+
+commit 69d75311e52036ba38a11a6ccd6e6a45c51a6520
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Jun 12 20:47:30 2012 -0500
+
+    fixed eularian pressure calc bug, added trajectory coloring based on acceleration or velocity, added accumulator to determine centroid uncertainty of static points, added ability to save data to file
+
+commit ad54e7d52118af84800f5b00f95d85e372536b43
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Jun 8 01:39:37 2012 -0500
+
+    updated uncertainty calculation, added svd 3D reconstruction, added measurement function in visualization for velocity test and 3d position test
+
+commit 97ccf20e09c30ccd30e3e6f0037f4e9ae5693c31
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu May 31 18:10:36 2012 -0500
+
+    added image creation using focal length, distance and intensity to calculate proper particle image
+
+commit eff98f33e5657f592603f1067be6d4b89b3543d0
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue May 29 22:02:35 2012 -0500
+
+    added centriod pixel uncertainty calc to camera calibration using boost accumulators
+
+commit 77f0cf33ef7f281a1056ab298ed59ccfa17eaebe
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri May 25 18:46:39 2012 -0500
+
+    Uncertainty analysis works well now, results are very reasonable
+
+commit 4a698740253c2bf791414ed34e4b3b108e38c143
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu May 24 22:00:14 2012 -0500
+
+    fixed bugs in uncertainty analysis, it now prints uncertainties to file, and analyzes multiple 3d points
+
+commit b53172d72155a76871c8330acd79ff58718cdc89
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed May 23 19:10:20 2012 -0500
+
+    uncertainty calculation is complete, including distortion coefficients
+
+commit eff5c5ab1dd8d514d429136b9f341c82c725b4db
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue May 22 01:46:00 2012 -0500
+
+    completed 3D position uncertainty calculation, appears to be working
+
+commit 163dcf8833b8bb5e2afdc180ea3df8872585bb0a
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri May 18 12:09:43 2012 -0500
+
+    added 3D position uncertainty calculation class, changed scale factor of pivstd data
+
+commit 66e4215255c0c4000e5565b7c5b1383f9d139949
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu May 10 20:26:41 2012 -0500
+
+    particle trajectory path view now shows colored tails and the tails trail the particle by a set length
+
+commit acfdac5370591d65497f0af0c274d7cf0073f3c6
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu May 10 11:24:40 2012 -0500
+
+    Added lagrangian pressure caluclation and visualization
+
+commit 9282c189d39da52fcf918773225ea8969ff66c53
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Apr 27 17:02:23 2012 -0500
+
+    added vorticity vector plot, added separate thread to calculate pressure field
+
+commit 14c1bb638d93dac7bead62cfb9f49481138cc4c3
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Apr 26 17:06:12 2012 -0500
+
+    updated visualization pipeline for use in creating trajectory fate probability map
+
+commit ca3e66be62504d893dba7ae065fe8c13f24ba92c
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Apr 25 01:25:19 2012 -0500
+
+    added visualization thread to handle the queue of trajectories for visualization and updating accumulators
+
+commit aa5af25d01bfa1958af5d6d83b0e217c2c856138
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Apr 24 21:35:16 2012 -0500
+
+     added gpu selection and initialization in pointmatchercuda
+
+commit e50ad9beda6077381e79e000d6df79e37324e19b
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Apr 24 17:52:03 2012 -0500
+
+    modified correspond class to include multi-thread frame work, original findMatches approach works still
+
+commit 2e0bdf0e70b5623b999b32569528fc8b4cec54ae
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Apr 23 00:11:36 2012 -0500
+
+    added producer/consumer model conncurent_queue, now CPU usage is down to about 20% from 65%
+
+commit 6c859562ec4fa37028012c63944cc8c8b6e0b8fe
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sun Apr 22 21:55:24 2012 -0500
+
+    modified matching to unify gpu and host versions, updated virtual cams main file, started producer consumer switch over from polling
+
+commit 8dac4254dce56d0d7ce4564ee8453342d9fd1b8b
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sat Apr 21 01:09:30 2012 -0500
+
+    cleaned up correspond code removed match map from particle image data structure, made image processing done on cpu for segment precision and mjpeg modes, cleaned up usage of pointers and new command
+
+commit 1595770f25ce1dc77fb054c7a62fb4d795af66af
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Apr 18 19:32:42 2012 -0500
+
+    added two step pressure solver based on steady state reynolds averaged navier stokes equations
+
+commit d8c18a22a650e8476360e72d56fe69c91ac45715
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sat Apr 14 03:30:00 2012 -0500
+
+    added covariance accumulator to calculate reynolds stress tensor, calculates and displays turbulent energy and dissipation, but disspation is wrong now..should not go negative
+
+commit ef8d49ba9baf2e435696c840bfa6abee7c8bf36f
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Apr 13 02:46:27 2012 -0500
+
+    interpolation added based on 26 neighbor cells, works awesome, pressure poisson solve may work after all, need to include all source terms to improve convergence
+
+commit 83e567cc47e1d9ccfd32e9a623b53ca8e562133a
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Apr 12 21:18:14 2012 -0500
+
+    removed accumulators from pressuresolver and added vectors for velocity and acceleration fields
+
+commit d1f882b5586768e284727995046eb90469d3dabb
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Apr 12 01:07:14 2012 -0500
+
+     updated poisson pressure solver and it appears to work now
+
+commit 0692edcba792e3b1d267821d3784bfdc82b60b7b
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Apr 10 02:32:59 2012 -0500
+
+    added stat accumulators to each vis mode to automatically adjust the color bars, histogram is not working well
+
+commit 1a21b55e67bf23ffbae740026aecb12bbb4d1a4b
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Apr 9 18:51:44 2012 -0500
+
+    added histogram plot (doesnt work well) and mass residual calculation (works well)
+
+commit bb6812977437cc7e5f6599b4275b996d6a0f7ca9
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sat Apr 7 05:40:51 2012 -0500
+
+    updated pressure poisson solver, but used wrong bc, next will try to use navier stokes equations as bc
+
+commit 2a745a92214e7e62a54efe4e1b0bcb867bbf11c0
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Apr 6 22:04:23 2012 -0500
+
+    added initial try at pressure calculation from poisson equation
+
+commit 371e4e862489b5ef1f3825f0d616b026e8897424
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Apr 5 02:10:52 2012 -0500
+
+    small changes to visualizer
+
+commit f5495070403fbc1f54c4aee47948f3d3edb1eb44
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Apr 4 22:53:44 2012 -0500
+
+    improved rendering by removing grid actor before update
+
+commit ed1997f5e0e2f01aaedbba153487cb1ac40210e0
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Apr 4 20:22:27 2012 -0500
+
+    added visualization for error of mean for accel and velocity, ready for pressure vis
+
+commit 9647049a8121e68bbd0413464ea5a3ac8baaed64
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Apr 4 00:55:51 2012 -0500
+
+    acceleration vector view is working well, velocity and acceleration finite differece equations moved to visualizer
+
+commit a4feffad7bdee3336c858d807943b3d15eb112f1
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Apr 3 00:22:32 2012 -0500
+
+    added framerate variable to camerasystem, added acceleration switch to set vectors
+
+commit ae07a0ff6ca72bfd70cfd2810fb169107ed8e7cd
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Apr 2 17:52:31 2012 -0500
+
+    added controls for camera display, add camera id text to display, added coordinate widget
+
+commit c3d44deb376740a3e2a925bae772dc59303e0412
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Apr 2 00:38:57 2012 -0500
+
+    unified visualization vtkCommand handlers and added camera visualizaiton, all appears to work, vector field updates appears to have slowed, need to optimize
+
+commit b22e84b5ff02d8e7632ca11cb762e1dd42fea307
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Mar 30 01:13:52 2012 -0500
+
+    Added Camera views to vtk vis, added implicit plane widget to visualize cell data on finitevolumegrid:  Something is wrong with shutdown of visuializer and an error causes the program to crash
+
+commit bfd9dcc739520260195056258995759da9fd9df3
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Mar 16 03:04:33 2012 -0500
+
+    added visualization of camera views
+
+commit 4234584c5cf4a7e3a0cf2ad1df484ebd7242a691
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Mar 8 16:54:11 2012 -0600
+
+    modified monitor display stride to match visualizer
+
+commit 4d5cfd2eddd378c53d103b9f7310993b530468ad
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Mar 8 13:41:54 2012 -0600
+
+     minor format changes
+
+commit f86c0da939527cc3a4fa207faf2e74e01ba5b577
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Mar 8 01:17:09 2012 -0600
+
+    gpu matcher works but easily overwhelms the match buffer, need to add sorting in findmatch kernels
+
+commit 900656b93f8b5ef6e223cf2f25b3b35ced4b1333
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Mar 7 23:09:34 2012 -0600
+
+    moved thrusttest.cu .h to gpu folder and created module correspondcuda
+
+commit a72bb42a7c15095b45a30e2958e19526929511f4
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Mar 7 00:12:18 2012 -0600
+
+    cleaned up cuda matcher, ready to integrate into coorespond module
+
+commit 58cf24b9727512e0dd680a252d79d4e10c0bbbd5
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Mar 6 18:19:43 2012 -0600
+
+     added random shuffle to test case frames, found bug in cuda code and fixed it, now working properly
+
+commit 5addd0a26591ef256dd9d3e020962ab8b983ed83
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Mar 6 14:40:49 2012 -0600
+
+    cuda matching code passes tests with pivstd data sets, old serial matching code appears to have problems with accuracy when matching threshold is increased
+
+commit 7e18efe73fe82996bd36da65d4caacc8cad45252
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Mar 6 00:41:35 2012 -0600
+
+    gpu matcher works in total, find2wayMatches and findMatches, slight differences with gpu and serial code in tests (gpu code finds two less matches of 6cams frame one
+
+commit a8dbe31699e6a4eba685b8d21db2cfaca1b714f7
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sat Mar 3 20:58:34 2012 -0600
+
+    fixed bug and now 11 camera data set is solved correctly with cuda code
+
+commit bf617cf39e1b4037ddfd2f14044da29a34f9a37a
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sat Mar 3 17:18:40 2012 -0600
+
+    fixed several bugs in cuda code, solution is different for 11 cam case, but correct for 4 and 6 cameras
+
+commit 0c3683eeedb884b4ea3d702de76aa3fdad3c014b
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sat Mar 3 00:14:04 2012 -0600
+
+    updated traj vis to show smoother trajectories
+
+commit 0d8181220dbfb4a75cc455fe601871847c7ddb70
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Mar 1 23:57:30 2012 -0600
+
+    got streaming with cuda working, ~5-8x faster
+
+commit 5aa4e8fdb62c363e257119e4f36daf0552af2955
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Feb 29 20:23:57 2012 -0600
+
+    added cuda streams, but no speed up
+
+commit 9791fb3feaf21ebdec1a33673c83f56aedfb6378
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Feb 27 23:00:03 2012 -0600
+
+    added two kernel matching code, it is slower but still works
+
+commit 95dec259a2875c029a1f486780431d2ed6cffc14
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Feb 27 12:52:12 2012 -0600
+
+    cuda matching code works but is slow, ~1.5x speedup
+
+commit 7f53eafc2434fd6649301b240e18290915e6759d
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Feb 24 00:27:15 2012 -0600
+
+    serial comparison added to thrusttest pointmatcher code, cuda version does not match serial now
+
+commit 99335020a685fb5602ea23fb20649440f41a1772
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Feb 23 23:57:18 2012 -0600
+
+    all in one epipolar residual kernel compiles and runs without failure...now check accuracy
+
+commit 00e72d110dd11c8963540b978c66700a6216470f
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Feb 22 20:03:15 2012 -0600
+
+    added thrust vector to kernel array implicit conversion
+
+commit 16386f98a008659858e69fa7de28c62f71a991d9
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Feb 22 16:19:21 2012 -0600
+
+    PointMatcherCUDA has a basic framework now
+
+commit 859a7e675cca9d20b8c45aee93237a8fbbb176df
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Feb 14 14:06:26 2012 -0600
+
+    removed 2 particle trajs from visualizations
+
+commit 060b0db4f3192ab0624b3da813ad8e85becf94ac
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Feb 14 03:55:49 2012 -0600
+
+    can now reset vector field
+
+commit 510295d6a6fd7ce2df0d1385c4ad70473f82aa52
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Feb 14 03:12:53 2012 -0600
+
+    colored glyphs, vectors, and traj tails all viewable
+
+commit 3ab5a78cbcea3cd442d6b598f81440d10ddea07a
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Feb 14 02:01:23 2012 -0600
+
+    vector and traj views selectible
+
+commit 91aeda96dd49073184f270be5ca316899f2ecdb9
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Feb 13 22:34:20 2012 -0600
+
+    vectors handler is working at a basic level
+
+commit c2c3786ebec8d05fbda7dce5f8112462441be2ef
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sun Feb 12 20:57:01 2012 -0600
+
+    adding vector plotting
+
+commit 0a944302887e11d9d3c4c1cec01b2a068d43a320
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Feb 6 23:24:00 2012 -0600
+
+    working on vector visualization
+
+commit 9795bc731fa7d8d5dd203d0eadbbe6655a4b03e7
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sun Feb 5 21:38:01 2012 -0600
+
+    added distance display to vtk window, updated vtk code for smart pointers
+
+commit d5724760c5665ed0a91dde9a11c089001438ff95
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Feb 2 17:01:23 2012 -0600
+
+    updated vtk test code to show 3d colored vectors
+
+commit b67dfbf93d3b82edd166a794e05c76052f358fb0
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Wed Feb 1 23:58:36 2012 -0600
+
+    added some code for vtk structured grid glyphs
+
+commit 6b5b86920969aa9e77e06adb1fe799c1a4b049ff
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Feb 1 19:26:34 2012 -0600
+
+    improved speed of findMatches function
+
+commit f6191f5647446c367232f06d42be88aec012e2ca
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Jan 31 22:44:22 2012 -0600
+
+    formatting
+
+commit 0c31bbb2edc782ced88ae5987a4dd4f53c1de154
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Jan 31 20:39:34 2012 -0600
+
+    added find4way and 3way match functions
+
+commit f36a2a30640c7f92bfe7a1a9ca3312ba2cb3d7f3
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Jan 31 16:01:37 2012 -0600
+
+    added 6cam virtual data
+
+commit 894d5a5cfe2475d2d3858a60ce43804d9dfbd09f
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Jan 26 18:07:55 2012 -0600
+
+    cuda example is working, need to update to cmake 2.8.7
+
+commit b32bf9746026bc5a53f8279ec1e78b099e323d57
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Jan 26 14:12:42 2012 -0600
+
+    added limit on trajectory lengths while visualizing in 3d
+
+commit 92582ed92371fc65a086154578217550fd62a464
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Jan 26 00:51:08 2012 -0600
+
+    updated tube filter and stride parameters to view at heigher frame rates
+
+commit 50841bd83031328c4d322274a39b85817ced97ab
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Jan 25 23:39:54 2012 -0600
+
+     trajectories are properly added and removed from the visualization
+
+commit 4ea7788b0656f93d506f1ec16cc3d1aa81fd9265
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Jan 25 19:56:15 2012 -0600
+
+    trajectory visualization works with streamdata app
+
+commit 801de7e4a9b426186d8c6241e7f4ca821252b484
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Tue Jan 24 23:26:15 2012 -0600
+
+    visualizer now works with virtual cameras app
+
+commit 0335c4aa3712e6236d12a7419368826701938702
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Jan 24 00:20:36 2012 -0600
+
+    added trajectory visualization sample and updated module
+
+commit 4f52cd2f84c8f9962b9d49a0a54bc5354ebf82c0
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Jan 23 15:55:52 2012 -0600
+
+    cuda sample does not cause cmake to fail, but still does not build
+
+commit c2931dc593fee8718b37f00395f937014e7b4ab2
+Merge: 53facf1 abd30c6
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Jan 23 15:37:48 2012 -0600
+
+    Merge remote-tracking branch 'taub/newwork' into newwork
+
+commit 53facf100bbd244899f7b934a7d1a8b7eb1a17a9
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Jan 23 15:36:12 2012 -0600
+
+    added coordinate vectors to vtk visualization and a visualization module
+
+commit abd30c6a439e3b2d180f89c093b0a2dd7c47f8d2
+Merge: 916f724 58f4aec
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Sun Jan 22 19:15:53 2012 -0600
+
+    fixed merge
+
+commit 7db26e03ce0aa97876b678c64ae303cd104d91e2
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sat Jan 21 14:49:44 2012 -0600
+
+    vtk trajectories are self contained now, ready to make visualization module and add example
+
+commit c76cb6741ac619444721b0712782b95d061dd913
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Jan 20 23:26:20 2012 -0600
+
+    vtk test renders trajectories lines and spheres
+
+commit b696b0787ee10a33f66f8ef0ccfdbfce711d3d39
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Jan 19 23:00:00 2012 -0600
+
+    vtk test with moving particles works
+
+commit 58f4aec735b4b9384eee7e7d0555a856d246c019
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Jan 19 16:32:37 2012 -0600
+
+     added vtk sample
+
+commit 916f724298d91a7f676ba617c9c11d1513288599
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Tue Jan 17 18:59:48 2012 -0600
+
+    working on adding cuda
+
+commit 763f89afa3928f929a07d54954db93ee39a83aaa
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Tue Jan 17 12:25:05 2012 -0600
+
+     working on adding cuda
+
+commit 3bb622d232ce5f004dd7e24ed45a9a8578055383
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Jan 12 13:40:37 2012 -0600
+
+    added qt sample and started on cuda sample
+
+commit 3c24c3a1d94ad2352915352916cd1a3f38e05569
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Jan 9 15:04:19 2012 -0600
+
+    added extra thread for 2 way matching
+
+commit 834b892af3f7ef6655a519a5df1a49946cfcf5bd
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Mon Jan 9 00:11:28 2012 -0600
+
+    added virtual camera project
+
+commit f464d24f6004e01f33b52a603666821abd7423a8
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Jan 6 22:43:55 2012 -0600
+
+    updated tracking and all bugs appear to be fixed, added random color to trajectories, incorporated std::move into all logical places
+
+commit 8bcccb3eb6949500cde0cc77abd7afed173f6804
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Jan 6 13:58:59 2012 -0600
+
+    removed usage of static methods in trajectory_ class for extrapolated particle position and appears to solve strange bug that depended on external events
+
+commit a2a1127292e78ff68b4882df33af5f013a1da33b
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Jan 5 20:50:50 2012 -0600
+
+    in the middle of debugging a major problem with tracking
+
+commit 439e824bd53852154e1ffe678106b220ac5aa7f3
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Jan 5 00:09:43 2012 -0600
+
+    completed first draft of unified tracker class, complies, runs , but appears to have trouble creating long trajectories
+
+commit 3bed44498272f74de385e8657194866671ce4f10
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Jan 3 19:18:12 2012 -0600
+
+    hacked to fix imageproc threads hanging at exit
+
+commit a8858efac8be9d54820f4dcd1fc2451d4a6dd4d6
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Jan 3 17:06:30 2012 -0600
+
+    draw trajectory function working
+
+commit a58792df53ba7cff6537ccd3058b9389c7effcb6
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Jan 2 19:54:44 2012 -0600
+
+    tracking appears to be working, also there is a persistant problem with threads getting stuck while exiting image processer
+
+commit bbed64f68a850c75f5fe55a74270f110461e7b3b
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sat Dec 31 13:23:04 2011 -0600
+
+    incoporated Frame3d templated object frame into frame3D_queue and updated tracking.hpp to prepare for incorporation of initial tracking code
+
+commit b029f994fdaaf360f5979c709c45337e56abf8d1
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Dec 30 20:21:57 2011 -0600
+
+    shared pointers in correspond code changed to regular pointers to eliminate major memory leak
+
+commit 19a08bbf1987288dec8950cffe05b70bcf468f52
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Dec 30 17:35:22 2011 -0600
+
+    sealed a few memory leaks, major leak still exists
+
+commit 459f0dd32c51e85b8a0358bce10b039551df156c
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Dec 30 14:30:17 2011 -0600
+
+    initial thread deadlock appears to be solved, but may still happen.  The imageproc threads may still find a deadlock at camera shutdown
+
+commit ebec6d35d39d5bfcbbf8199f160c10c95ddfb781
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Dec 21 04:55:12 2011 -0600
+
+    changes a lot but broke the streaming app, system freezes at startup, possibly tied to ObjectFrame class and templates
+
+commit fc3136ef94db697dd4d51c48c729ecd2ba572868
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Dec 20 16:53:13 2011 -0600
+
+    fixed bug in tracking.  Regression search class does not work due to the final calculation of predicted particle coordinate. Need to make the calculation simular to that of the finite diff method
+
+commit efa8496374a64a3856471aa63fa289df0a00d4d8
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Dec 20 11:49:33 2011 -0600
+
+    4-way matching is complete and only allows unique matches to come through
+
+commit 4f54e61cca22d9a3a48689de0e851f694c72b773
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Dec 20 10:36:48 2011 -0600
+
+    cleaned up calibrator initialization and destructors for calibration and recorder
+
+commit 5119e60d8e3c5a4936ea2ee99887b71101e1d024
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Dec 20 01:05:19 2011 -0600
+
+    correspondence is working for all cameras along with 3D reconstruction on its own thread
+
+commit e09d517eb3e15ba2ec9373def40c1fc9668147dd
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Sun Dec 18 23:20:03 2011 -0600
+
+    virtual cameras works with 3d reconstruction and 4 camera matching
+
+commit 13a42e7d7bff7c2694fa81f00a02365fdb88b1b2
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sun Dec 18 18:39:44 2011 -0600
+
+    correspondece is implimented and compiles but has runtime errors due to unknown states
+
+commit 7f06c07e05614b9a4e5da88c4e4fd07ad3fa2b7a
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sat Dec 17 22:18:26 2011 -0600
+
+    corrected bug in finding 3point line objects
+
+commit 38c436a1aac5a3111d67132821a1087a0972fcb4
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sat Dec 17 21:24:36 2011 -0600
+
+    3D reconstructed particles can now be drawn in each frame
+
+commit 594953d8548ec9f0b494055f62c3c958f1db050a
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sat Dec 17 20:27:30 2011 -0600
+
+    3D reconstruction working with < 1 mm error
+
+commit 0dee67b963b596d8e4af4450eb83deae1fec9741
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Dec 16 19:42:06 2011 -0600
+
+    full streaming framework is working, 3d reconstruction and 3pointline matcher appear to be working, need to check accuracy
+
+commit b91c9cbbd3ef29051093aab0474d3ca592e0242e
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Dec 15 23:49:08 2011 -0600
+
+    added tracking placeholders
+
+commit 91814d3bdc3481a252c30749146a17c6c3dc4a6a
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Dec 15 23:27:52 2011 -0600
+
+    created matcher derived classes and framework
+
+commit 2ad2494b5c1f759c843b9053e9b7047613b848f7
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Dec 15 21:10:44 2011 -0600
+
+    global reference finder complete, started 3D reconstruction code for 3 point wand
+
+commit 9e00bc4def3f808c4d82c5f93d459de890e064ba
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Dec 13 23:58:52 2011 -0600
+
+    calibration is working after solved bug with undistortpoints
+
+commit 2a629149662c08de974bb366493711d40e46fa31
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Dec 13 00:03:36 2011 -0600
+
+    calibration works for internal and F mat params, need to add global ref next
+
+commit f9957a24c085f6c674a752ec7e37dba08306a273
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sun Dec 11 22:51:31 2011 -0600
+
+    basic calibration internal params and F mats is working in real time
+
+commit 5b9a531c54d277717dc7a6509db97503443ea2a6
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Dec 9 21:23:59 2011 -0600
+
+    find fund mat works, need to clean up though
+
+commit ceb37452fca268a95208ca48cfdc8d7607d9a03d
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Dec 9 19:01:36 2011 -0600
+
+     changes
+
+commit c9929f452b5364b567f946d0c1316b028772de7b
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Fri Dec 9 03:21:44 2011 -0600
+
+    working on calib
+
+commit 1d4221f66dfff70cee953783b4c5d1c4242ff28b
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Dec 8 18:51:32 2011 -0600
+
+    almost done with 3 point wand calibration and fund mat calc
+
+commit eb6558eab4b65b5811bda6d3848fe045178557aa
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Dec 7 18:11:28 2011 -0600
+
+    working on calibration module for real-time calibration
+
+commit b8e6fa36fa2d09a375fe8783625b2e1b762b3ba0
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Wed Dec 7 02:17:56 2011 -0600
+
+    Virtual Cameras works in release mode now and several bugs fixed
+
+commit 0ebbfb7bcb517caff67de49bfc6ab08f9a08e8ad
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Dec 5 16:01:36 2011 -0600
+
+    Virtual Cameras works but GFTT is still broken due to CV_Assert() and uchar
+
+commit 40f9a490766ef126b4166f00eac9252e11549abc
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Mon Dec 5 05:10:23 2011 -0600
+
+    updated initialization of virtual cameras but now having problems adding image processor controls to the control window
+
+commit 5be1ba190ff6ff9252df27190f7998fa58e92457
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Dec 2 21:26:09 2011 -0600
+
+    runs multiple video streams to screen and flushes queues
+
+commit 02a12b9baf587a5986854de0d4e2af85518c281c
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Dec 1 21:20:44 2011 -0600
+
+    updated virtual camera system, need to finished VC initialization for datagenerator member
+
+commit 1a6b394d69452194bc41600bda75256e08a8a94e
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Dec 1 18:34:19 2011 -0600
+
+    yeahgit status -s realtime detection achieved for six cameras at 120 fps
+
+commit 2c2049e03704ad8e6a3c8e9155a611a9c5069d23
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Thu Dec 1 00:26:57 2011 -0600
+
+    completed untested code for virtual cameras and threaded image processing
+
+commit cff0d96da5fa6042ca4e5896f2b2b9ac7e31215a
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Nov 30 19:27:30 2011 -0600
+
+    video creator class update and image proc update, gftt does not work with new example, needs further testing
+
+commit b19258bf2ea05535ea19cd4545a8cbcd17659ca0
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Nov 29 16:16:44 2011 -0600
+
+    CameraSystem class interface is working now for Optitrack
+
+commit f03b1bd32769a812c506f99a4d095ed4ccf5f478
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Tue Nov 29 01:35:52 2011 -0600
+
+    major changes to pt::CameraSystem interface and derived classes including Optitrack. The code compiles now but may not run
+
+commit 08a1bf17bce17927707fde9f8700a63d9e68b9bf
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Wed Nov 23 18:38:45 2011 -0600
+
+    reworked datagen into a more coherent class and separate functions, made unified CameraSystem base class and in progress now, surely broken at this point. Next find a way to display both processed and raw images while poping from a queue and keeping frames of common timestep together
+
+commit 921bc0ce4b4272268e818ce52934421ceffc5633
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Tue Nov 22 09:44:01 2011 -0600
+
+    small changes
+
+commit 893eaf2cda3941e295626056fe853c5c5537acf2
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Nov 22 01:23:42 2011 -0600
+
+    overhaul of image processor test app, update to include WIN64 def in camera sdk, sync is a pointer
+
+commit 4b29f410898667b514785b5a885388880422fb87
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Mon Nov 21 05:36:27 2011 -0600
+
+    fixed GFTT
+
+commit 7bc88a141536bdd81bb47d746a360d9419dce318
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Mon Nov 21 05:11:45 2011 -0600
+
+    found bug in imageproc, pure virtual functions were added to solve linking error, imageprocessor app was verified with new interface, need to debug gaussian fitting function of GFTT
+
+commit 4a1ef9fa25cd5ab41a29ad7668f434cf7de2ce1f
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Nov 21 03:37:11 2011 -0600
+
+    added image processing and feature detection classes, streamdata does not compile, linking problem exists
+
+commit 41b2e1c4a7a0f5a2af156c68f931c4131fe7a63d
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Sun Nov 20 03:23:38 2011 -0600
+
+    baboon pic added, small changes to imageproc and datagen
+
+commit 02d60b9727f5e395fef1135f561654f8ddaf2015
+Author: Doug Barker (Y550PWR-linux) <doug.barker@gmail.com>
+Date:   Sat Nov 19 05:23:01 2011 -0600
+
+    added project directives and fixed compile errors in linux
+
+commit a596bc2341a27eb45a48cb3b63a53d319efc6641
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sat Nov 19 01:17:41 2011 -0600
+
+    added boost circular buffer to framegroup listener, added use-np-camera-sdk #def to dataaq module
+
+commit d4eab0c77264080d9cadaf42c75594fe9c09b947
+Merge: c5f7e75 779d132
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Nov 18 23:51:17 2011 -0600
+
+    Merge branch 'newwork' of ssh://taub.campuscluster.illinois.edu/home/dbarker2/openPT into newwork
+
+commit c5f7e751152210e26fcc8bd2d22a7319ac014533
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Nov 18 23:46:33 2011 -0600
+
+    big update to boost threads and Optitrack class ..it works
+
+commit 779d132fabad0c76eec126e787056f7ad2851a13
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Fri Nov 18 04:11:01 2011 -0600
+
+    removed boost tarball
+
+commit bb2703b45186a27ac80aeb7daafb9b0bd1daa289
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Nov 16 23:52:44 2011 -0600
+
+    Added CameraSystem class and Optitrack
+
+commit d90af03fa34086982a7539986ff21c505122ce28
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Nov 16 22:09:12 2011 -0600
+
+    small changes
+
+commit 90a5371be318fb8ed065f3f8e1ded6f536c979a0
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Nov 14 18:37:21 2011 -0600
+
+    renamed image aqusition to data aquisition and reformatted files
+
+commit 3b3f4e719c1faf55aadb528de397f8403c37a656
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Nov 14 00:38:15 2011 -0600
+
+    imageaquisition code was separated into .hpp and .cpp files
+
+commit 3d9c7140a9237dbd88ce065ba958e1c3fd2db741
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sun Nov 13 23:07:44 2011 -0600
+
+    cmake file change
+
+commit 962ea7106a5560ef9fcda7b4a134431719bbf6c7
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sun Nov 13 23:06:27 2011 -0600
+
+    removed optitrack folder in samples
+
+commit 2fe6c17302bbfa961cef593cb30377d05eb1b02b
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sun Nov 13 23:05:24 2011 -0600
+
+    moved optitrack code to 3rdparty folder and created stand alone app
+
+commit 112cda530a649e60845267cef98eb7b8bd8b0fb3
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Sun Nov 13 21:17:37 2011 -0600
+
+    small changes
+
+commit f59ef8ef342177dc8360e00354556a30a6457a67
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sun Nov 13 21:00:02 2011 -0600
+
+    cleaned up optitrack sample viewer
+
+commit 5f504d765790ef4b614a28d654d2358796128407
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sun Nov 13 18:52:01 2011 -0600
+
+    updated optitrack sample for submission to forum
+
+commit f7aab58e22b6cdc5591d36ca3e5da078caf73e3e
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Thu Nov 10 18:18:48 2011 -0600
+
+    added image aquisition
+
+commit 54cc017836d3ed50285d8f45b07aaee959c5d3aa
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Nov 7 18:31:53 2011 -0600
+
+    updated openmp section
+
+commit e9d3e33c0cfea45025008a9c522b01ae482e4102
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Sun Nov 6 20:04:17 2011 -0600
+
+    added text overlay control and queue for objects
+
+commit 9e07ccde4fd807b98a388340032e7a513e240497
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Nov 4 19:02:21 2011 -0500
+
+    fixed calibration for asymetric circles grid, added base code for 3point wand, added code for imagelist output
+
+commit ca4db075769f0076c2c3212441f3f0df47ce73e2
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Nov 4 18:23:16 2011 -0500
+
+    adding to test branch
+
+commit add2cc73f8d5f5d652168cb3be378173c98edb7c
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Oct 26 22:34:29 2011 -0500
+
+    updated calibration sample to include circles grid and starting code for 3pt wand
+
+commit d1dd50c30165cfbc079147754f8c05fbe68871c4
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Tue Oct 25 01:21:18 2011 -0500
+
+    fixed avi and image output in optitrack code
+
+commit 98a9e71ae34c966206da556fe79d46672160986f
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Fri Oct 21 05:07:48 2011 -0500
+
+    updated optitrack code to record video and pics, now need to make sure they are synchronized
+
+commit fbec6ba5bd6f9acd11a4fdcc7a5a84157bde0060
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Oct 19 19:27:47 2011 -0500
+
+     minor changes to optitrack camera code
+
+commit 571d7827b6bbd7c99b46ce9b46b769a1192139bd
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Wed Oct 19 18:43:20 2011 -0500
+
+    Optitrack camera code working and full control of cameras
+
+commit 8c30623a195159f8a5793197c2db842341a2d35f
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Oct 17 21:36:47 2011 -0500
+
+    fixed sleeping problem
+
+commit 468b29d7468caf07dbe295c8bf511381dc02f632
+Author: Doug Barker (colfax-Windows) <doug.barker@gmail.com>
+Date:   Mon Oct 17 20:29:12 2011 -0500
+
+    camera sdk sample is working with opencv and openmp for multicamera sync and realtime image viewing
+
+commit d52ae15dd5dbdac12a8ade527fc67c747c8ea9ed
+Author: unknown <dbarker2@(none)>
+Date:   Sat Oct 15 23:43:21 2011 -0500
+
+     added sample for image aquisition for OptiTrack cameras using Natural Point's Camera SDK
+
+commit d66c7cf8a3a3c4f6a425a8d95e9f26b4c1d831af
+Author: Doug Barker (Y550PWR Win) <doug.barker@gmail.com>
+Date:   Fri Oct 14 18:49:14 2011 -0500
+
+    updated code for use on windows
+
+commit f35f49a94544db73ca57d4a9f29da41fdab0f3df
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Tue Oct 11 21:04:24 2011 -0500
+
+    stuff I forgot about
+
+commit 99db9ceda4fc405c29692cb4970b7933b3316d21
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Wed Aug 31 03:38:50 2011 +0200
+
+    added cost function to templated cost class
+
+commit f573d0a296eb66b1815faac445b4ba4bf8e04963
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Wed Aug 31 01:54:08 2011 +0200
+
+    fixed segfault in regression kinetic model class, need to templatize Regression to use float_type form Object_T
+
+commit 6728df57f19d9cf67a87046b5454ebf007451467
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Wed Aug 31 00:12:58 2011 +0200
+
+    updated template code to include regression model, all compiles, still need runtime testing
+
+commit 5e4396a0eb250b405cb579da75d02bfb952c2f84
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Sat Aug 27 05:33:21 2011 +0200
+
+    updated finite difference calculation for template version
+
+commit c053694b5d74d7ad776aa92e4db9d24baba31b81
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Sat Aug 27 04:47:46 2011 +0200
+
+    transfered more tracking class to template version
+
+commit b95f2b325a9e933e020ef9842ab8c96ca50d09ac
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Sat Aug 27 03:15:20 2011 +0200
+
+     added template code and templatetest project to openPT, in process of converting tracking over to template version
+
+commit 024bc7dbaab244d9ffd178b90328f9dc6730e666
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Fri Aug 26 23:13:38 2011 +0200
+
+    changed cmakelists files to deal with changed directory path
+
+commit fb0cbdab8f33aa20a4fb20e662d657f8c34a870d
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Fri Aug 26 00:39:10 2011 +0200
+
+     added template code (commented out cor.hpp) and pig finder in rough form
+
+commit 0a87dd3c814fd6c973f3b2374abcd2d95a307677
+Merge: 8b277a8 bd1d8ff
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Mon Aug 22 17:22:36 2011 +0200
+
+    Merge branch 'newwork'
+
+commit 8b277a8961c001aa24c990760927c9e7ff7cf79f
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Sun Aug 21 00:17:06 2011 +0200
+
+    added gaussian estimator to goodfeaturestotrack method
+
+commit bd1d8ffd63f1ca10629d5c9c4265f38510d4ba84
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Sat Aug 20 19:29:52 2011 +0200
+
+     added unfinished changes to Tracking module, test added and updated, Tracker is broken still
+
+commit 64436d11f6fb748450ba2a5f21922c8f9dea1add
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Thu Aug 18 23:16:54 2011 +0200
+
+    cleaned up files
+
+commit f6c6d091efdaa6fc1388215ba08e89426ee5983d
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Thu Aug 18 05:05:03 2011 +0200
+
+    fixed bug in find2waymatch()
+
+commit 6a17c01c0c253ba2ff1c4b5beedd5f8aaaf0716e
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Thu Aug 18 04:42:39 2011 +0200
+
+    added full3Dtracker sample code to test the full openPT platform in action, at this point it segfaults in the find2waymatches() function
+
+commit 31411d759b6838d033f06226715a04d3cce7d01a
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Thu Aug 18 02:05:31 2011 +0200
+
+    further cleanup of files format and style, isolated opencv to calib, imageproc, and datagen modules
+
+commit 8b9d1d7c4beceb147c04de79606d29f2ddfc1687
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Thu Aug 18 01:12:36 2011 +0200
+
+    cleaned up files (removed all using namespace pt and cv) now using pt:: and cv::
+
+commit 128930f9656996d6981cda213c913838d53737c4
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Wed Aug 17 18:36:26 2011 +0200
+
+    cleaned up files and structure
+
+commit eafe26eee0e6b088c6d1c3589cd0f549826ea40f
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Wed Aug 17 15:11:29 2011 +0200
+
+    added test function for image processing and cleaned files
+
+commit 0e54b8949b2b7bdc7c1609a0bb86199367128d73
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Tue Aug 16 11:05:36 2011 +0200
+
+    fixed discrepancy between fundamental matrix calculations and usage in datagen and calib (openCV)
+
+commit 25d09a27671011df8d6a21ab3f76fb2dbea092a8
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Tue Aug 16 01:17:12 2011 +0200
+
+    completed first running version of image processing module with find contours and goodfeatures methods
+
+commit b967b221910fe45eb0b11a60037a0672c157a5b2
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Wed Aug 10 15:28:31 2011 +0200
+
+    3d reconstruction is working and tested, deleted old makefiles and interface.h files, added data folder to keep data sets separated and organized
+
+commit ac7abf2bd859b7221fcf05dd91e1e3b10df60673
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Tue Aug 9 16:40:04 2011 +0200
+
+    completed first version of 3D reconstruction, added image proc files from Pan Jian, added code to get images from webcam, added boost library but not in use yet
+
+commit 1e653a6b67b10646317018630f46462feed39107
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Thu Aug 4 09:48:09 2011 +0200
+
+    updated datagen module and now it can add multiple arbitrary cameras and display synthetic images of 3d trajectories projected to the image planes, the fundamental matrices from cv::stereoCalibrate and the simple version programmed in dategen::calcFundamentalMatrix are still opposites and this needs to be fixed in future commits
+
+commit b50b5763cd3186c644837f8fa31761c3b0082ebd
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Mon Aug 1 05:08:05 2011 -0500
+
+    updated datagen module and included calculation of fundamental matrix, this FundMat does not coincide with the OpenCV generated one by stereoCalibrate() for each camera pair
+
+commit 3c20d895370acbab3784a26cbfc391511224fd71
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Mon Jul 25 23:10:12 2011 -0500
+
+    datagen module is now working and can convert 3D trajectorys in a file to 2d image frames saved to a file for each camera
+
+commit 2a6ed9e0415d06625d9db6ea07ad8d893780bf5a
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Sun Jul 24 00:13:26 2011 -0500
+
+    Added ImageFrame output and input using YAML, Matching code is working again (it appears), all sample codes build
+
+commit 4bab2e5a40062f4a9df20f04c2fe8a8127bd987e
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Sat Jul 23 17:22:23 2011 -0500
+
+    calibration is now working, input and output YAML functions created for Cameras and CameraPairs, general compile errrors fixed in correspond module
+
+commit 6aa61386de962410fe07fea0173c718bea7d5f8c
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Thu Jul 21 20:42:55 2011 -0500
+
+    calibration has been fixed and now handles case when no points are found in an image, data structures have been changed to better reuse code, coorispond and matching are currently broken and will be fixed next
+
+commit a92e64bea9f25f6d74837a02682ba6d4420ccc5b
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Tue Jul 19 15:47:56 2011 -0500
+
+    removed yaml build folder from git
+
+commit 97e47e4d69c33bb4572d09ba20f9e871d66f2893
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Tue Jul 19 15:44:23 2011 -0500
+
+    added YAML library and new input and output overloads for Camera and Particles, Datagen module is added but not entinrely working
+
+commit d79fe8981a5c65814e03f6031963bc72af63ecd3
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Sat Jul 16 00:33:05 2011 -0500
+
+    removed time member from Frame class, tested particle template in isolation, updated datagen (still not functional)
+
+commit 58ab83e1392dd6ed5150078606c15fad2c5b1869
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Fri Jul 15 14:25:15 2011 -0500
+
+    created data generation module to create simulated images from 3d data - builds and compiles but has not functionality at this point
+
+commit 9cf80e91aff8fe8c3f0a11a408339de1100ff46f
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Thu Jul 14 23:56:26 2011 -0500
+
+    minor changes, still compiles and works for all sample tests: calib, tracking, openCVtest
+
+commit c4c826e98d839f21eb50dd6fc39a1c25d410e843
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Thu Jul 14 23:46:59 2011 -0500
+
+    cpp hpp conversion and file consolidation complete for tracking module, SerialTracker tested ok for 256p512f. All #define paramters were set to extern const except CHARM and EVALRESULT
+
+commit d81b7ae325795cc20bde3ba6e49b3c041b0a4438
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Thu Jul 14 21:07:07 2011 -0500
+
+     updated .hpp and cpp files for correspond module, matcher works now
+
+commit 289f33601e19359fde73ffe40ce4d17457f01922
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Thu Jul 14 20:03:12 2011 -0500
+
+    cpp headers and namespaces fixed for calib and core, caib and openCVtest compile and run
+
+commit ba1e7e87fdddc23b340985279ac0b87c28b402e6
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Thu Jul 14 19:32:12 2011 -0500
+
+    corrected cpp namespace issues in core module
+
+commit fa98c0b9ab47dff08b16910542587bd5fe07224e
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Thu Jul 14 17:55:32 2011 -0500
+
+    removed old .h files and consolidated src files for core module
+
+commit 364ae8b83a1ed3cf113d90d8f7d1a25fdc561a2a
+Merge: 1d65442 dc64367
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Thu Jul 14 15:54:17 2011 -0500
+
+    Merge branch 'master' into newwork
+
+commit dc64367a161781bf943297a8daad28f8e35c99b6
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Thu Jul 14 15:53:34 2011 -0500
+
+    small change to openCVtest
+
+commit 1d65442fae5ced08a084ff4a129de7528ac80731
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Thu Jul 14 02:15:41 2011 -0500
+
+    moved merge regression files to core module
+
+commit 4b697228241af9b663466e4828eb9940d05311a8
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Thu Jul 14 02:10:12 2011 -0500
+
+    updated .hpp files for calib and core
+
+commit 5469d6385c4c99edbfdbea5267d29946ce6c19c3
+Author: Doug Barker (colfax) <doug.barker@gmail.com>
+Date:   Thu Jul 14 00:47:16 2011 -0500
+
+    added new include files and changing to hpp extensions
+
+commit c175cfd7f06112b70ff7dfdfe3de76b00f3ff8f9
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Mon Jul 11 19:31:54 2011 -0500
+
+    added calibration object images
+
+commit f42e7d335c417e464f2795600a232aafd45d2a94
+Author: Doug Barker <doug.barker@gmail.com>
+Date:   Mon Jul 11 19:28:07 2011 -0500
+
+    initial commit of openpt project files.  includes initial modules and sample programs

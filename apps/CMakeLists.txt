@@ -1,0 +1,7 @@
+add_subdirectory(calibration)
+add_subdirectory(datagenerator)
+add_subdirectory(uncertaintyCalculator)
+if (NP_CAMERASDK_FOUND)
+    add_subdirectory(lptOptitrack)
+endif()
+add_subdirectory(lptVirtual)

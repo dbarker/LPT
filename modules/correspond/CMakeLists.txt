@@ -1,0 +1,1 @@
+lptModule(correspond core)

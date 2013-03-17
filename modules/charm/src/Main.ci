@@ -1,0 +1,56 @@
+mainmodule Tracker {
+  readonly CProxy_Main mainProxy;
+  readonly CProxy_Merger mergeProxy;
+  readonly CProxy_FrameSet frameSetProxy;
+  readonly CProxy_OutputG outputProxy;
+  readonly int framesize;
+  readonly int frameset_size;
+  readonly int blocksize;
+  readonly int groups;
+  readonly char input_file[100];
+  readonly char output_file[100];
+  readonly double time1;
+
+  mainchare Main {
+    entry Main(CkArgMsg*);
+    entry void finishInit();
+    entry void startshortsend();
+    entry void stoptimer();
+    entry void finished();
+  };
+
+  array [1D] FrameSet {
+    entry FrameSet();
+    entry void initialize(CkVec<Frame>);
+    entry void merge();
+    entry void sendShortTrajs();
+    entry void output(CkVec<int>, CkVec<int>, int);
+  };
+
+  array [1D] Merger {
+    entry Merger();
+    entry void sendMerge(CkVec<Trajectory>, int);
+  };
+
+  group rrmap : CkArrayMap {
+    entry rrmap();
+    entry void sendcountstoOutput(int);
+  };
+
+  group blockmap : CkArrayMap {
+    entry blockmap();
+    entry void sendcountstoOutput(int);
+  };
+
+  group OutputG {
+    entry OutputG();
+    entry void receivecounts(int);
+    entry void addTrajToList(Trajectory, int);
+    entry void addShortTrajs(Trajectory);
+    entry void recvMap(map<int,int>, int);
+    entry void addtocheckinMap(int);
+    entry void finishmerge(int, int);
+    entry void finished(int);
+    entry void fprintTrajs();
+  };
+};

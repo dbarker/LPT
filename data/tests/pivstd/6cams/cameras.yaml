@@ -1,0 +1,126 @@
+---
+CameraID: 0
+Name: Synthetic Camera-0
+path: ../../../data/tests/pivstd/6cams/
+R: [0.923879532511287, 0, -0.38268343236509, 0.146446609406726, 0.923879532511287, 0.353553390593274, 0.353553390593274, -0.38268343236509, 0.853553390593274]
+r_vec_u: [0.00156956198075138, 0.00156956198075138, 0.00156956198075138]
+T: [0, 0, 500]
+T_u: [0.05, 0.05, 0.5]
+f: [750, 750]
+f_u: [0.75, 0.75]
+c: [319.5, 239.5]
+c_u: [0.32, 0.24]
+distortion: [0, 0, 0, 0]
+distortion_uncertainty: [0, 0, 0, 0]
+centriod_loc_uncertainty: 0.64
+sensor_size: [3.84, 2.88]
+pixel_size: [0.006, 0.006]
+avg_reprojection_error: 0
+imagelist:
+  []
+...
+---
+CameraID: 1
+Name: Synthetic Camera-1
+path: ../../../data/tests/pivstd/6cams/
+R: [0.923879532511287, 0, 0.38268343236509, -0.146446609406726, 0.923879532511287, 0.353553390593274, -0.353553390593274, -0.38268343236509, 0.853553390593274]
+r_vec_u: [0.00156956198075138, 0.00156956198075138, 0.00156956198075138]
+T: [0, 0, 500]
+T_u: [0.05, 0.05, 0.5]
+f: [750, 750]
+f_u: [0.75, 0.75]
+c: [319.5, 239.5]
+c_u: [0.32, 0.24]
+distortion: [0, 0, 0, 0]
+distortion_uncertainty: [0, 0, 0, 0]
+centriod_loc_uncertainty: 0.64
+sensor_size: [3.84, 2.88]
+pixel_size: [0.006, 0.006]
+avg_reprojection_error: 0
+imagelist:
+  []
+...
+---
+CameraID: 2
+Name: Synthetic Camera-2
+path: ../../../data/tests/pivstd/6cams/
+R: [0.923879532511287, 0, 0.38268343236509, 0.146446609406726, 0.923879532511287, -0.353553390593274, -0.353553390593274, 0.38268343236509, 0.853553390593274]
+r_vec_u: [0.00156956198075138, 0.00156956198075138, 0.00156956198075138]
+T: [0, 0, 500]
+T_u: [0.05, 0.05, 0.5]
+f: [750, 750]
+f_u: [0.75, 0.75]
+c: [319.5, 239.5]
+c_u: [0.32, 0.24]
+distortion: [0, 0, 0, 0]
+distortion_uncertainty: [0, 0, 0, 0]
+centriod_loc_uncertainty: 0.64
+sensor_size: [3.84, 2.88]
+pixel_size: [0.006, 0.006]
+avg_reprojection_error: 0
+imagelist:
+  []
+...
+---
+CameraID: 3
+Name: Synthetic Camera-3
+path: ../../../data/tests/pivstd/6cams/
+R: [0.923879532511287, 0, -0.38268343236509, -0.146446609406726, 0.923879532511287, -0.353553390593274, 0.353553390593274, 0.38268343236509, 0.853553390593274]
+r_vec_u: [0.00156956198075138, 0.00156956198075138, 0.00156956198075138]
+T: [0, 0, 500]
+T_u: [0.05, 0.05, 0.5]
+f: [750, 750]
+f_u: [0.75, 0.75]
+c: [319.5, 239.5]
+c_u: [0.32, 0.24]
+distortion: [0, 0, 0, 0]
+distortion_uncertainty: [0, 0, 0, 0]
+centriod_loc_uncertainty: 0.64
+sensor_size: [3.84, 2.88]
+pixel_size: [0.006, 0.006]
+avg_reprojection_error: 0
+imagelist:
+  []
+...
+---
+CameraID: 4
+Name: Synthetic Camera-4
+path: ../../../data/tests/pivstd/6cams/
+R: [1, 0, 0, 0, 0.707106781186548, -0.707106781186547, 0, 0.707106781186547, 0.707106781186548]
+r_vec_u: [0.00156956198075138, 0.00156956198075138, 0.00156956198075138]
+T: [0, 0, 500]
+T_u: [0.05, 0.05, 0.5]
+f: [750, 750]
+f_u: [0.75, 0.75]
+c: [319.5, 239.5]
+c_u: [0.32, 0.24]
+distortion: [0, 0, 0, 0]
+distortion_uncertainty: [0, 0, 0, 0]
+centriod_loc_uncertainty: 0.64
+sensor_size: [3.84, 2.88]
+pixel_size: [0.006, 0.006]
+avg_reprojection_error: 0
+imagelist:
+  []
+...
+---
+CameraID: 5
+Name: Synthetic Camera-5
+path: ../../../data/tests/pivstd/6cams/
+R: [1, 0, 0, 0, 0.707106781186548, 0.707106781186547, 0, -0.707106781186547, 0.707106781186548]
+r_vec_u: [0.00156956198075138, 0.00156956198075138, 0.00156956198075138]
+T: [0, 0, 500]
+T_u: [0.05, 0.05, 0.5]
+f: [750, 750]
+f_u: [0.75, 0.75]
+c: [319.5, 239.5]
+c_u: [0.32, 0.24]
+distortion: [0, 0, 0, 0]
+distortion_uncertainty: [0, 0, 0, 0]
+centriod_loc_uncertainty: 0.64
+sensor_size: [3.84, 2.88]
+pixel_size: [0.006, 0.006]
+avg_reprojection_error: 0
+imagelist:
+  []
+...

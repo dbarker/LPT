@@ -1,0 +1,7 @@
+../../../data/calib/jai1402/cam0_1.bmp
+../../../data/calib/jai1402/cam0_2.bmp
+../../../data/calib/jai1402/cam0_3.bmp
+../../../data/calib/jai1402/cam0_4.bmp
+../../../data/calib/jai1402/cam0_5.bmp
+../../../data/calib/jai1402/cam0_6.bmp
+../../../data/calib/jai1402/cam0_7.bmp

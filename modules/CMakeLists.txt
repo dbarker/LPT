@@ -1,0 +1,13 @@
+add_subdirectory(core)
+add_subdirectory(calib)
+add_subdirectory(datagen)
+add_subdirectory(imageproc)
+add_subdirectory(correspond)
+add_subdirectory(tracking)
+add_subdirectory(dataaquisition)
+add_subdirectory(visualization)
+if (CUDA_FOUND)
+	add_subdirectory(gpu)
+endif()
+
+#add_subdirectory(charm)

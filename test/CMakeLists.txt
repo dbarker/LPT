@@ -1,0 +1,7 @@
+add_subdirectory(testConcurrentQueue)
+add_subdirectory(testQt)
+add_subdirectory(testVtk)
+add_subdirectory(testCorrespondence)
+add_subdirectory(test3dReconstruction)
+add_subdirectory(testTracking)
+add_subdirectory(testImageprocessor)
