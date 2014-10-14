@@ -38,9 +38,9 @@ namespace lpt {
 		stress_field.resize( velocity_accumulators.size() );
 
 		for (int p = 0; p < velocity_accumulators.size(); ++p) {
-			stress_field[p][0] = extract_result<tag::weighted_variance>( velocity_accumulators[p][0] );  // u
-			stress_field[p][1] = extract_result<tag::weighted_variance>( velocity_accumulators[p][1] );  // v
-			stress_field[p][2] = extract_result<tag::weighted_variance>( velocity_accumulators[p][2] );  // w
+            stress_field[p][0] = extract_result<tag::weighted_variance>( velocity_accumulators[p][0] );  // uu
+            stress_field[p][1] = extract_result<tag::weighted_variance>( velocity_accumulators[p][1] );  // vv
+            stress_field[p][2] = extract_result<tag::weighted_variance>( velocity_accumulators[p][2] );  // ww
 			stress_field[p][3] = extract_result<tag::weighted_covariance<double, tag::covariate1>>( reynolds_stress_accumulators[p][0] );  // uv
 			stress_field[p][4] = extract_result<tag::weighted_covariance<double, tag::covariate1>>( reynolds_stress_accumulators[p][1] );  // uw
 			stress_field[p][5] = extract_result<tag::weighted_covariance<double, tag::covariate1>>( reynolds_stress_accumulators[p][2] );  // vw
@@ -399,7 +399,7 @@ namespace lpt {
 	}
 
 
-	void  PressurePoissonSolver2Step::addControls() { }
+    void PressurePoissonSolver2Step::addControls() { }
 
 	void PressurePoissonSolver2Step::calcCellPressure(int i, int j, int k) {
 			

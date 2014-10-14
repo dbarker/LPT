@@ -21,8 +21,19 @@ public:
 	
 	CostNearestNeighbor() {}
 	double calculate(lpt::Trajectory3d& traj, lpt::Particle3d& particle) {
-		return lpt::calculateDistance(traj.extrap_object, particle);
+        return lpt::calculateDistance(*(traj.objects.back()), particle);
 	}
+};
+
+class CostMinimumAcceleration : public CostCalculator {
+public:
+    typedef shared_ptr<CostMinimumAcceleration> Ptr;
+    static inline CostMinimumAcceleration::Ptr create () { return std::make_shared<lpt::CostMinimumAcceleration>(); }
+
+    CostMinimumAcceleration() {}
+    double calculate(lpt::Trajectory3d& traj, lpt::Particle3d& particle) {
+        return lpt::calculateDistance(traj.extrap_object, particle);
+    }
 };
 
 class Tracker {
@@ -61,6 +72,8 @@ public:
 	void setTrajectoryViews(vector<lpt::Camera>& cameras, cv::Mat image_type);
 	
 	inline void setSharedObjects( std::shared_ptr<SharedObjects> new_shared_objects) { shared_objects = new_shared_objects; }
+
+    inline void setCostCalculator( lpt::CostCalculator::Ptr new_cost_calculator ) { cost_calculator = new_cost_calculator; }
 	
 	inline std::shared_ptr<SharedObjects> getSharedObjects() { return shared_objects; }
 	
@@ -71,12 +84,12 @@ public:
 	bool clear_drawings;
 
 private:
-	lpt::CostCalculator::Ptr						cost_calculator;
+    lpt::CostCalculator::Ptr					cost_calculator;
 	list<lpt::Trajectory3d_Ptr>					trajectories;
 	list<lpt::Trajectory3d_Ptr>					active_trajs;
 	list<lpt::Particle3d_Ptr>					unmatched_particles;
 	vector<cv::Mat>								trajectory_views;
-	std::shared_ptr<lpt::SharedObjects>		shared_objects; 
+    std::shared_ptr<lpt::SharedObjects>         shared_objects;
 }; 
 
 

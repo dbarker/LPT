@@ -53,6 +53,8 @@ class ImageFrame;
 class Camera;
 class CameraPair;
 
+typedef vector<ImageFrame> ImageFrameGroup;
+
 template <typename FLOATTYPE, int DIM> class Particle_;
 template <class Object_T> class Frame_;
 template <class Object_T> class Trajectory_;
@@ -217,8 +219,6 @@ public:
 	ImageFrame(int f, cv::Mat image):frame_index(f), image(image){}
 	inline void addParticle(ParticleImage::Ptr new_particle) { particles.push_back(new_particle);}
 };
-
-typedef vector<ImageFrame> ImageFrameGroup;
 
 inline vector< cv::Mat > getImageVector (ImageFrameGroup& framegroup) {
 	vector< cv::Mat > images(framegroup.size()); 

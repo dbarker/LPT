@@ -44,8 +44,10 @@ namespace lpt {
 	class Optitrack;
 	class StreamingPipeline;
 	
+    /*
+     * This class provides the video object that the Recorder class will use to store images and convert into avi files
+     */
 	class Video {
-		//This class provides the video object that the recorder will use to store images and convert into avi files 
 	public: 
 		typedef std::shared_ptr<Video> Ptr;
 		static inline Video::Ptr create(string path = "./") { return Video::Ptr( new Video(path) ); }
@@ -66,8 +68,10 @@ namespace lpt {
 		string file_path;
 	};
 
+    /*
+     * This class provides the functionality to record avi files from the camera system images
+     */
 	class Recorder {
-		//This class provides the functionality to record avi files from the camera system images. 
 	public:
 		typedef std::shared_ptr<lpt::Recorder> Ptr;
 		static inline lpt::Recorder::Ptr create(int num_cams, string path = "./", int length = 240) { 
@@ -127,8 +131,10 @@ namespace lpt {
 	
 	};
 
+    /*
+     * This is a generic base class for the camera system used in particle tracking
+     */
 	class CameraSystem {
-		//This is a generic base class for the camera system used in particle tracking. 
 	public:	
 		typedef std::shared_ptr < lpt::CameraSystem > Ptr;
 
@@ -170,8 +176,10 @@ namespace lpt {
 		string window_name;
 	};
 
+    /*
+     * This class provides virtual cameras to allow simulation of particle images based on synthetic trajectories given in a file
+     */
 	class VirtualCameras : public CameraSystem {
-		// This class provides virtual cameras to allow simulation of particle images based on synthetic trajectories given in a file. 
 	public:
 		typedef std::shared_ptr<VirtualCameras> Ptr;
 		static VirtualCameras::Ptr create( string cams_file, string traj_file ) { return std::make_shared<VirtualCameras> (cams_file, traj_file); }
@@ -198,8 +206,10 @@ namespace lpt {
 
 #ifdef USE_NP_CAMERASDK
 	
+    /*
+     * This class identifies, controls, and grabs images/data from Optitrack motion capture cameras using the Natural Point C++ camera SDK
+     */
 	class Optitrack : public CameraSystem {
-		// This class identifies, controls, and grabs images/data from Optitrack motion capture cameras using the Natural Point C++ camera SDK
 	public:		
 		typedef std::shared_ptr<Optitrack> Ptr;
 		static Optitrack::Ptr create() { return make_shared< lpt::Optitrack >(); }
@@ -243,8 +253,10 @@ namespace lpt {
 
 #endif /*USE_NP_CAMERASDK*/
 	
+    /*
+     * This class provides the multi threaded streaming pipeline structure of the particle tracking system
+     */
 	class StreamingPipeline {
-		// This class provides the multi threaded streaming pipeline structure of the particle tracking system
 	public:
 		typedef std::shared_ptr<lpt::StreamingPipeline> Ptr;
 		static StreamingPipeline::Ptr create() { return make_shared< lpt::StreamingPipeline >(); }

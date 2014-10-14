@@ -176,7 +176,7 @@ public:
 	void detectFeatures( cv::Mat& image, vector<lpt::ParticleImage::Ptr>& features ) {
 		vector<vector< cv::Point > > contours;
 		cv::findContours(image, contours, params.mode, params.method);
-		double area;
+        //double area;
 		for(int c = 0; c < contours.size(); ++c) {
 			//area = cv::contourArea( contours[c] );
 			if( contours[c].size() > (double)params.min_contour_area  && contours[c].size() < (double)params.max_contour_area) {
