@@ -573,7 +573,7 @@ public:
 	array<float_type, Object_T::dim> V;
 	array<float_type, Object_T::dim> A;
 
-	list<pair<int, float_type> > candidates_costs;
+    vector<pair<int, float_type> > candidates_costs;
 	int id, gap, startframe, last_cell_id;
 	float_type search_radius;
 	Object_T extrap_object;

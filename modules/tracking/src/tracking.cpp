@@ -33,14 +33,13 @@ namespace lpt {
     {
 		list<lpt::Particle3d_Ptr> next_unmatched_particles;
 		list<lpt::Trajectory3d_Ptr> new_trajs;
-        //cost_calculator = lpt::CostNearestNeighbor::create();
 
 		if ( active_trajs.empty() && unmatched_particles.empty() ) 
         {
-            std::move(frame1.objects.begin(), frame1.objects.end(), std::back_inserter(unmatched_particles));							//TODO: Maybe try std::move here to save time
+            std::move(frame1.objects.begin(), frame1.objects.end(), std::back_inserter(unmatched_particles));
         }
       
-      //TODO: Maybe try parallelizing this loop for multi-core system
+        //TODO: Maybe try parallelizing this loop for multi-core system
         // Extrapolate all active trajectories
         for (list<lpt::Trajectory3d_Ptr>::iterator traj_iter = active_trajs.begin(); traj_iter != active_trajs.end(); ++traj_iter)
         {
@@ -52,7 +51,7 @@ namespace lpt {
 		for (int p2 = 0; p2 < frame2.objects.size(); ++p2) 
         {
 			lpt::Particle3d& particle2 = *frame2.objects[p2];
-			double lowest_cost = 1E15;  //just a high number to get started
+            double lowest_cost = 1E15;  ///<just a high number to get started
 			lpt::Trajectory3d* traj_match = 0;
 			for (list<lpt::Trajectory3d_Ptr>::iterator traj_iter = active_trajs.begin(); traj_iter != active_trajs.end(); ++traj_iter) {
 				lpt::Trajectory3d& traj = *(*traj_iter);
@@ -71,6 +70,7 @@ namespace lpt {
 			if ( traj_match ) 
             {
 				traj_match->candidates_costs.push_back( std::make_pair(p2, lowest_cost) );
+                std::push_heap( traj_match->candidates_costs.begin(), traj_match->candidates_costs.end(), lpt::compareCost );
 			} 
 
             // Match not found, initialize new trajectories using unmatched particles
@@ -111,8 +111,7 @@ namespace lpt {
             // If has a candidate, add the candidate to trajectory
 			if ( ! (*traj_iter)->candidates_costs.empty() )
             {
-				(*traj_iter)->candidates_costs.sort(lpt::compareCostAscending);
-				int p2 = (*traj_iter)->candidates_costs.front().first;
+                int p2 = (*traj_iter)->candidates_costs.front().first;
 				(*traj_iter)->objects.push_back( frame2.objects[p2] );
 			}
             // If no candidate, move trajectory to inactive list
