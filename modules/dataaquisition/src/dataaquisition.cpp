@@ -794,7 +794,7 @@ void StreamingPipeline::processImages(int index) {
 	auto& image_type = shared_objects->image_type;
 
 	cout << index << " Processing images" << endl;
-	boost::chrono::system_clock::time_point start, stop;
+//	boost::chrono::system_clock::time_point start, stop;
 	cv::Mat map1, map2;
 	cv::Mat temp_image;
 	cv::Mat cam_mat = cameras[index].getCameraMatrix();
@@ -838,7 +838,7 @@ void StreamingPipeline::processImages(int index) {
 }
 
 void StreamingPipeline::solveCorrespondence() {
-	boost::chrono::system_clock::time_point start, stop;
+//	boost::chrono::system_clock::time_point start, stop;
 //	start = boost::chrono::system_clock::now();
 	matcher->run(&processed_queue, &match_queue, 1,1); 
 	
@@ -849,7 +849,7 @@ void StreamingPipeline::solveCorrespondence() {
 
 void StreamingPipeline::reconstuct3DObjects() {
 	cout << "Reconstruct 3D Objects Thread" << endl;
-	boost::chrono::system_clock::time_point start, stop;
+//	boost::chrono::system_clock::time_point start, stop;
 	
 	while( camera_system->areCamerasRunning() ) {	
 		std::pair<lpt::ImageFrameGroup, vector<lpt::Match::Ptr> > newpair;
@@ -878,19 +878,21 @@ void StreamingPipeline::reconstuct3DObjects() {
 void StreamingPipeline::trackObjects() {
 	cout << "Track Objects Thread started" << endl;
 	boost::posix_time::microseconds sleeptime(500);
-	boost::chrono::system_clock::time_point start, stop;
+//	boost::chrono::system_clock::time_point start, stop;
 	int count = 0;
 	int last_frame_index = 0;
 	lpt::Frame3d_Ptr frame1, frame2;
 
 	while( camera_system->areCamerasRunning() ) {
 		
-		if( !frame1 )
+        if( !frame1 ) {
 			frame3D_queue.wait_and_pop(frame1);
+        }
 		frame3D_queue.wait_and_pop(frame2);
+
 		//start = boost::chrono::system_clock::now();		
 		if (last_frame_index != frame1->frame_index ) {
-			cout << "!!!!!!!!Frame skipped!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
+            cout << "!!!!!!!!!!Frame skipped!!!!!!!!!!!!! " << frame1->frame_index << endl;
 			last_frame_index = frame2->frame_index;
 			frame1 = frame2;
 			continue;
@@ -898,7 +900,7 @@ void StreamingPipeline::trackObjects() {
 
 		last_frame_index = frame2->frame_index;
 
-		tracker->trackFrames(*frame1, *frame2);
+        tracker->trackFrames(*frame1, *frame2);
 		
 		if ( visualizer->getVisualizationStatus() ) 
 			visualizer->addTrajectoriesToQueue( tracker->getActiveTrajectories() );

@@ -51,6 +51,7 @@ int main(int argc, char** argv) {
 	matcher_cuda->params.match_thresh_level = 20;
 
 	auto tracker = std::make_shared<lpt::Tracker>();
+    tracker->setCostCalculator(lpt::CostNearestNeighbor::create());
 	tracker->params.min_radius = 4.0; //mm
 	tracker->params.min_radius_level = 4;
 	tracker->params.max_radius = 25.0; //mm
