@@ -28,8 +28,8 @@ int main(int argc, char** argv){
 	auto& camera_pairs = shared_objects->camera_pairs;
 
    lpt::ImageProcessor processor;
-   processor.addProcess( lpt::GaussianBlur(5) );
-   processor.addProcess( lpt::Threshold(20) );
+   processor.addProcess( lpt::GaussianBlur::create(5) );
+   processor.addProcess( lpt::Threshold::create(20) );
 
    auto fc_detector = std::make_shared<lpt::FindContoursDetector>();
    fc_detector->params.max_contour_area = 150;

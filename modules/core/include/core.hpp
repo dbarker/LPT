@@ -323,7 +323,7 @@ public:
 		centriod_loc_uncertainty = 0;
 	}
 
-	inline cv::Mat getCameraMatrix() { 
+    inline cv::Mat getCameraMatrix() const {
 		cv::Mat camera_matrix = cv::Mat::eye(3,3, CV_64F);
 		camera_matrix.at<double>(0,0) = this->f[0];
 		camera_matrix.at<double>(1,1) = this->f[1];
@@ -332,7 +332,7 @@ public:
 		return camera_matrix;
 	}
 
-	inline cv::Mat getDistCoeffs() {
+    inline cv::Mat getDistCoeffs() const {
 		cv::Mat dist = cv::Mat(4, 1, CV_64F);
 		dist.at<double>(0) = this->dist_coeffs[0]; 
 		dist.at<double>(1) = this->dist_coeffs[1];

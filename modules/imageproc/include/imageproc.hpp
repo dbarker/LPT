@@ -31,7 +31,20 @@ class GoodFeaturesToTrackDetector;
  * @param camera The camera to obtain coefficients
  * @param frame The frame to be processed
  */
-void undistortPoints(lpt::Camera& camera, lpt::ImageFrame& frame);
+void undistortPoints(const lpt::Camera& camera, lpt::ImageFrame& frame);
+
+/**
+ * @brief The ImageProcess class
+ * Base class for various image processing operations
+ */
+class ImageProcess {
+public:
+    typedef std::shared_ptr<ImageProcess> Ptr;
+
+    virtual void addControls() = 0;
+    virtual void process(cv::Mat& image) = 0;
+    virtual ~ImageProcess();
+};
 
 /**
  * @brief The ImageProcessor class
@@ -47,7 +60,7 @@ public:
      *
      * @return a shared_ptr to ImageProcessor class
      */
-	static inline ImageProcessor::Ptr create() { return std::make_shared<lpt::ImageProcessor>(); }
+    static inline ImageProcessor::Ptr create() { return std::make_shared<ImageProcessor>(); }
 
     /**
      * @brief ImageProcessor constructor
@@ -71,7 +84,7 @@ public:
      *
      * @param process The image process to be added
      */
-    void addProcess(ImageProcess& process);
+    void addProcess(ImageProcess::Ptr process);
 
     /**
      * @brief showResults
@@ -79,20 +92,9 @@ public:
      * @param window_name
      */
 	void showResults( const string& window_name );
+
 private:
-    vector<ImageProcess*> m_processes;
-};
-
-/**
- * @brief The ImageProcess class
- * Base class for various image processing operations
- */
-class ImageProcess {
-public:
-    typedef std::shared_ptr<ImageProcess> Ptr;
-
-    virtual void addControls() = 0;
-    virtual void process(cv::Mat& image) = 0;
+    vector<ImageProcess::Ptr> m_processes;
 };
 
 /**
@@ -101,6 +103,8 @@ public:
  */
 class SubtractBackground : public ImageProcess {
 public:
+    typedef std::shared_ptr<SubtractBackground> Ptr;
+    static inline SubtractBackground::Ptr create() { return make_shared<SubtractBackground>(); }
     /**
      * @brief SubtractBackground construcotr
      */
@@ -115,9 +119,14 @@ public:
      *
      * @param image The image to be processed
      */
-	inline void process(cv::Mat& image) {
+    inline void process(cv::Mat& image) {
         image = image - m_background;
 	}
+
+    /**
+     * @brief SubtractBackground destructor
+     */
+    virtual ~SubtractBackground();
 
 private:
     cv::Mat m_background;
@@ -129,6 +138,11 @@ private:
  */
 class Threshold : public ImageProcess {
 public:
+    typedef std::shared_ptr<Threshold> Ptr;
+    static inline Threshold::Ptr create(int threshold = 100, int max_threshold = 255) {
+        return std::make_shared<Threshold>(threshold, max_threshold);
+    }
+
     /**
      * @brief Threshold constructor
      *
@@ -150,6 +164,12 @@ public:
 	inline void process(cv::Mat& image) {
         cv::threshold(image, image, m_threshold, m_max_threshold, cv::THRESH_BINARY);
 	}
+
+    /**
+     * @brief Threshold destroctor
+     */
+    virtual ~Threshold();
+
 private:
     int m_threshold;
     int m_max_threshold;
@@ -161,6 +181,11 @@ private:
  */
 class Erode : public ImageProcess {
 public:
+    typedef std::shared_ptr<Erode> Ptr;
+    static inline Erode::Ptr create(int iterations = 1, int max_iterations = 5) {
+        return std::make_shared<Erode>(iterations, max_iterations);
+    }
+
     /**
      * @brief Erode consturctor
      *
@@ -182,6 +207,12 @@ public:
 	inline void process(cv::Mat& image) {
         cv::erode(image, image, cv::Mat(), cv::Point(-1,-1), m_iterations);
 	}
+
+    /**
+     * @brief Erode destructor
+     */
+    virtual ~Erode();
+
 private:
     int m_iterations;
     int m_max_iterations;
@@ -193,6 +224,11 @@ private:
  */
 class EqualizeHistogram : public ImageProcess {
 public:
+    typedef std::shared_ptr<EqualizeHistogram> Ptr;
+    static inline EqualizeHistogram::Ptr create() {
+        return make_shared<EqualizeHistogram>();
+    }
+
     /**
      * @brief EqualizeHistogram constructor
      */
@@ -211,6 +247,11 @@ public:
 	inline void process(cv::Mat& image){
 		cv::equalizeHist(image, image);
 	}
+
+    /**
+     * @brief EqualizeHistogram destructor
+     */
+    virtual ~EqualizeHistogram();
 };
 
 /**
@@ -219,6 +260,11 @@ public:
  */
 class Dilate : public ImageProcess {
 public:
+    typedef std::shared_ptr<Dilate> Ptr;
+    static inline Dilate::Ptr create(int iterations = 1, int max_iterations = 5) {
+        return make_shared<Dilate>(iterations, max_iterations);
+    }
+
     /**
      * @brief Dilate constructor
      *
@@ -240,6 +286,12 @@ public:
 	inline void process(cv::Mat& image) {
         cv::dilate(image, image, cv::Mat(), cv::Point(-1,-1), m_iterations);
 	}
+
+    /**
+     * @brief Dilate destructor
+     */
+    virtual ~Dilate();
+
 private:
     int m_iterations;
     int m_max_iterations;
@@ -251,6 +303,11 @@ private:
  */
 class GaussianBlur : public ImageProcess {
 public:
+    typedef std::shared_ptr<GaussianBlur> Ptr;
+    static inline GaussianBlur::Ptr create(int kernel_size = 5, double sigma1 = 0.0, double sigma2 = 0.0, int boarder = 4) {
+        return std::make_shared<GaussianBlur>(kernel_size, sigma1, sigma2, boarder);
+    }
+
     /**
      * @brief GaussianBlur constructor
      *
@@ -259,7 +316,7 @@ public:
      * @param sigma2
      * @param boarder
      */
-    GaussianBlur(int kernal_size = 5, double sigma1 = 0.0, double sigma2 = 0.0, int boarder = 4);
+    GaussianBlur(int kernel_size = 5, double sigma1 = 0.0, double sigma2 = 0.0, int boarder = 4);
 
     /**
      * @brief addControls
@@ -274,6 +331,11 @@ public:
 	inline void process(cv::Mat& image) {
         cv::GaussianBlur( image, image, cv::Size(m_kernel_size, m_kernel_size), m_sigma1, m_sigma2, m_boarder_type);
 	}
+
+    /**
+     * @brief GaussianBlur destructor
+     */
+    virtual ~GaussianBlur();
 
 private:
     int m_kernel_size;
@@ -299,6 +361,8 @@ public:
      * @param frame
      */
     void drawResult(ImageFrame& frame);
+
+    virtual ~Detector();
 };
 
 /**
@@ -358,6 +422,8 @@ public:
      * @param contours The contours to be drawn
      */
     void drawContours(cv::Mat& result_image, vector<vector<cv::Point> > contours);
+
+    virtual ~FindContoursDetector();
 };
 
 /**
@@ -414,6 +480,8 @@ public:
      * @brief addControls
      */
     void addControls();
+
+    virtual ~GoodFeaturesToTrackDetector();
 };
 
 /**

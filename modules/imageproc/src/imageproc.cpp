@@ -9,7 +9,7 @@ namespace lpt {
 
 using namespace std;
 
-void undistortPoints(lpt::Camera& camera, lpt::ImageFrame& frame) {
+void undistortPoints(const lpt::Camera& camera, lpt::ImageFrame& frame) {
 	if (frame.particles.size() > 0) {
 		vector<cv::Point2f> image_points(frame.particles.size());
 		
@@ -24,6 +24,11 @@ void undistortPoints(lpt::Camera& camera, lpt::ImageFrame& frame) {
 			frame.particles[j]->y = image_points[j].y;	
 		}
 	}
+}
+
+ImageProcess::~ImageProcess()
+{
+    cout << "ImageProcess destructed" << endl;
 }
 
 ImageProcessor::ImageProcessor()
@@ -49,9 +54,9 @@ void ImageProcessor::addControls()
     }
 }
 
-void ImageProcessor::addProcess(ImageProcess& process)
+void ImageProcessor::addProcess(lpt::ImageProcess::Ptr process)
 {
-    m_processes.push_back(&process);
+    m_processes.push_back(process);
     cout << "Image process added " << endl;
 }
 
@@ -65,9 +70,15 @@ void SubtractBackground::addControls()
     cout << "Add controls for background subtraction" << endl;
 }
 
+SubtractBackground::~SubtractBackground()
+{
+    cout << "SubtractBackgournd destructed" << endl;
+}
+
 Threshold::Threshold(int threshold, int max_threshold)
   : m_threshold(threshold), m_max_threshold(max_threshold)
 {
+    cout << "Threshold constructed" << endl;
 }
 
 void Threshold::addControls()
@@ -76,14 +87,25 @@ void Threshold::addControls()
     cout << "\t\tAdded Threshold process to Control Window" << endl;
 }
 
+Threshold::~Threshold()
+{
+    cout << "Threshold destructed" << endl;
+}
+
 Erode::Erode(int iterations, int max_iterations)
   : m_iterations(iterations), m_max_iterations(max_iterations)
 {
+    cout << "Erode constructed" << endl;
 }
 
 void Erode::addControls()
 {
     cv::createTrackbar("Erode iterations", string(), &m_iterations, m_max_iterations, 0, 0 );
+}
+
+Erode::~Erode()
+{
+    cout << "Erode desturcted" << endl;
 }
 
 EqualizeHistogram::EqualizeHistogram()
@@ -96,9 +118,15 @@ void EqualizeHistogram::addControls()
     cout << "Add controls for EqualizeHistogram" << endl;
 }
 
+EqualizeHistogram::~EqualizeHistogram()
+{
+    cout << "EqualizeHistogram destructed" << endl;
+}
+
 Dilate::Dilate(int iterations, int max_iterations)
   : m_iterations(iterations), m_max_iterations(max_iterations)
 {
+    cout << "Dilate constructed" << endl;
 }
 
 void Dilate::addControls()
@@ -106,9 +134,15 @@ void Dilate::addControls()
     cv::createTrackbar("Dilate iterations", string(), &m_iterations, m_max_iterations, 0, 0 );
 }
 
-GaussianBlur::GaussianBlur(int ksize, double sigma1, double sigma2, int boarder)
-  : m_kernel_size(ksize), m_sigma1(sigma1), m_sigma2(sigma2), m_boarder_type(boarder)
+Dilate::~Dilate()
 {
+    cout << "Dilate destructed" << endl;
+}
+
+GaussianBlur::GaussianBlur(int kernel_size, double sigma1, double sigma2, int boarder)
+  : m_kernel_size(kernel_size), m_sigma1(sigma1), m_sigma2(sigma2), m_boarder_type(boarder)
+{
+    cout << "Gaussian blur constructed" << endl;
 }
 
 void GaussianBlur::addControls()
@@ -117,12 +151,22 @@ void GaussianBlur::addControls()
     cout << "\t\tAdded GaussianBlur to Control Window" << endl;
 }
 
+GaussianBlur::~GaussianBlur()
+{
+    cout << "Gaussian blur destructed" << endl;
+}
+
 void Detector::drawResult(ImageFrame &frame)
 {
     cv::cvtColor(frame.image, frame.image, CV_GRAY2BGR);
     for (int i = 0; i < frame.particles.size(); i++) {
         cv::circle( frame.image, cv::Point( (int) (frame.particles[i]->x + 0.5), (int) (frame.particles[i]->y) + 0.5), 5, cv::Scalar(0, 255, 0), 1, 8, 2);
     }
+}
+
+Detector::~Detector()
+{
+    cout << "Detector destructed" << endl;
 }
 
 FindContoursDetector::FindContoursDetector()
@@ -157,6 +201,11 @@ void FindContoursDetector::addControls()
 void FindContoursDetector::drawContours(cv::Mat &result_image, vector<vector<cv::Point> > contours)
 {
     cv::drawContours( result_image, contours, -1, cv::Scalar(0), 1 );
+}
+
+FindContoursDetector::~FindContoursDetector()
+{
+    cout << "Find Contours detector destructed" << endl;
 }
 
 GoodFeaturesToTrackDetector::GoodFeaturesToTrackDetector()
@@ -219,7 +268,12 @@ void GoodFeaturesToTrackDetector::detectFeatures(const cv::Mat &image, vector<Pa
 
 void GoodFeaturesToTrackDetector::addControls()
 {
-    cout << "GoodFeaturesToTrack Detector Controls Added" << endl;
+    cout << "GoodFeaturesToTrack detector controls added" << endl;
+}
+
+GoodFeaturesToTrackDetector::~GoodFeaturesToTrackDetector()
+{
+    cout << "GoodFeaturesToTrack detector destructed" << endl;
 }
 
 void processImages( Camera& camera, ImageProcessor& processor, Detector& detector )

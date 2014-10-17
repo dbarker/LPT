@@ -18,9 +18,9 @@ int main(int argc, char** argv) {
 	pipeline.setQueueCapacity(10);
 
 	lpt::ImageProcessor::Ptr processor = lpt::ImageProcessor::create();
-	lpt::GaussianBlur blur(3);
-	lpt::Threshold thresh(20);
-	processor->addProcess( blur );
+    lpt::ImageProcess::Ptr blur = lpt::GaussianBlur::create(3);
+    lpt::ImageProcess::Ptr thresh = lpt::Threshold::create(20);
+    processor->addProcess( blur );
 	processor->addProcess( thresh );
 	
 	lpt::FindContoursDetector::Ptr detector = lpt::FindContoursDetector::create();
