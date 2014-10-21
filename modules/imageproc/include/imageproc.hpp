@@ -362,6 +362,9 @@ public:
      */
     void drawResult(ImageFrame& frame);
 
+    /**
+     * @brief Detector destructor
+     */
     virtual ~Detector();
 };
 
@@ -423,6 +426,9 @@ public:
      */
     void drawContours(cv::Mat& result_image, vector<vector<cv::Point> > contours);
 
+    /**
+     * @brief FindContoursDetector destructor
+     */
     virtual ~FindContoursDetector();
 };
 
@@ -481,6 +487,9 @@ public:
      */
     void addControls();
 
+    /**
+     * @brief GoodFeaturesToTrackDetector destructor
+     */
     virtual ~GoodFeaturesToTrackDetector();
 };
 

@@ -624,7 +624,7 @@ bool StreamingPipeline::initialize() {
 		this->matcher->initialize();
 		this->tracker->setTrajectoryViews(cameras, shared_objects->image_type);
 		this->recorder = std::make_shared < lpt::Recorder > (cameras.size(), output_path );
-		this->reconstructor = std::make_shared < lpt::Reconstruct3D >(); //std::make_shared < lpt::Recontstuct3DwithSVD > ();
+		this->reconstructor = std::make_shared < lpt::Reconstruct3D >(); //std::make_shared < lpt::Reconstruct3DwithSVD > ();
 		this->reconstructor->setSharedObjects(this->shared_objects);
 				
 		//if ( camera_pairs.empty() )       

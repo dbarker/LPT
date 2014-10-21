@@ -75,9 +75,9 @@ int main(int argc, char** argv){
     
     for (int f = 0; f < cameras[0].frames.size(); ++f) {
 		for (int p = 0; p < cameras[0].frames[f].particles.size(); ++p) {
-			auto newmatch = std::make_shared<lpt::Match>();
+			auto newmatch = lpt::Match::create();
     		for (int c = 0; c < cameras.size(); ++c) {
-    			newmatch->addParticle(cameras[c].frames[f].particles[p].get(), cameras[c].id);
+    			newmatch->addParticle(cameras[c].frames[f].particles[p], cameras[c].id);
     		}
     		globalmatches[f].push_back(newmatch);
     	}

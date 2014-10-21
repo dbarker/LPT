@@ -86,68 +86,72 @@ template<typename Data>
 class concurrent_queue
 {
 private:
-	std::queue<Data> _queue;
-	boost::mutex _mutex;
-	boost::condition_variable _condition_variable;
-	int _capacity;
+	std::queue<Data> m_queue;
+	boost::mutex m_mutex;
+	boost::condition_variable m_condition_variable;
+	int m_capacity;
+
 public:
-	concurrent_queue() : _capacity(1000) {}
+	concurrent_queue(int capacity = 1000) : m_capacity(capacity) {}
+
 	bool push(Data const& data)
 	{
-		boost::mutex::scoped_lock lock(_mutex);
-      bool ispushed = false;
-      if (_queue.size() < _capacity)
-      {
-		   _queue.push(data);
-         ispushed = true;
-      }
-      lock.unlock();
-		_condition_variable.notify_one();
-      return ispushed;
+		boost::mutex::scoped_lock lock(m_mutex);
+		bool ispushed = false;
+
+		if (m_queue.size() < m_capacity)
+		{
+			m_queue.push(data);
+			ispushed = true;
+		}
+
+		lock.unlock();
+			m_condition_variable.notify_one();
+		return ispushed;
 	}
 
-	inline int size() const	{ return _queue.size();	}
+	inline int size() const	{ return m_queue.size();	}
 
 	bool empty()
 	{
-		boost::mutex::scoped_lock lock(_mutex);
-		return _queue.empty();
+		boost::mutex::scoped_lock lock(m_mutex);
+		return m_queue.empty();
 	}
 
 	inline void clear() {
-		boost::mutex::scoped_lock lock(_mutex);
-		_queue = std::queue<Data>();
+		boost::mutex::scoped_lock lock(m_mutex);
+		m_queue = std::queue<Data>();
 	}
 	
    inline bool full()
 	{
-		boost::mutex::scoped_lock lock(_mutex);
-		return (_queue.size() < _capacity ? false : true);
+		boost::mutex::scoped_lock lock(m_mutex);
+		return (m_queue.size() < m_capacity ? false : true);
 	}
 
 	inline void setCapacity(int capacity) {
-		_capacity = capacity;
+		m_capacity = capacity;
 	}
 
 	bool try_pop(Data& popped_value)
 	{
-		boost::mutex::scoped_lock lock(_mutex);
-		if( _queue.empty() )
+		boost::mutex::scoped_lock lock(m_mutex);
+		if( m_queue.empty() )
 			return false;
 
-		popped_value = _queue.front();
-		_queue.pop();
+		popped_value = m_queue.front();
+		m_queue.pop();
 		return true;
 	}
 
 	void wait_and_pop(Data& popped_value)
 	{
-		boost::mutex::scoped_lock lock(_mutex);
-		while( _queue.empty() ) 
-			_condition_variable.wait(lock);
+		boost::mutex::scoped_lock lock(m_mutex);
+		while( m_queue.empty() ) 
+			m_condition_variable.wait(lock);
 
-		popped_value = _queue.front();
-		_queue.pop();
+		popped_value = m_queue.front();
+		m_queue.pop();
 	}
 
 };
@@ -162,7 +166,7 @@ public:
 		double radius = 0.0,
 		double intensity = 0.0
 		)
-		{ return ParticleImage::Ptr( new ParticleImage(idnumber, x_pixel, y_pixel, radius, intensity) ); }	
+        { return std::make_shared<ParticleImage>(idnumber, x_pixel, y_pixel, radius, intensity); }
 	
 	double x, y, radius, intensity;
 	int id, match_count; 
@@ -176,17 +180,18 @@ public:
 class Match {
 public:
 	typedef std::shared_ptr<Match> Ptr;
+    static inline Match::Ptr create() { return std::make_shared<Match>(); }
 
-	vector < pair < ParticleImage*, int > > particles;
+    vector < pair < ParticleImage::Ptr, int > > particles;
 	double residual;
 	//array<ParticleImage*,4> p;
 	//array<int, 4> i;
 	//int id;
 	Match():residual(0)/*, id(0)*/{}
 	
-	inline void addParticle(lpt::ParticleImage* added_particle, int camera_id) {
-		added_particle->match_count++;
-		particles.push_back( std::move(std::make_pair(added_particle, camera_id)) );
+    inline void addParticle(lpt::ParticleImage::Ptr new_particle, int camera_id) {
+        new_particle->match_count++;
+        particles.push_back( std::move(std::make_pair(new_particle, camera_id)) );
 		//p[id] = added_particle;
 		//i[id] = camera_id;
 	}
@@ -204,8 +209,6 @@ public:
 */
 		return unique;
 	}
-	
-	static inline Match::Ptr create() { return Match::Ptr(new Match()); }
 };
 
 class ImageFrame {
@@ -250,12 +253,17 @@ public:
 class ObjectFrame {
 public:
 	typedef std::shared_ptr<ObjectFrame> Ptr;
+    static inline ObjectFrame::Ptr create( lpt::ImageFrameGroup& frames, int index = -1 )
+    {
+        return std::make_shared<ObjectFrame>(frames, index);
+    }
+
+    lpt::ImageFrameGroup camera_frames;
 	int frame_index;
 	vector<lpt::Particle3d_Ptr> particles;
-	lpt::ImageFrameGroup camera_frames;
-	ObjectFrame(){}
-	ObjectFrame(int index, lpt::ImageFrameGroup& frames) : frame_index(index), camera_frames(frames){}
-	static inline ObjectFrame::Ptr create( lpt::ImageFrameGroup& frames, int index = -1 ) { return ObjectFrame::Ptr(new ObjectFrame(index, frames));}
+
+    ObjectFrame() {}
+    ObjectFrame(lpt::ImageFrameGroup& frames, int index = -1) : camera_frames(frames), frame_index(index) {}
 };
 
 class Camera {
@@ -375,6 +383,12 @@ class SharedObjects {
 class Particle {
 public:
 	typedef std::shared_ptr<Particle> Ptr;
+    static inline Particle::Ptr create(
+        int id = -1, double x = 0.0, double y = 0.0, double z = 0.0)
+    {
+        return std::make_shared<Particle>(id, x, y, z);
+    }
+
 	double x, y, z, e;
 	int id, frame_index;
 
@@ -382,11 +396,6 @@ public:
 	Particle(double x, double y, double z) : x(x), y(y), z(z) {}
 	Particle(int id, double x, double y, double z) : id(id), x(x), y(y), z(z) {}
 	
-	static inline Particle::Ptr create(
-		int id = -1, double x = 0.0, double y = 0.0, double z = 0.0)
-	{ 
-		return Particle::Ptr(new Particle(id, x, y, z)); 
-	} 
 #if(EVALRESULT)
 	double vel, accel, cost, dr;
 #endif /* EVALRESULT */
@@ -405,12 +414,15 @@ public:
 class Frame {
 public:
 	typedef std::shared_ptr<Frame> Ptr;
+    static inline Frame::Ptr create(int index = -1) { return std::make_shared<Frame>(index); }
+
 	int frame_index;
 	vector<lpt::Particle::Ptr> particles;
 	lpt::ImageFrameGroup camera_frames;
+
 	Frame(){}
 	Frame(int index): frame_index(index){}
-	static inline Frame::Ptr create(int index = -1) {return Frame::Ptr(new Frame(index));}
+
 #if(EVALRESULT)
 	double S;
 #endif /* EVALRESULT */
@@ -443,11 +455,11 @@ public:
 class Trajectory {
 public:
 	typedef std::shared_ptr<Trajectory> Ptr;
+    static inline Trajectory::Ptr create() { return std::make_shared<Trajectory>(); }
+
 	int id, gap, startframe;
 	vector<Particle::Ptr> particles;
 	vector<bool> matches;
-	
-	static inline Trajectory::Ptr create() { return std::shared_ptr<Trajectory>(new Trajectory() );}
 
 #if(EVALRESULT)
 	double R,Rh,Rl,C,Ch,Cl;
@@ -524,13 +536,13 @@ public:
 			X[i] = 0.0;
 	}
 
-	Particle_(int id, array<float_type, DIM> coords) : id(id), X(coords), frame_index(-1) {}
+    Particle_(array<float_type, DIM> coords, int id) : X(coords), id(id), frame_index(-1) {}
 
-	static inline std::shared_ptr<Particle_<FLOATTYPE, DIM> > create() { 
-		return std::shared_ptr<Particle_<FLOATTYPE, DIM> >( new Particle_<FLOATTYPE, DIM>() ); 
+	static inline std::shared_ptr<Particle_<FLOATTYPE, DIM> > create() {  
+        return std::make_shared<Particle_<FLOATTYPE, DIM>>();
 	}
 	static inline std::shared_ptr<Particle_<FLOATTYPE, DIM> > create(array<float_type, DIM> coords, int id = -1) { 
-		return std::shared_ptr<Particle_<FLOATTYPE, DIM> >( new Particle_<FLOATTYPE, DIM>(id, coords) ); 
+        return std::make_shared<Particle_<FLOATTYPE, DIM>>(coords, id);
 	}
 };
 
@@ -541,13 +553,15 @@ public:
 	vector<std::shared_ptr<Object_T>> objects;	//Fixme Can we eliminate pointers here?
 	lpt::ImageFrameGroup camera_frames;
 	int frame_index;
+
 	Frame_(){}
-	Frame_(int index, lpt::ImageFrameGroup& frames) : frame_index(index), camera_frames(frames) {}
+    Frame_(lpt::ImageFrameGroup& frames, int index) : camera_frames(frames), frame_index(index) {}
+
 	static inline std::shared_ptr<Frame_<Object_T>> create() { 
-		return std::shared_ptr<Frame_<Object_T>>( new Frame_<Object_T>() ); 
+        return std::make_shared<Frame_<Object_T>>();
 	}
 	static inline std::shared_ptr<Frame_<Object_T>> create( lpt::ImageFrameGroup& frames, int index = -1 ) { 
-		return std::shared_ptr<Frame_<Object_T>>( new Frame_<Object_T>(index, frames));
+        return std::make_shared<Frame_<Object_T>>(frames, index);
 	}
 };
 
@@ -565,7 +579,7 @@ public:
 	typedef typename Object_T::float_type float_type;
 	
 	static inline std::shared_ptr<Trajectory_<Object_T>> create() { 
-		return std::shared_ptr<Trajectory_<Object_T>>( new Trajectory_<Object_T>() ); 
+        return std::make_shared<Trajectory_<Object_T>>();
 	}
 
 	vector<std::shared_ptr<Object_T>> objects;
@@ -578,6 +592,7 @@ public:
 	float_type search_radius;
 	Object_T extrap_object;
 	lpt::TrajectoryVTKBase::Ptr trajvtk_ptr;
+
 	Trajectory_() : search_radius(0.0), id(-1), gap(0), startframe(0), last_cell_id(-1) {}		
 };
 

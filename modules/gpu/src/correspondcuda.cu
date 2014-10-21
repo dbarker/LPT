@@ -230,7 +230,7 @@ void PointMatcherCUDA::initialize() {
 	this->initializeMatchMap();
 }
 
-void PointMatcherCUDA::findEpipolarMatches(lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap) {
+void PointMatcherCUDA::findEpipolarMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap) {
 	
 	thrust::fill(matches2way_d.begin(), matches2way_d.end(), match_initializer);
 	
@@ -307,7 +307,7 @@ void PointMatcherCUDA::findEpipolarMatches(lpt::ImageFrameGroup& frame_group, lp
 		;//cout << "WARNING: MORE MATCHES THAN ARRAY SIZE NUM_MATCHES: total overload = " << match_overload << endl;
 }
 
-void PointMatcherCUDA::findUniqueMatches(lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches) {
+void PointMatcherCUDA::findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches) {
 	vector<int> num_particles(frame_group.size());
 		num_particles[0] = frame_group[0].particles.size();
 		for(int i = 1; i < frame_group.size(); ++i) 
@@ -316,7 +316,7 @@ void PointMatcherCUDA::findUniqueMatches(lpt::ImageFrameGroup& frame_group, lpt:
         for (int cam_a = 0; cam_a < frame_group.size() - 1; ++cam_a) {
 			int a_start = (cam_a !=0 ? num_particles[cam_a - 1] : 0);
 			for (int a = 0; a < frame_group[cam_a].particles.size(); ++a) {
-                lpt::ParticleImage* Pa = frame_group[cam_a].particles[a].get();
+                lpt::ParticleImage::Ptr Pa = frame_group[cam_a].particles[a];
 				if( ! Pa->is_4way_matched ) 
                 for (int cam_b = cam_a + 1; cam_b < frame_group.size() - 1; ++cam_b) {
 					int b_start = (cam_b !=0 ? num_particles[cam_b-1] : 0);
@@ -324,7 +324,7 @@ void PointMatcherCUDA::findUniqueMatches(lpt::ImageFrameGroup& frame_group, lpt:
 						int b = matchmap[a + a_start][cam_b][match_ab]; 
 						if (b < 0)
 							break;
-						lpt::ParticleImage* Pb = frame_group[cam_b].particles[b].get();
+						lpt::ParticleImage::Ptr Pb = frame_group[cam_b].particles[b];
 						
 						if( ! Pb->is_4way_matched ) 
 						for (int cam_c = cam_b + 1; cam_c < frame_group.size(); ++cam_c) {
@@ -334,7 +334,7 @@ void PointMatcherCUDA::findUniqueMatches(lpt::ImageFrameGroup& frame_group, lpt:
 								if (c < 0) 
 									break;
 								
-								lpt::ParticleImage* Pc = frame_group[cam_c].particles[c].get();
+								lpt::ParticleImage::Ptr Pc = frame_group[cam_c].particles[c];
 
 								if( ! Pc->is_4way_matched && std::count(matchmap[a + a_start][cam_c].begin(), matchmap[a + a_start][cam_c].end(), c) )  
                                 for (int cam_d = cam_c + 1; cam_d < frame_group.size(); ++cam_d) {
@@ -344,7 +344,7 @@ void PointMatcherCUDA::findUniqueMatches(lpt::ImageFrameGroup& frame_group, lpt:
 										int d = matchmap[c + c_start][cam_d][match_cd];
 										if (d < 0)
 											break;
-										lpt::ParticleImage* Pd = frame_group[cam_d].particles[d].get();
+										lpt::ParticleImage::Ptr Pd = frame_group[cam_d].particles[d];
 										if( ! Pd->is_4way_matched && std::count(matchmap[a + a_start][cam_d].begin(), matchmap[a + a_start][cam_d].end(), d)  && std::count(matchmap[b + b_start][cam_d].begin(), matchmap[b+b_start][cam_d].end(), d)  ) {
 											if(! Pa->is_4way_matched && ! Pb->is_4way_matched && ! Pc->is_4way_matched && ! Pd->is_4way_matched) { 
 												lpt::Match::Ptr newmatch = lpt::Match::create();

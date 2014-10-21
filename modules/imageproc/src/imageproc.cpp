@@ -54,7 +54,7 @@ void ImageProcessor::addControls()
     }
 }
 
-void ImageProcessor::addProcess(lpt::ImageProcess::Ptr process)
+void ImageProcessor::addProcess(ImageProcess::Ptr process)
 {
     m_processes.push_back(process);
     cout << "Image process added " << endl;
