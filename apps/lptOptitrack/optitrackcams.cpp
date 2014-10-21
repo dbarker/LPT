@@ -35,10 +35,10 @@ int main(int argc, char** argv) {
 	pipeline.setQueueCapacity(1000);
 
 	auto processor = std::make_shared<lpt::ImageProcessor>();
-	lpt::GaussianBlur blur(3);
-	lpt::Threshold thresh(20);
+    lpt::ImageProcess::Ptr blur = lpt::GaussianBlur::create(3);
+    lpt::ImageProcess::Ptr thresh = lpt::Threshold::create(20);
 	processor->addProcess( blur );
-	//processor->addProcess( thresh );
+	processor->addProcess( thresh );
 	
 	auto detector = std::make_shared<lpt::FindContoursDetector>();
 	

@@ -2812,7 +2812,7 @@ namespace lpt {
 
 					for (int j = 0; j < matches[match_id]->particles.size(); ++j ) {
 						int cam_id = matches[match_id]->particles[j].second;
-						lpt::ParticleImage* particle = matches[match_id]->particles[j].first;
+						lpt::ParticleImage::Ptr particle = matches[match_id]->particles[j].first;
 
 						centroid_uncertainty_accumulators[match_id][j][0]( particle->x );
 						centroid_uncertainty_accumulators[match_id][j][1]( particle->y );
@@ -2822,7 +2822,7 @@ namespace lpt {
 				for (int match_id = 0; match_id < matches.size(); ++match_id) {	
 					for (int j = 0; j < matches[match_id]->particles.size(); ++j ) {
 						int cam_id = matches[match_id]->particles[j].second;
-						lpt::ParticleImage* particle = matches[match_id]->particles[j].first;
+						lpt::ParticleImage::Ptr particle = matches[match_id]->particles[j].first;
 
 						for (int p = 0; p < matches.size(); ++p) {
 							double x = extract_result<tag::mean>(centroid_uncertainty_accumulators[p][j][0]);

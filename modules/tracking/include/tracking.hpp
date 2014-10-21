@@ -1,4 +1,3 @@
-
 #ifndef TRACKING_H
 #define TRACKING_H
 
@@ -44,7 +43,7 @@ public:
 	friend void callbackSetAlpha(int state, void* data);
 	friend void callbackSetRMax(int state, void* data);
 	friend void callbackSetRMin(int state, void* data);
-	friend inline bool compareCostAscending(pair<int,double>& one, pair<int,double>& two) {return one.second < two.second;}
+    friend inline bool compareCost(pair<int,double>& one, pair<int,double>& two) {return one.second > two.second;}
 	
 	class Parameters {
 	public:

@@ -67,8 +67,8 @@ public:
 		void* matcher_void_ptr = static_cast<void*> ( this );
 		cv::createTrackbar("Match Thresh", string() , &params.match_thresh_level, 50, callbackMatchThreshcuda, matcher_void_ptr);
 	}
-	virtual void findUniqueMatches(lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches);
-	virtual void findEpipolarMatches(lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap);
+    virtual void findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches);
+    virtual void findEpipolarMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap);
 
 private:
 	void findEpipolarMatchesStreams(lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap);

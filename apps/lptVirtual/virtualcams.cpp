@@ -18,9 +18,9 @@ int main(int argc, char** argv) {
 	pipeline.setQueueCapacity(10);
 
 	lpt::ImageProcessor::Ptr processor = lpt::ImageProcessor::create();
-	lpt::GaussianBlur blur(3);
-	lpt::Threshold thresh(20);
-	processor->addProcess( blur );
+    lpt::ImageProcess::Ptr blur = lpt::GaussianBlur::create(3);
+    lpt::ImageProcess::Ptr thresh = lpt::Threshold::create(20);
+    processor->addProcess( blur );
 	processor->addProcess( thresh );
 	
 	lpt::FindContoursDetector::Ptr detector = lpt::FindContoursDetector::create();
@@ -35,6 +35,8 @@ int main(int argc, char** argv) {
 	camera_system->getGenerator()->setImageCreator(image_creator);
 	
 	lpt::PointMatcher::Ptr matcher = lpt::PointMatcher::create();
+	matcher->params.match_threshold = 2.0;
+	matcher->params.match_thresh_level = 20;
 	
 	lpt::PointMatcherCUDA::Ptr matcher_cuda =  lpt::PointMatcherCUDA::create();
 	matcher_cuda->params.match_threshold = 2.0; //pixels
@@ -57,7 +59,7 @@ int main(int argc, char** argv) {
 	pipeline.attachCameraSystem(camera_system);
 	pipeline.attachImageProcessor(processor);
 	pipeline.attachDetector(detector);
-	pipeline.attachMatcher(matcher_cuda);
+	pipeline.attachMatcher(matcher);
 	pipeline.attachTracker(tracker);
 	pipeline.attachVisualizer(visualizer);
 

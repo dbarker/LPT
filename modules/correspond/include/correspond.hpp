@@ -1,3 +1,8 @@
+/**
+ * @file correspond.hpp
+ * @brief Correspondence module declaration
+ * The module contains correspondence and 3D reconstruction classes
+ */
 
 #ifndef CORRESPOND_H_
 #define CORRESPOND_H_
@@ -8,26 +13,50 @@
 
 #define NUM_MATCHES 10
 
-namespace lpt {
+namespace lpt
+{
 
 using namespace std;
 
+/**
+ * @brief MatchMap
+ * Bookkeeping tool to identify 4-way unique matches from epipolar matches
+ * Size: # total particles by # cameras by # max_matches
+ */
 typedef vector< vector < array <int, NUM_MATCHES> > > MatchMap;
 
-class Correspondence {
+/**
+ * @brief The Correspondence class
+ * Base class for correspondence functionality
+ * Completes correspondence in two steps: 1) Epipolar matching 2) 4-way unique matching
+ * Also defines the streaming pipeline functions
+ */
+class Correspondence
+{
 public:	
 	typedef	std::shared_ptr<Correspondence> Ptr;
 	
-	Correspondence() : 
-		initial_max_particles_per_image(2048), 
-		map_storage_size(500) { }
-	
-	void findMatches(lpt::ImageFrameGroup& frame_group, vector<lpt::Match::Ptr>& matches) {
-		resetMatchMap(current_matchmap);
-		findEpipolarMatches(frame_group, current_matchmap);
-		findUniqueMatches(frame_group, current_matchmap, matches);
-	}
+    Correspondence();
 
+    virtual ~Correspondence();
+	
+    /**
+     * @brief Completes correspondence in an image frame group
+     * Invokes resetMatchMap, findEpipolarMathes, and findUniqueMatches
+     *
+     * @param frame_group Input image frame group
+     * @param matches Output vector of Match pointers
+     */
+    void findMatches(const ImageFrameGroup &frame_group, vector<lpt::Match::Ptr>& matches);
+
+    /**
+     * @brief Run correspondence
+     *
+     * @param in_queue Input queue
+     * @param out_queue Output queue
+     * @param number_epipolarmatching_threads
+     * @param number_uniquematching_threads
+     */
 	void  run(
 		lpt::concurrent_queue<lpt::ImageFrameGroup>* in_queue, 
 		lpt::concurrent_queue<std::pair<lpt::ImageFrameGroup, vector<lpt::Match::Ptr> > >* out_queue,
@@ -35,27 +64,107 @@ public:
 		int number_uniquematching_threads = 1
 		); 
 
+    /**
+     * @brief Stop correspondence
+     */
 	void stop();
+
+    /**
+     * @brief Run Epipolar matching
+     * @param thread_id
+     * @param in_queue Input queue
+     */
 	void runEpipolarMatching(int thread_id, lpt::concurrent_queue<lpt::ImageFrameGroup>* in_queue);
+
+    /**
+     * @brief Run 4-way unique matching
+     *
+     * @param thread_id
+     * @param out_queue Output queue
+     */
 	void runUniqueMatching(int thread_id, lpt::concurrent_queue<std::pair<lpt::ImageFrameGroup, vector<lpt::Match::Ptr> > >* out_queue);	
 
-	virtual void findEpipolarMatches(lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap)=0;
-	virtual void findUniqueMatches(lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches)=0;
+    /**
+     * @brief Find Epipolar matches
+     * Epipolar matches are created by calculating Epiploar lines and Epipolar residuals
+     * MatchMap is generated for use in finding unique matches
+     *
+     * @param frame_group
+     * @param matchmap
+     */
+	virtual void findEpipolarMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap)=0;
 
+    /**
+     * @brief Find 4-way unique matches
+     * A match must be found in at least 4 cameras to be considered a unique match
+     * Unique matches are added to the final match list
+     *
+     * @param frame_group
+     * @param matchmap
+     * @param matches The final match list
+     */
+	virtual void findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches)=0;
+
+    /**
+     * @brief Initialize MatchMap
+     */
 	virtual void initialize()=0;
 	virtual void initializeEpipolarMatchThread(int thread_id)=0;
+
+    /**
+     * @brief addControls
+     */
 	virtual void addControls()=0;
-		
-	inline double calculateEpipolarResidual(double lineB[3], lpt::ParticleImage& pointB);
-	inline void calculateEpiline( lpt::ParticleImage& pointA, const double F[3][3], double line[3] );
+
+    /**
+     * @brief Calculate the residual between an Epipolar line and a point
+     * @param line The Epipolar line
+     * @param point The Given point
+     * @return Epiolar residual
+     */
+    inline double calculateEpipolarResidual(double line[3], const lpt::ParticleImage& point) const;
+
+    /**
+     * @brief Calculate the Epipolar line
+     * @param point Starting point
+     * @param F Camera parameter
+     * @param line The resulting Epipolar line
+     */
+    inline void calculateEpiline( const lpt::ParticleImage& point, const double F[3][3], double line[3] ) const;
 	
+    /**
+     * @brief Set SharedObjects
+     * @param new_shared_objects
+     */
 	inline void setSharedObjects( std::shared_ptr<SharedObjects> new_shared_objects) { shared_objects = new_shared_objects; }
-	inline std::shared_ptr<SharedObjects> getSharedObjects() { return shared_objects; }
-	void testMatches(lpt::ImageFrameGroup& cameragroup, vector<lpt::Match::Ptr>& matches);
-	void printMatchMap(lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, string output_file_name);
+    /**
+     * @brief Get SharedObjects
+     * @return SharedObjects
+     */
+    inline std::shared_ptr<SharedObjects> getSharedObjects() const { return shared_objects; }
+    /**
+     * @brief Test matches
+     * @param cameragroup
+     * @param matches
+     */
+    void testMatches(const lpt::ImageFrameGroup& cameragroup, const vector<lpt::Match::Ptr>& matches) const;
+    /**
+     * @brief Print MatchMap
+     * @param frame_group
+     * @param matchmap
+     * @param output_file_name
+     */
+    void printMatchMap(const lpt::ImageFrameGroup& frame_group, const lpt::MatchMap& matchmap, string output_file_name) const;
 
 protected:
+    /**
+     * @brief Reset MatchMap
+     * @param matchmap
+     */
 	void resetMatchMap(lpt::MatchMap& matchmap);
+    /**
+     * @brief Initialize MatchMap
+     */
 	void initializeMatchMap();
 	lpt::MatchMap init_matchmap;
 	lpt::MatchMap current_matchmap;
@@ -75,31 +184,32 @@ protected:
 	int map_storage_size;
 };
 
-class PointMatcher : public Correspondence {
+/**
+ * @brief The PointMatcher class
+ * Derived class from the Correspondence class
+ */
+class PointMatcher : public Correspondence
+{
 public:
 	typedef	std::shared_ptr<lpt::PointMatcher> Ptr;
 	static inline lpt::PointMatcher::Ptr create() { return std::make_shared<lpt::PointMatcher>(); }
 
 	class Parameters {
 	public:
-		Parameters() : match_thresh_level(5), match_threshold(0.5){}
+        Parameters() : match_threshold(0.5), match_thresh_level(5) {}
 		double match_threshold;
 		int match_thresh_level;
 	} params;
 
-	PointMatcher() { cout << "Epipolor Point matcher created " << endl; }
+    PointMatcher();
+    virtual ~PointMatcher();
 		
-	virtual void initialize(){
-		this->initializeMatchMap();
-	}
+    virtual void initialize();
 	virtual void initializeEpipolarMatchThread(int thread_id){}
+    virtual void addControls() ;
 
-	virtual void addControls() {
-		void* matcher_void_ptr = static_cast<void*> ( this );
-		cv::createTrackbar("Match Thresh", string() , &params.match_thresh_level, 50, callbackMatchThresh, matcher_void_ptr);
-	}
-	virtual void findEpipolarMatches(lpt::ImageFrameGroup& cameragroup, lpt::MatchMap& matchmap);
-	virtual void findUniqueMatches(lpt::ImageFrameGroup& frame_group, lpt::MatchMap& MatchMap, vector<lpt::Match::Ptr>& matches);
+	virtual void findEpipolarMatches(const lpt::ImageFrameGroup& cameragroup, lpt::MatchMap& matchmap);
+	virtual void findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& MatchMap, vector<lpt::Match::Ptr>& matches);
 
 	friend void callbackMatchThresh(int state, void* data) {
 		PointMatcher* matcher = static_cast<PointMatcher*>(data);
@@ -107,35 +217,55 @@ public:
 	}
 
 private:
+    /**
+     * @brief Remove NonUnique Matches
+     * @param matches
+     */
 	inline void removeNonUniqueMatches(vector<Match::Ptr>& matches);
 	//void find3wayMatches(lpt::ParticleImage::Ptr Pa, int camB_id, int camC_id );
 	//virtual void find3wayMatches(tuple<int,int,int>& triple, lpt::ImageFrameGroup& cameragroup, vector<lpt::Match::Ptr>& matches);
 	//virtual void find4WayMatches(tuple<int,int,int,int>& quad, lpt::ImageFrameGroup& cameragroup, vector<lpt::Match::Ptr>& matches);
 };
 
-class Reconstruct3D {
+class Reconstruct3D
+{
 public:
 	typedef std::shared_ptr<Reconstruct3D> Ptr;
-	static inline Reconstruct3D::Ptr create(vector<lpt::Camera>& cams) { return std::make_shared<Reconstruct3D>(); }
+    static inline Reconstruct3D::Ptr create() { return std::make_shared<Reconstruct3D>(); }
 
-	Reconstruct3D() { }
+    Reconstruct3D();
+    virtual ~Reconstruct3D();
+
+    /**
+     * @brief Reconstruct 3D frame for matched particles
+     * @param matches Match list
+     * @param frame Output 3D frame
+     */
 	virtual void reconstruct3DFrame(vector<lpt::Match::Ptr>& matches, lpt::Frame3d& frame);
+
+    /**
+     * @brief Draw reconstruced objects
+     * @param frame
+     */
 	virtual void draw(lpt::Frame3d& frame);
 
 	inline void setSharedObjects( std::shared_ptr<SharedObjects> new_shared_objects) { shared_objects = new_shared_objects; }
-	inline std::shared_ptr<SharedObjects> getSharedObjects() { return shared_objects; }
+    inline std::shared_ptr<SharedObjects> getSharedObjects() const { return shared_objects; }
 protected:
 	std::shared_ptr < lpt::SharedObjects > shared_objects;
 private:
 	lpt::Regression solver;	
 };
 
-class Recontstuct3DwithSVD : public Reconstruct3D {
+class Reconstruct3DwithSVD : public Reconstruct3D
+{
 public:
-	typedef std::shared_ptr<Recontstuct3DwithSVD> Ptr;
-	static inline Recontstuct3DwithSVD::Ptr create() { return std::make_shared<lpt::Recontstuct3DwithSVD>(); }
+    typedef std::shared_ptr<Reconstruct3DwithSVD> Ptr;
+    static inline Reconstruct3DwithSVD::Ptr create() { return std::make_shared<lpt::Reconstruct3DwithSVD>(); }
 
-	Recontstuct3DwithSVD() : Reconstruct3D() {}
+    Reconstruct3DwithSVD();
+    virtual ~Reconstruct3DwithSVD();
+
 	virtual void reconstruct3DFrame(vector<lpt::Match::Ptr>& matches, lpt::Frame3d& frame);
 private:
 	cv::SVD svd;

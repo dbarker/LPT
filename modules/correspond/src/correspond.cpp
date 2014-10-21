@@ -5,6 +5,20 @@ namespace lpt {
 
 using namespace std;
 
+Correspondence::Correspondence()
+    : initial_max_particles_per_image(2048), map_storage_size(500)
+{
+}
+
+Correspondence::~Correspondence() {}
+
+void Correspondence::findMatches(const ImageFrameGroup &frame_group, vector<Match::Ptr> &matches)
+{
+    resetMatchMap(current_matchmap);
+    findEpipolarMatches(frame_group, current_matchmap);
+    findUniqueMatches(frame_group, current_matchmap, matches);
+}
+
 void  Correspondence::run(
 		lpt::concurrent_queue<lpt::ImageFrameGroup>* in_queue, 
 		lpt::concurrent_queue<std::pair<lpt::ImageFrameGroup, vector<lpt::Match::Ptr> > >* out_queue,
@@ -35,7 +49,8 @@ void  Correspondence::run(
 }
 
 
-void Correspondence::stop() {
+void Correspondence::stop()
+{
 	epipolar_match_threads.interrupt_all();
 	epipolar_match_threads.join_all();
 
@@ -43,7 +58,8 @@ void Correspondence::stop() {
 	unique_match_threads.join_all();
 }
 
-void Correspondence::runEpipolarMatching(int thread_id, lpt::concurrent_queue<lpt::ImageFrameGroup>* in_queue) {
+void Correspondence::runEpipolarMatching(int thread_id, lpt::concurrent_queue<lpt::ImageFrameGroup>* in_queue)
+{
 	this->initializeEpipolarMatchThread(thread_id);
 	while (true) {
 		lpt::ImageFrameGroup frame_group;
@@ -65,7 +81,8 @@ void Correspondence::runEpipolarMatching(int thread_id, lpt::concurrent_queue<lp
 	}
 }
 
-void Correspondence::runUniqueMatching(int thread_id, lpt::concurrent_queue<std::pair<lpt::ImageFrameGroup, vector<lpt::Match::Ptr> > >* out_queue) {
+void Correspondence::runUniqueMatching(int thread_id, lpt::concurrent_queue<std::pair<lpt::ImageFrameGroup, vector<lpt::Match::Ptr> > >* out_queue)
+{
 	while (true) {
 		vector<lpt::Match::Ptr> matches;
 		vector<pair<lpt::ImageFrameGroup, lpt::MatchMap>>::iterator iter;
@@ -84,11 +101,13 @@ void Correspondence::runUniqueMatching(int thread_id, lpt::concurrent_queue<std:
 	}
 }
 
-double Correspondence::calculateEpipolarResidual(double line[3], lpt::ParticleImage& point)  {
+double Correspondence::calculateEpipolarResidual(double line[3], const lpt::ParticleImage& point) const
+{
     return fabs( point.x * line[0] + point.y * line[1] + line[2] );
 }
 
-void Correspondence::calculateEpiline(lpt::ParticleImage& point, const double F[3][3], double line[3]) {
+void Correspondence::calculateEpiline(const lpt::ParticleImage& point, const double F[3][3], double line[3]) const
+{
     double x = point.x;
     double y = point.y;
     double z = 1.0;
@@ -96,6 +115,7 @@ void Correspondence::calculateEpiline(lpt::ParticleImage& point, const double F[
     line[0] = F[0][0] * x + F[1][0] * y + F[2][0] * z;
     line[1] = F[0][1] * x + F[1][1] * y + F[2][1] * z;
     line[2] = F[0][2] * x + F[1][2] * y + F[2][2] * z;
+
     double factor = line[0] * line[0] + line[1] * line[1];
     factor = factor ? 1./sqrt(factor) : 1.;
     line[0] *= factor;
@@ -103,17 +123,75 @@ void Correspondence::calculateEpiline(lpt::ParticleImage& point, const double F[
     line[2] *= factor;
 }
 
-void Correspondence::resetMatchMap(lpt::MatchMap& matchmap) {
+void Correspondence::testMatches(const ImageFrameGroup &cameragroup, const vector<Match::Ptr> &matches) const
+{
+    int N_correct = 0;
+    int N_matched = 0;
+    int N_total = 100000000;
+    for(int c = 0; c < cameragroup.size(); c++) {
+        int temp = cameragroup[c].particles.size();
+        if (temp < N_total)
+            N_total = temp;
+    }
+
+    for (int m = 0; m < matches.size(); m++){
+        if ( matches[m] ) {
+            N_matched++;
+            vector<pair < lpt::ParticleImage::Ptr, int > >& particles = matches[m]->particles;
+            bool matched = true;
+            for (int j = 0; j < particles.size() - 1; j++){
+                matched &= particles[j].first->id == particles[j+1].first->id ? true : false;
+            }
+            if ( matched )
+                N_correct++;
+        }
+    }
+    cout << "\t Correct Ratio: " << N_correct << " / " << N_matched << " = " <<
+        setprecision(2) << (N_matched > 0 ? (double) N_correct / N_matched : 0.0 ) << endl;
+    cout << "\t Cover Ratio: " << N_correct << " / " << N_total << " = " <<
+        setprecision(2) <<  (N_total > 0 ? (double) N_correct / N_total : 0.0 ) << endl;
+
+}
+
+void Correspondence::printMatchMap(const lpt::ImageFrameGroup& frame_group, const lpt::MatchMap& matchmap, string output_file_name) const
+{
+    ofstream fout(output_file_name.c_str());
+    int p_id = 0;
+    for(int i = 0; i < frame_group.size(); ++i) {
+        fout << "------------------------------------------" << endl;
+        for (int p = 0; p < frame_group[i].particles.size();  ++p, ++p_id) {
+            fout << "Cam " << i << ", " << p << ": " << endl;
+            for (int c = 0; c < frame_group.size(); ++c) {
+                fout << "\tC" << c << " -- ";
+                for (int d = 0; d < NUM_MATCHES; ++d) {
+                    int index = matchmap[p_id][c][d];
+                    if (index >=0 )
+                        fout << "[" << index << ", " << frame_group[c].particles[index]->id << "]  ";
+                    else
+                        fout << index << "  ";
+                }
+                fout << endl;
+            }
+        }
+    }
+    fout.close();
+}
+
+void Correspondence::resetMatchMap(lpt::MatchMap& matchmap)
+{
 	for (int a = 0; a < matchmap.size(); ++a) { 
-		for (int b = 0; b < matchmap[b].size(); ++b)
-			for (int c = 0; c < matchmap[a][b].size(); ++c)
+        for (int b = 0; b < matchmap[b].size(); ++b) {
+            for (int c = 0; c < matchmap[a][b].size(); ++c) {
 				matchmap[a][b][c] = -1;
+            }
+        }
 	}
 }
 
-void Correspondence::initializeMatchMap() {
+void Correspondence::initializeMatchMap()
+{
 	auto& cameras = shared_objects->cameras;
-	init_matchmap.resize( cameras.size() * this->initial_max_particles_per_image);
+    init_matchmap.resize( cameras.size() * this->initial_max_particles_per_image );
 	array<int, NUM_MATCHES> temp;
 	for (int z = 0; z < temp.size(); ++z)
 		temp[z] = -1;
@@ -131,141 +209,26 @@ void Correspondence::initializeMatchMap() {
 		empty_maps_queue.push(iter);
 }
 
-void Correspondence::testMatches(lpt::ImageFrameGroup& cameragroup, vector<lpt::Match::Ptr>& matches) {
-	int N_correct = 0;
-	int N_matched = 0;
-	int N_total = 100000000;
-	for(int c = 0; c < cameragroup.size(); c++) {
-		int temp = cameragroup[c].particles.size();
-		if (temp < N_total)
-			N_total = temp;
-	}
-
-	for (int m = 0; m < matches.size(); m++){
-		if ( matches[m] ) {
-			N_matched++;
-			vector<pair < lpt::ParticleImage*, int > >& particles = matches[m]->particles;
-			bool matched = true;
-			for (int j = 0; j < particles.size() - 1; j++){
-				matched &= particles[j].first->id == particles[j+1].first->id ? true : false;
-			}
-			if ( matched )
-				N_correct++;
-		}
-	}
-	cout << "\t Correct Ratio: " << N_correct << " / " << N_matched << " = " <<
-		setprecision(2) << (N_matched > 0 ? (double) N_correct / N_matched : 0.0 ) << endl;
-	cout << "\t Cover Ratio: " << N_correct << " / " << N_total << " = " <<
-		setprecision(2) <<  (N_total > 0 ? (double) N_correct / N_total : 0.0 ) << endl;
-
+PointMatcher::PointMatcher()
+{
+    cout << "Epipolar Point matcher constructed" << endl;
 }
 
-void Correspondence::printMatchMap(lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, string output_file_name) {
-	ofstream fout(output_file_name.c_str());
-	int p_id = 0;
-	for(int i = 0; i < frame_group.size(); ++i) {
-		fout << "------------------------------------------" << endl;
-		for (int p = 0; p < frame_group[i].particles.size();  ++p, ++p_id) {
-			fout << "Cam " << i << ", " << p << ": " << endl;
-			for (int c = 0; c < frame_group.size(); ++c) {
-				fout << "\tC" << c << " -- ";
-				for (int d = 0; d < NUM_MATCHES; ++d) {
-					int index = matchmap[p_id][c][d];
-					if (index >=0 )
-						fout << "[" << index << ", " << frame_group[c].particles[index]->id << "]  ";
-					else
-						fout << index << "  ";
-				}
-				fout << endl;
-			}
-		}
-	}
-	fout.close();
+PointMatcher::~PointMatcher() {}
+
+void PointMatcher::initialize()
+{
+    this->initializeMatchMap();
 }
 
-void PointMatcher::findUniqueMatches(lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches) {
-
-   vector<int> num_particles(frame_group.size());
-   num_particles[0] = frame_group[0].particles.size();
-   for(int i = 1; i < frame_group.size(); ++i) 
-      num_particles[i] = frame_group[i].particles.size() + num_particles[i-1];
-
-   int num_cameras = frame_group.size();
-
-   for (int cam_a = 0; cam_a < num_cameras - 3; ++cam_a) 
-   {
-      int a_start = (cam_a !=0 ? num_particles[cam_a - 1] : 0);
-      for (int a = 0; a < frame_group[cam_a].particles.size(); ++a) 
-      {
-         lpt::ParticleImage* Pa = frame_group[cam_a].particles[a].get();
-         if( ! Pa->is_4way_matched ) 
-         {
-            for (int cam_b = cam_a + 1; cam_b < num_cameras - 2; ++cam_b) 
-            {
-               int b_start = (cam_b !=0 ? num_particles[cam_b-1] : 0);
-               for(int match_ab = 0; match_ab < NUM_MATCHES; ++match_ab) { //loop through all A,B matches
-                  int b = matchmap[a + a_start][cam_b][match_ab]; 
-                  if (b < 0)
-                     break;
-                  lpt::ParticleImage* Pb = frame_group[cam_b].particles[b].get();
-
-                  if( ! Pb->is_4way_matched ) 
-                  {
-                     for (int cam_c = cam_b + 1; cam_c < num_cameras - 1; ++cam_c) 
-                     {
-                        int c_start = (cam_c !=0 ? num_particles[cam_c-1] : 0);
-                        for (int match_bc = 0; match_bc < NUM_MATCHES; ++match_bc) 
-                        {
-                           int c = matchmap[b + b_start][cam_c][match_bc];
-                           if (c < 0) 
-                              break;
-
-                           lpt::ParticleImage* Pc = frame_group[cam_c].particles[c].get();
-
-                           if( ! Pc->is_4way_matched && std::count(matchmap[a + a_start][cam_c].begin(), matchmap[a + a_start][cam_c].end(), c) )  
-                           {
-                              for (int cam_d = cam_c + 1; cam_d < num_cameras; ++cam_d) 
-                              {
-                                 int d_start = (cam_d !=0 ? num_particles[cam_d-1] : 0);
-                                 for (int match_cd = 0; match_cd < NUM_MATCHES; ++match_cd) 
-                                 {
-                                    int d = matchmap[c + c_start][cam_d][match_cd];
-                                    if (d < 0)
-                                       break;
-                                    lpt::ParticleImage* Pd = frame_group[cam_d].particles[d].get();
-                                    if( ! Pd->is_4way_matched && std::count(matchmap[a + a_start][cam_d].begin(), matchmap[a + a_start][cam_d].end(), d)  && std::count(matchmap[b + b_start][cam_d].begin(), matchmap[b+b_start][cam_d].end(), d)  ) 
-                                    {                                       
-                                       lpt::Match::Ptr newmatch = lpt::Match::create();
-                                       newmatch->addParticle(Pa,cam_a);
-                                       newmatch->addParticle(Pb,cam_b);
-                                       newmatch->addParticle(Pc,cam_c);
-                                       newmatch->addParticle(Pd,cam_d);
-                                       matches.push_back(std::move(newmatch));
-                                       Pa->is_4way_matched = true;
-                                       Pb->is_4way_matched = true;
-                                       Pc->is_4way_matched = true;
-                                       Pd->is_4way_matched = true;
-                                       match_ab = NUM_MATCHES;
-                                       match_bc = NUM_MATCHES;
-                                       match_cd = NUM_MATCHES;
-                                       cam_b = num_cameras;
-                                       cam_c = num_cameras;
-                                       cam_d = num_cameras;
-                                    } 
-                                 }
-                              }
-                           }
-                        }
-                     }
-                  }
-               }
-            }
-         }
-      }
-   }
+void PointMatcher::addControls()
+{
+    void* matcher_void_ptr = static_cast<void*> (this);
+    cv::createTrackbar("Match Threshold", string(), &params.match_thresh_level, 50, callbackMatchThresh, matcher_void_ptr);
 }
 
-void PointMatcher::findEpipolarMatches(lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap ) {
+void PointMatcher::findEpipolarMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap )
+{
 	auto& camera_pairs = shared_objects->camera_pairs;
 	int match_overload = 0;
 	vector<int> num_particles( frame_group.size(), 0 );
@@ -277,8 +240,8 @@ void PointMatcher::findEpipolarMatches(lpt::ImageFrameGroup& frame_group, lpt::M
 
 		int cam_a = pair->cam_A.id;
 		int cam_b = pair->cam_B.id;
-		vector<ParticleImage::Ptr>& cam_A_particles = frame_group[cam_a].particles;
-		vector<ParticleImage::Ptr>& cam_B_particles = frame_group[cam_b].particles;	
+		const vector<ParticleImage::Ptr>& cam_A_particles = frame_group[cam_a].particles;
+		const vector<ParticleImage::Ptr>& cam_B_particles = frame_group[cam_b].particles;	
 
 	
 		int b_start = (cam_b !=0 ? num_particles[cam_b-1] : 0);
@@ -307,9 +270,94 @@ void PointMatcher::findEpipolarMatches(lpt::ImageFrameGroup& frame_group, lpt::M
 			}
 		}
 	}
+    cout << match_overload << endl;
 }
 
-void PointMatcher::removeNonUniqueMatches(vector<Match::Ptr>& matches) {
+void PointMatcher::findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches)
+{
+
+   vector<int> num_particles(frame_group.size());
+   num_particles[0] = frame_group[0].particles.size();
+   for(int i = 1; i < frame_group.size(); ++i)
+      num_particles[i] = frame_group[i].particles.size() + num_particles[i-1];
+
+   int num_cameras = frame_group.size();
+
+   for (int cam_a = 0; cam_a < num_cameras - 3; ++cam_a)
+   {
+      int a_start = (cam_a !=0 ? num_particles[cam_a - 1] : 0);
+      for (int a = 0; a < frame_group[cam_a].particles.size(); ++a)
+      {
+         lpt::ParticleImage::Ptr Pa = frame_group[cam_a].particles[a];
+         if( ! Pa->is_4way_matched )
+         {
+            for (int cam_b = cam_a + 1; cam_b < num_cameras - 2; ++cam_b)
+            {
+               int b_start = (cam_b !=0 ? num_particles[cam_b-1] : 0);
+               for(int match_ab = 0; match_ab < NUM_MATCHES; ++match_ab) { //loop through all A,B matches
+                  int b = matchmap[a + a_start][cam_b][match_ab];
+                  if (b < 0)
+                     break;
+                  lpt::ParticleImage::Ptr Pb = frame_group[cam_b].particles[b];
+
+                  if( ! Pb->is_4way_matched )
+                  {
+                     for (int cam_c = cam_b + 1; cam_c < num_cameras - 1; ++cam_c)
+                     {
+                        int c_start = (cam_c !=0 ? num_particles[cam_c-1] : 0);
+                        for (int match_bc = 0; match_bc < NUM_MATCHES; ++match_bc)
+                        {
+                           int c = matchmap[b + b_start][cam_c][match_bc];
+                           if (c < 0)
+                              break;
+
+                           lpt::ParticleImage::Ptr Pc = frame_group[cam_c].particles[c];
+
+                           if( ! Pc->is_4way_matched && std::count(matchmap[a + a_start][cam_c].begin(), matchmap[a + a_start][cam_c].end(), c) )
+                           {
+                              for (int cam_d = cam_c + 1; cam_d < num_cameras; ++cam_d)
+                              {
+                                 int d_start = (cam_d !=0 ? num_particles[cam_d-1] : 0);
+                                 for (int match_cd = 0; match_cd < NUM_MATCHES; ++match_cd)
+                                 {
+                                    int d = matchmap[c + c_start][cam_d][match_cd];
+                                    if (d < 0)
+                                       break;
+                                    lpt::ParticleImage::Ptr Pd = frame_group[cam_d].particles[d];
+                                    if( ! Pd->is_4way_matched && std::count(matchmap[a + a_start][cam_d].begin(), matchmap[a + a_start][cam_d].end(), d)  && std::count(matchmap[b + b_start][cam_d].begin(), matchmap[b+b_start][cam_d].end(), d)  )
+                                    {
+                                       lpt::Match::Ptr newmatch = lpt::Match::create();
+                                       newmatch->addParticle(Pa,cam_a);
+                                       newmatch->addParticle(Pb,cam_b);
+                                       newmatch->addParticle(Pc,cam_c);
+                                       newmatch->addParticle(Pd,cam_d);
+                                       matches.push_back(std::move(newmatch));
+                                       Pa->is_4way_matched = true;
+                                       Pb->is_4way_matched = true;
+                                       Pc->is_4way_matched = true;
+                                       Pd->is_4way_matched = true;
+                                       match_ab = NUM_MATCHES;
+                                       match_bc = NUM_MATCHES;
+                                       match_cd = NUM_MATCHES;
+                                       cam_b = num_cameras;
+                                       cam_c = num_cameras;
+                                       cam_d = num_cameras;
+                                    }
+                                 }
+                              }
+                           }
+                        }
+                     }
+                  }
+               }
+            }
+         }
+      }
+   }
+}
+
+void PointMatcher::removeNonUniqueMatches(vector<Match::Ptr>& matches)
+{
 	for (int i = 0; i < matches.size(); ++i) {
 		if (matches[i]->isUnique() == false) {
 			matches[i].reset();
@@ -404,7 +452,12 @@ void PointMatcher::removeNonUniqueMatches(vector<Match::Ptr>& matches) {
 //	std::move(matches4way.begin(), matches4way.end(), std::back_inserter(matches) );
 //}
 
-void Reconstruct3D::reconstruct3DFrame(vector<lpt::Match::Ptr>& matches, lpt::Frame3d& frame) {
+Reconstruct3D::Reconstruct3D() {}
+
+Reconstruct3D::~Reconstruct3D() {}
+
+void Reconstruct3D::reconstruct3DFrame(vector<lpt::Match::Ptr>& matches, lpt::Frame3d& frame)
+{
 	auto& cameras = shared_objects->cameras;
 	for (int m = 0; m < matches.size(); ++m) {
 		if ( matches[m] ) {
@@ -422,7 +475,7 @@ void Reconstruct3D::reconstruct3DFrame(vector<lpt::Match::Ptr>& matches, lpt::Fr
 					int e = s + 1;
 					A[s] = new double[3];
 					A[e] = new double[3];
-					lpt::ParticleImage* P = matches[m]->particles[i].first;
+					lpt::ParticleImage::Ptr P = matches[m]->particles[i].first;
 					int camID = matches[m]->particles[i].second;
 					double x = ( P->x - cameras[camID].c[0] ) / (1. * cameras[camID].f[0]);    // FIXME: May need -1 multiplier for pixel coordinate system (upper left corner origin)
 					double y = ( P->y - cameras[camID].c[1] ) / (1. * cameras[camID].f[1]);    // Convert P.x and P.y to normalized coordinates through intrinsic parameters
@@ -460,7 +513,8 @@ void Reconstruct3D::reconstruct3DFrame(vector<lpt::Match::Ptr>& matches, lpt::Fr
 	}
 }
 
-void Reconstruct3D::draw(lpt::Frame3d& frame) {
+void Reconstruct3D::draw(lpt::Frame3d& frame)
+{
 	auto& cameras = shared_objects->cameras;
 	vector<cv::Point3f> object_points(frame.objects.size()); 
 	vector<cv::Point2f> image_points(frame.objects.size());
@@ -486,7 +540,12 @@ void Reconstruct3D::draw(lpt::Frame3d& frame) {
 	}
 }
 
-void Recontstuct3DwithSVD::reconstruct3DFrame(vector<lpt::Match::Ptr>& matches, lpt::Frame3d& frame) {
+Reconstruct3DwithSVD::Reconstruct3DwithSVD() : Reconstruct3D() {}
+
+Reconstruct3DwithSVD::~Reconstruct3DwithSVD() {}
+
+void Reconstruct3DwithSVD::reconstruct3DFrame(vector<lpt::Match::Ptr>& matches, lpt::Frame3d& frame)
+{
 	auto& cameras = shared_objects->cameras;
 	for (int m = 0; m < matches.size(); ++m) {
 		if ( matches[m] ) {
@@ -502,7 +561,7 @@ void Recontstuct3DwithSVD::reconstruct3DFrame(vector<lpt::Match::Ptr>& matches, 
 					int s = i * 2;
 					int e = s + 1;
 				
-					lpt::ParticleImage* P = matches[m]->particles[i].first;
+					lpt::ParticleImage::Ptr P = matches[m]->particles[i].first;
 					int cam_id = matches[m]->particles[i].second;              
 					newparticle->camera_ids[i] = cam_id;								//WARNING this will cause a segfault if number_of_cameras is greater than four;
 					id = P->id;
