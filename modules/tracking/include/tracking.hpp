@@ -1,3 +1,8 @@
+/**
+ * @file tracking.hpp
+ * The tracking module declaration
+ * Includes CostCalculator class and Tracker class
+ */
 #ifndef TRACKING_H
 #define TRACKING_H
 
@@ -7,34 +12,67 @@ namespace lpt {
 
 using namespace std;
 
+/**
+ * @brief The CostCalculator class
+ * Base class for various cost calculators
+ */
 class CostCalculator {
 public:
 	typedef shared_ptr<CostCalculator> Ptr;
-	virtual double calculate (lpt::Trajectory3d& traj, lpt::Particle3d& particle)=0;
+    virtual double calculate (const lpt::Trajectory3d& traj, const lpt::Particle3d& particle) const = 0;
+    virtual ~CostCalculator();
 };
 
+/**
+ * @brief The CostNearestNeighbor class
+ * Derived class from the CostCalculator class
+ * Calculates candidate cost based on a 2-frame nearest neighbor criteria
+ * Minimizes the displacement within the 2-frame interval
+ */
 class CostNearestNeighbor : public CostCalculator {
 public:
 	typedef shared_ptr<CostNearestNeighbor> Ptr;
 	static inline CostNearestNeighbor::Ptr create() { return std::make_shared<lpt::CostNearestNeighbor>(); }
 	
-	CostNearestNeighbor() {}
-	double calculate(lpt::Trajectory3d& traj, lpt::Particle3d& particle) {
-        return lpt::calculateDistance(*(traj.objects.back()), particle);
-	}
+    CostNearestNeighbor();
+    virtual ~CostNearestNeighbor();
+
+    /**
+     * @brief Calculates the candidate cost
+     * @param traj The trajectory
+     * @param particle The candidate particle
+     * @return The cost of adding current candidate to this trajectory
+     */
+    double calculate(const lpt::Trajectory3d& traj, const lpt::Particle3d& particle) const;
 };
 
+/**
+ * @brief The CostMinimumAcceleration class
+ * Derived class from the CostCalculator class
+ * Calculates candidate cost based on a 3-frame minimum accelearation algorithm
+ * Minimizes the acceleration within the 3-frame interval
+ */
 class CostMinimumAcceleration : public CostCalculator {
 public:
     typedef shared_ptr<CostMinimumAcceleration> Ptr;
     static inline CostMinimumAcceleration::Ptr create () { return std::make_shared<lpt::CostMinimumAcceleration>(); }
 
-    CostMinimumAcceleration() {}
-    double calculate(lpt::Trajectory3d& traj, lpt::Particle3d& particle) {
-        return lpt::calculateDistance(traj.extrap_object, particle);
-    }
+    CostMinimumAcceleration();
+    ~CostMinimumAcceleration();
+
+    /**
+     * @brief Calculates the candidate cost
+     * @param traj The trajectory
+     * @param particle The candidate particle
+     * @return The cost of adding current candidate to this trajectory
+     */
+    double calculate(const Trajectory3d &traj, const Particle3d &particle) const;
 };
 
+/**
+ * @brief The Tracker class
+ * Manages the tracking parameters and algorithms
+ */
 class Tracker {
 public:
 	typedef	shared_ptr<Tracker> Ptr;
@@ -63,21 +101,55 @@ public:
 		int alpha_level;
 	} params;
 
-	Tracker() : clear_drawings(false) { cout << "tracker created " << endl; }
+    Tracker();
+
+    /**
+     * @brief Track particles across consecutive frames
+     * @param frame1 The current frame [n]
+     * @param frame2 The future frame [n+1]
+     */
 	void trackFrames(lpt::Frame3d& frame1, lpt::Frame3d& frame2 );
 	
+    /**
+     * @brief addControls
+     */
 	void addControls();
 	
+    /**
+     * @brief setTrajectoryViews
+     * @param cameras
+     * @param image_type
+     */
 	void setTrajectoryViews(vector<lpt::Camera>& cameras, cv::Mat image_type);
 	
+    /**
+     * @brief Set SharedObjects
+     * @param new_shared_objects
+     */
 	inline void setSharedObjects( std::shared_ptr<SharedObjects> new_shared_objects) { shared_objects = new_shared_objects; }
 
+    /**
+     * @brief Set CostCalculator
+     * @param new_cost_calculator
+     */
     inline void setCostCalculator( lpt::CostCalculator::Ptr new_cost_calculator ) { cost_calculator = new_cost_calculator; }
 	
-	inline std::shared_ptr<SharedObjects> getSharedObjects() { return shared_objects; }
+    /**
+     * @brief Get SharedObjects
+     * @return SharedObjects
+     */
+    inline std::shared_ptr<SharedObjects> getSharedObjects() const { return shared_objects; }
 	
-	inline list<lpt::Trajectory3d_Ptr>& getActiveTrajectories() { return active_trajs; }
+    /**
+     * @brief Get ActiveTrajectories
+     * @return The list of active trajectories
+     */
+    inline list<lpt::Trajectory3d_Ptr>& getActiveTrajectories() { return active_trajs; }
 	
+    /**
+     * @brief drawTrajectories
+     * @param cameras
+     */
 	void drawTrajectories(vector<lpt::Camera>& cameras);
 
 	bool clear_drawings;
@@ -91,7 +163,10 @@ private:
     std::shared_ptr<lpt::SharedObjects>         shared_objects;
 }; 
 
-
+/**
+ * @brief The TestTracker class
+ * Tests tracking algorithms and prints results
+ */
 class TestTracker{
 public:
 	vector<Trajectory3d_Ptr>& trajectories;
@@ -102,19 +177,11 @@ public:
 	int links_created;
 	int links_total;
 	int links_correct;
-	TestTracker(
-			vector<Trajectory3d_Ptr>& trajs,
-			vector<Trajectory3d_Ptr>& gold_trajs
-			):
-				trajectories(trajs),
-				gold_trajectories(gold_trajs),
-				correct_ratio(0.0),
-				cover_ratio(0.0),
-				links_created(0),
-				links_total(0),
-				links_correct(0) {}
-	void testTrajectories(int maxframes);
-	void printTestResults();
+
+    TestTracker(vector<Trajectory3d_Ptr>& trajs, vector<Trajectory3d_Ptr>& gold_trajs);
+
+    void testTrajectories(int maxframes) const;
+    void printTestResults() const;
 };
 
 } /* NAMESPACE_PT */

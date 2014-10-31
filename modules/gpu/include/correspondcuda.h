@@ -49,7 +49,7 @@ public:
 	
 	friend void callbackMatchThreshcuda(int state, void* data) {
 		PointMatcherCUDA* matcher = static_cast<PointMatcherCUDA*>(data);
-		matcher->params.match_threshold = matcher->params.match_thresh_level / 10.0;
+		matcher->params.match_threshold = matcher->params.match_thresh_level / static_cast<float>(10.0);
 	}
 
 	class Parameters {

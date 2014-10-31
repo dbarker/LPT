@@ -23,8 +23,7 @@ void  Correspondence::run(
 		lpt::concurrent_queue<lpt::ImageFrameGroup>* in_queue, 
 		lpt::concurrent_queue<std::pair<lpt::ImageFrameGroup, vector<lpt::Match::Ptr> > >* out_queue,
 		int number_epipolarmatching_threads,
-		int number_uniquematching_threads
-		) 
+        int number_uniquematching_threads )
 {
 	cout << "Running correspondence with " << number_epipolarmatching_threads<< " epi threads, and " << number_uniquematching_threads << " unique match threads " << endl; 
 	//for (int i = 0; i < number_2way_threads; ++i)
@@ -153,7 +152,7 @@ void Correspondence::testMatches(const ImageFrameGroup &cameragroup, const vecto
 
 }
 
-void Correspondence::printMatchMap(const lpt::ImageFrameGroup& frame_group, const lpt::MatchMap& matchmap, string output_file_name) const
+void Correspondence::printMatchMap(const lpt::ImageFrameGroup& frame_group, string output_file_name) const
 {
     ofstream fout(output_file_name.c_str());
     int p_id = 0;
@@ -164,7 +163,7 @@ void Correspondence::printMatchMap(const lpt::ImageFrameGroup& frame_group, cons
             for (int c = 0; c < frame_group.size(); ++c) {
                 fout << "\tC" << c << " -- ";
                 for (int d = 0; d < NUM_MATCHES; ++d) {
-                    int index = matchmap[p_id][c][d];
+                    int index = current_matchmap[p_id][c][d];
                     if (index >=0 )
                         fout << "[" << index << ", " << frame_group[c].particles[index]->id << "]  ";
                     else
@@ -270,7 +269,7 @@ void PointMatcher::findEpipolarMatches(const lpt::ImageFrameGroup& frame_group, 
 			}
 		}
 	}
-    cout << match_overload << endl;
+    //cout << match_overload << endl;
 }
 
 void PointMatcher::findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches)
@@ -282,6 +281,7 @@ void PointMatcher::findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lp
       num_particles[i] = frame_group[i].particles.size() + num_particles[i-1];
 
    int num_cameras = frame_group.size();
+   matches.clear();
 
    for (int cam_a = 0; cam_a < num_cameras - 3; ++cam_a)
    {

@@ -127,7 +127,7 @@ public:
     /**
      * @brief Calculate the Epipolar line
      * @param point Starting point
-     * @param F Camera parameter
+     * @param F Fundamental matrix
      * @param line The resulting Epipolar line
      */
     inline void calculateEpiline( const lpt::ParticleImage& point, const double F[3][3], double line[3] ) const;
@@ -154,7 +154,7 @@ public:
      * @param matchmap
      * @param output_file_name
      */
-    void printMatchMap(const lpt::ImageFrameGroup& frame_group, const lpt::MatchMap& matchmap, string output_file_name) const;
+    void printMatchMap(const lpt::ImageFrameGroup& frame_group, string output_file_name) const;
 
 protected:
     /**

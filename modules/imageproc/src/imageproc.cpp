@@ -313,7 +313,7 @@ void testDetectedParticles(
 			double diff_x = true_particles[m]->x - detected_particles[n]->x;
 			double diff_y = true_particles[m]->y - detected_particles[n]->y;
 			double r = sqrt( diff_x * diff_x + diff_y * diff_y );
-			if(r <= 1.2/*true_particles[m]->radius*/) {   //FIXME: make this a function of actual particle radius
+            if(r <= true_particles[m]->radius) {   //FIXME: make this a function of actual particle radius
 				residuals[m] += r;
 				number_of_matches++;
 				break;                                    //FIXME: consider if more than one particle matches
