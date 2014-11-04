@@ -259,7 +259,7 @@ void DataSetGenerator::project3DFramesTo2D() {
 				double intensity =  image_creator->object_intensity / ( distance * distance );
 				//cout << "radius = " << radius << " intensity = " << intensity << " distance " << distance << endl;
 				lpt::ParticleImage::Ptr newparticle = lpt::ParticleImage::create(point_ids[p], image_points[p].x, image_points[p].y, radius, intensity);
-				newframe.particles.push_back(newparticle);
+                newframe.particles.push_back(newparticle);
 			}
 			
 			//!!!!!!!!!!!!!!!

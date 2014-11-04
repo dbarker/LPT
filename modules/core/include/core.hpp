@@ -355,29 +355,32 @@ public:
 };
 
 class CameraPair {
-    public:
-        lpt::Camera& cam_A;
-        lpt::Camera& cam_B;
-        double F [3][3];
-        double epipolar_error;
-        double reprojection_error;
+public:
+    lpt::Camera& cam_A;
+    lpt::Camera& cam_B;
+    double F [3][3];
+    double epipolar_error;
+    double reprojection_error;
 
-        CameraPair(lpt::Camera& A, lpt::Camera& B ) : cam_A(A), cam_B(B),
-        		epipolar_error(0.0),reprojection_error(0.0){}
+    CameraPair(lpt::Camera& A, lpt::Camera& B ) : cam_A(A), cam_B(B),
+        epipolar_error(0.0),reprojection_error(0.0){}
 };
 
 class SharedObjects { 
-	public:
-		SharedObjects() : frame_rate(0), input_path("./"), output_path("./") { }
+public:
+    typedef std::shared_ptr<SharedObjects> Ptr;
+    static inline SharedObjects::Ptr create() {return std::make_shared<SharedObjects>();}
+
+    SharedObjects() : frame_rate(0), input_path("./"), output_path("./") { }
 		
-		vector<lpt::Camera> cameras;
-		vector<lpt::CameraPair> camera_pairs;
-		lpt::CameraSystemType camera_type;
-		cv::Mat image_type;
+    vector<lpt::Camera> cameras;
+    vector<lpt::CameraPair> camera_pairs;
+    lpt::CameraSystemType camera_type;
+    cv::Mat image_type;
 	
-		int frame_rate;
-		string input_path;
-		string output_path;
+    int frame_rate;
+    string input_path;
+    string output_path;
 };
 
 class Particle {
