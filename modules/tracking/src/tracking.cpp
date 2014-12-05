@@ -235,7 +235,7 @@ TestTracker::TestTracker(vector<Trajectory3d_Ptr> &trajs, vector<Trajectory3d_Pt
 {
 }
 
-void TestTracker::testTrajectories(int maxframes) const
+void TestTracker::testTrajectories(int maxframes)
 {
     cout << endl <<"-------Running gold test------" << endl;
 	vector<vector<bool>> matches( gold_trajectories.size() );
@@ -313,7 +313,7 @@ void TestTracker::testTrajectories(int maxframes) const
 	fout.close();
 #endif
 }
-void TestTracker::printTestResults() const
+void TestTracker::printTestResults()
 {
 
 	cout << "Results:" << endl << endl;

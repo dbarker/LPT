@@ -1,3 +1,8 @@
+/**
+ * @file visualization.hpp
+ * The visualization module declaration
+ * Contains classes for fluid properties, flow variables, and particle/trajectory display
+ */
 #ifndef VISUALIZATION_H_
 #define VISUALIZATION_H_
 
@@ -117,13 +122,18 @@ void getReynoldsStressField(vector< array <lpt::boost_weighted_accumulator, 3 > 
 array<double, 3>  calcPressureGradiantNavierStokes( array<double,3>& U0, array<double,3>& U1, array<double,3>& U2, array<double,3>& A1, lpt::FluidProperties& fluid_props, array<double,3>& dX);
 array<double, 3>  calcPressureGradiantBernoulli( array<double,3>& U0, array<double,3>& U2, lpt::FluidProperties& fluid_props, array<double,3>& dX);
 
+/**
+ * @brief The FluidProperties class
+ */
 class FluidProperties {
 public:
 	typedef	shared_ptr<FluidProperties> Ptr;
 	static inline FluidProperties::Ptr create() { return FluidProperties::Ptr( new FluidProperties() ); }
 
-	FluidProperties() : rho(1.225), Td(15), Tw(15), mu(1.78E-5), P_ref(101325) {}
-	// Default air at 15 C
+    ///< Default air at 15 C
+    FluidProperties();
+    FluidProperties(double n_rho, double n_Td, double n_Tw, double n_mu, double n_P_ref);
+
 	double rho;  //density (kg/m3)
 	double Td;   //dry bulb temperature (C)
 	double Tw;   //wet bulb temperature (C)
@@ -131,13 +141,16 @@ public:
 	double P_ref; // Reference Pressure (Pa)
 };
 
+/**
+ * @brief The CoordinateArrows class
+ */
 class CoordinateArrows {
 public:
 	typedef std::shared_ptr<CoordinateArrows> Ptr; 
-	static inline CoordinateArrows::Ptr create(	vtkSmartPointer<vtkRenderWindowInteractor> iren, double scale = 1) { return CoordinateArrows::Ptr(new CoordinateArrows(iren, scale) ); }
+    static inline CoordinateArrows::Ptr create(	vtkSmartPointer<vtkRenderWindowInteractor> iren, double scale = 1) { return std::make_shared<CoordinateArrows>(iren, scale); }
 
 	CoordinateArrows( vtkSmartPointer<vtkRenderWindowInteractor> iren, double scale);
-	virtual ~CoordinateArrows() { }
+    virtual ~CoordinateArrows();
 private:
 	double scale;
 	vtkSmartPointer<vtkRenderWindowInteractor> interactor;
@@ -149,25 +162,50 @@ private:
 	vtkSmartPointer<vtkOrientationMarkerWidget> widget; 
 };
 
+/**
+ * @brief The CameraVTK class
+ */
 class CameraVTK {
 public:
-	
-	static array<double, 3> getRandomColor() { 
-		array<double, 3> color;
-		color[0] = vtkMath::Random(0.5, 1.0);
-		color[1] = vtkMath::Random(0.5, 1.0);
-		color[2] = vtkMath::Random(0.5, 1.0);
-		return color;
-	}
+    /**
+     * @brief Get Random Color
+     * @return A 3 by 1 array containing the random color
+     */
+    static array<double, 3> getRandomColor();
 
+    /**
+     * @brief CameraVTK constructor
+     * @param camera
+     */
 	CameraVTK(lpt::Camera& camera);
 
+    /**
+     * @brief Calculate Plane Equation
+     * @param A
+     * @param B
+     * @param C
+     * @param eq The resulting Plane equation
+     */
 	void calcPlaneEq(array<double,3>& A, array<double,3>& B, array<double,3>& C, array<double,4>& eq );
 
+    /**
+     * @brief Project from camera coordinate to world coordinate
+     * @param cam Camera
+     * @param pc Camera coordinate
+     * @param pw World coordinate
+     */
 	void camToWorld(lpt::Camera& cam, array<double, 3>& pc, array<double, 3>& pw);
 
+    /**
+     * @brief Add actors to renderer
+     * @param renderer
+     */
 	void addToRenderer(vtkSmartPointer<vtkRenderer> renderer); 
 
+    /**
+     * @brief Remove actors from renderer
+     * @param renderer
+     */
 	void removeFromRenderer(vtkSmartPointer<vtkRenderer> renderer);
 
 private:
@@ -186,15 +224,29 @@ private:
 	vtkSmartPointer<vtkFollower> follower;
 };
 
+/**
+ * @brief The TrajectoryPathVTK class
+ * Derived from the TrajectoryVTKBase class
+ */
 class TrajectoryPathVTK : public lpt::TrajectoryVTKBase {
 public:
 	typedef std::shared_ptr<TrajectoryPathVTK> Ptr; 
+    static inline TrajectoryPathVTK::Ptr create(vtkRenderer* renderer) { return std::make_shared<TrajectoryPathVTK>(renderer); }
 	
 	static vtkSmartPointer<vtkLookupTable> lookuptable;
 	static int max_points;
 	static bool show_paths;
 	static int scalar_index;
 
+    /**
+     * @brief TrajectoryPathVTK constructor
+     * @param renderer
+     */
+    TrajectoryPathVTK(vtkRenderer* renderer);
+
+    /**
+     * @brief Initialize Lookup Table
+     */
 	static inline void initializeLookupTable() {
 		lookuptable = vtkSmartPointer<vtkLookupTable>::New();
 		lookuptable->SetRange( 0, 2.0 );
@@ -203,8 +255,16 @@ public:
 		lookuptable->Build();
 	}
 
+    /**
+     * @brief Set Lookup Table
+     * @param lut Lookup Table
+     */
 	static inline void setLookupTable(vtkSmartPointer<vtkLookupTable> lut) { lookuptable = lut; }
 
+    /**
+     * @brief Set Vector Mode
+     * @param mode
+     */
 	static inline void setVectorMode(lpt::VectorMode mode) {	
 		switch (mode) {
 		case lpt::VELOCITY:
@@ -218,14 +278,20 @@ public:
 		}
 	}
 
-	static inline TrajectoryPathVTK::Ptr create(vtkRenderer* renderer) { return TrajectoryPathVTK::Ptr(new TrajectoryPathVTK(renderer)); }
-	
-	TrajectoryPathVTK(vtkRenderer* renderer);
-	
+    /**
+     * @brief Add next point
+     * @param current_particle
+     */
 	void addNextPoint(lpt::ParticleVectors& current_particle);
 
+    /**
+     * @brief Remove actors from renderer
+     */
 	void removeFromRenderer();
 
+    /**
+     * @brief TrajectoryPathVTK destructor
+     */
 	virtual ~TrajectoryPathVTK() { removeFromRenderer(); }
 
 private:
@@ -243,41 +309,67 @@ private:
 	vtkRenderer* renderer;
 };
 
+/**
+ * @brief The PressureFieldSolver class
+ * Base class for solving pressure field
+ */
 class PressureFieldSolver {
 public:
 	typedef	std::shared_ptr<PressureFieldSolver> Ptr;
 
-	PressureFieldSolver() : dt(0), dx(0), dy(0), dz(0), initial_pressure(0) {
-		grid_cell_counts[0] = 0; 
-		grid_cell_counts[1] = 0;
-		grid_cell_counts[2] = 0;
-		fluid_props = lpt::FluidProperties::create();  // Default to air at 15 C;
-	}
-	
+    /**
+     * @brief PressureFieldSolver constructor
+     */
+    PressureFieldSolver();
+
+    /**
+     * @brief PressureFieldSolver destructor
+     */
+    virtual ~PressureFieldSolver();
+
+    /**
+     * @brief Solve pressure field
+     * @param velocity_field Velocity
+     * @param acceleration_field Acceleration
+     * @param stress_field Reynolds stress
+     */
 	virtual void solve(lpt::VectorField& velocity_field, lpt::VectorField& acceleration_field, lpt::ReynoldsStressField& stress_field)=0;
 	
-	virtual void addControls(){}
+    /**
+     * @brief addControls
+     */
+    virtual void addControls();
 	
-	virtual void setFluidProperties(FluidProperties::Ptr props) {
-		fluid_props = props;
-	}
+    /**
+     * @brief Set Fluid Properties
+     * @param props Fluid properties
+     */
+    virtual void setFluidProperties(FluidProperties::Ptr props);
 
-	virtual void setGridProperties(array<int, 3>& grid_cell_counts, array<double, 3>& cell_dimensions) {
-		this->grid_cell_counts[0] = grid_cell_counts[0];
-		this->grid_cell_counts[1] = grid_cell_counts[1];
-		this->grid_cell_counts[2] = grid_cell_counts[2];
-		dx = cell_dimensions[0] / 1000.0; // mm
-		dy = cell_dimensions[1] / 1000.0; // mm
-		dz = cell_dimensions[2] / 1000.0; // mm
-		this->resetPressureField();
-	}
+    /**
+     * @brief Set Grid Properties
+     * @param grid_cell_counts Number of grid cells in each direction
+     * @param cell_dimensions Size of each grid cell in meter
+     */
+    virtual void setGridProperties(array<int, 3>& grid_cell_counts, array<double, 3>& cell_dimensions);
 	
-	inline void setSharedObjects( std::shared_ptr < lpt::SharedObjects > new_shared_objects ) { 
+    /**
+     * @brief Set SharedObjects
+     * @param new_shared_objects
+     */
+    inline void setSharedObjects( lpt::SharedObjects::Ptr new_shared_objects ) {
 		shared_objects = new_shared_objects; 
 	}
-	 
+
+    /**
+     * @brief Get Pressure Field
+     * @return Pressure field
+     */
 	inline const vector<double>& getPressureField() { return pressure; }
 
+    /**
+     * @brief Reset Pressure Field
+     */
 	inline void resetPressureField() {
 		pressure.clear();
 		int total_cell_count = grid_cell_counts[0] * grid_cell_counts[1] * grid_cell_counts[2]; 
@@ -301,39 +393,89 @@ protected:
 	lpt::ReynoldsStressField* stress_field;
 };
 
+/**
+ * @brief The PressurePoissonSolver2Step class
+ * Derived from the PressureFieldSolver class
+ * Solves pressure poisson equation using a 2-step method
+ * First calculates cell pressure gradient from the RANS equation
+ * Then calculates cell pressure by solving the pressure Poisson equation with pressure gradient as source terms
+ */
 class PressurePoissonSolver2Step : public PressureFieldSolver {
 public:
 	typedef	std::shared_ptr<PressurePoissonSolver2Step> Ptr;
-	static inline PressurePoissonSolver2Step::Ptr create() { return PressurePoissonSolver2Step::Ptr(new PressurePoissonSolver2Step() ); }
+    static inline PressurePoissonSolver2Step::Ptr create() { return std::make_shared<PressurePoissonSolver2Step>(); }
 	
+    /**
+     * @brief The Parameters class
+     * Parameters for successvie over relaxation solver
+     */
 	class Parameters {
 	public:
 		Parameters() : sor_weight(1.2), max_iterations(20000), convergence_tolerance(1E-6) {}
 		double sor_weight;
 		double max_iterations;
 		double convergence_tolerance;
-	};
+    } params;
 
-	Parameters params;
+    /**
+     * @brief PressurePoissonSolver2Step constructor
+     */
+    PressurePoissonSolver2Step();
 
-	PressurePoissonSolver2Step() {}
+    /**
+     * @brief PressurePoissonSolver2Step destructor
+     */
+    virtual ~PressurePoissonSolver2Step();
 
+    /**
+     * @brief Solve for pressure field
+     * Iteratively calls the calcCellPressure function over the entire domain
+     * @param velocities Velocity
+     * @param accelerations Acceleraton
+     * @param stresses Reynolds stress
+     */
 	virtual void solve(lpt::VectorField& velocities, lpt::VectorField& accelerations, lpt::ReynoldsStressField& stresses);
 
+    /**
+     * @brief addControls
+     */
 	virtual void addControls();
 
 private:
+    /**
+     * @brief Helper function. Calculate cell pressure by solving pressure Poisson equation
+     * @param i Cell index in X-direction
+     * @param j Cell index in Y-direction
+     * @param k Cell index in Z-direction
+     */
 	void calcCellPressure(int i, int j, int k);
+
+    /**
+     * @brief Helper function. Calculate cell pressure gradients using Steady RANS method
+     * @param i Cell index in X-direction
+     * @param j Cell index in Y-direction
+     * @param k Cell index in Z-direction
+     */
 	void calcCellPressureGradientsSteadyRANS(int i, int j, int k);
 
 	lpt::VectorField pressure_gradients;
 };
 
+/**
+ * @brief The LagrangianPressureFieldSolver class
+ * Derived from the PressureFieldSolver class
+ * Acquires cell pressure gradient from the accumulator grid
+ * Then calculates cell pressure following the same procedure as the PressurePoissonSolver2Step
+ */
 class LagrangianPressureFieldSolver : public PressureFieldSolver {
 public:
 	typedef	shared_ptr<LagrangianPressureFieldSolver> Ptr;
-	static inline LagrangianPressureFieldSolver::Ptr create() { return LagrangianPressureFieldSolver::Ptr(new LagrangianPressureFieldSolver() ); }
+    static inline LagrangianPressureFieldSolver::Ptr create() { return std::make_shared<LagrangianPressureFieldSolver>(); }
 			
+    /**
+     * @brief The Parameters class
+     * Parameters for successive over relaxation solver
+     */
 	class Parameters {
 	public:
 		Parameters() : sor_weight(1.2), max_iterations(20000), convergence_tolerance(1E-6) {}
@@ -342,21 +484,56 @@ public:
 		double convergence_tolerance;
 	} params;
 
-	LagrangianPressureFieldSolver() {}
+    /**
+     * @brief LagrangianPressureFieldSolver constructor
+     */
+    LagrangianPressureFieldSolver();
+
+    /**
+     * @brief ~LagrangianPressureFieldSolver destructor
+     */
+    virtual ~LagrangianPressureFieldSolver();
+
+    /**
+     * @brief Solve pressure field (not actually used)
+     * @param velocities
+     * @param accelerations
+     * @param stresses
+     */
 	virtual void solve(lpt::VectorField& velocities, lpt::VectorField& accelerations, lpt::ReynoldsStressField& stresses);
+
+    /**
+     * @brief Solve pressure field
+     * Iteratively calls the calcCellPressure function over the entire domain
+     * @param pressure_grads Pressure gradients obtained from Lagrangian pressure gradients
+     */
 	virtual void solve(lpt::VectorField& pressure_grads);
+
+    /**
+     * @brief addControls
+     */
 	virtual void addControls();
 
 private:
+    /**
+     * @brief Helper function. Calculate cell pressure by solving pressure Poisson equation
+     * @param i Cell index in X-direction
+     * @param j Cell index in Y-direction
+     * @param k Cell index in Z-direction
+     */
 	void calcCellPressure(int i, int j, int k);
 	
 	lpt::VectorField pressure_gradients;
 };
 
+/**
+ * @brief The FiniteVolumeGrid class
+ * Manages the finite volume grid
+ */
 class FiniteVolumeGrid {
 public:
 	typedef	shared_ptr<FiniteVolumeGrid> Ptr;
-	static inline FiniteVolumeGrid::Ptr create(vtkSmartPointer < vtkRenderer > renderer) { return FiniteVolumeGrid::Ptr(new FiniteVolumeGrid(renderer) ); }
+    static inline FiniteVolumeGrid::Ptr create(vtkSmartPointer < vtkRenderer > renderer) { return std::make_shared<FiniteVolumeGrid>(renderer); }
 	
 	class Parameters {
 	public:
@@ -393,77 +570,160 @@ public:
 		double scalar_range[2];
 	} params;
 
+    /**
+     * @brief FiniteVolumeGrid constructor
+     * @param renderer
+     */
 	FiniteVolumeGrid (vtkSmartPointer < vtkRenderer > renderer);
+
+    /**
+     * @brief FiniteVolumeGrid destructor
+     */
+    ~FiniteVolumeGrid();
+
+    /**
+     * @brief initialize
+     */
 	void initialize();
+
+    /**
+     * @brief Set pressure field solver
+     * @param solver Desired pressure solver
+     */
 	void setPressureFieldSolver(lpt::PressureFieldSolver::Ptr solver);
-	void setGridOrigin(double x, double y, double z) {
-		this->params.grid_origin[0] = x;
-		this->params.grid_origin[1] = y;
-		this->params.grid_origin[2] = z;
-	}
 
-	void setGridCellCounts(int nx, int ny, int nz) {
-		this->params.grid_cell_counts[0] = nx;
-		this->params.grid_cell_counts[1] = ny;
-		this->params.grid_cell_counts[2] = nz;
+    /**
+     * @brief Set Grid Origin
+     * @param x X origin
+     * @param y Y origin
+     * @param z Z origin
+     */
+    void setGridOrigin(double x, double y, double z);
 
-		this->params.cell_dimensions[0] = this->params.grid_dimensions[0] / static_cast<double>(this->params.grid_cell_counts[0]); //mm
-		this->params.cell_dimensions[1] = this->params.grid_dimensions[1] / static_cast<double>(this->params.grid_cell_counts[1]); //mm
-		this->params.cell_dimensions[2] = this->params.grid_dimensions[2] / static_cast<double>(this->params.grid_cell_counts[2]); //mm
-	}
+    /**
+     * @brief Set Grid Cell Counts
+     * @param nx X cell counts
+     * @param ny Y cell counts
+     * @param nz Z cell counts
+     */
+    void setGridCellCounts(int nx, int ny, int nz);
 
-	void setGridDimensions(double length_x, double length_y, double length_z) {
-		this->params.grid_dimensions[0] = length_x;
-		this->params.grid_dimensions[1] = length_y;
-		this->params.grid_dimensions[2] = length_z;
+    /**
+     * @brief Set Grid Dimensions
+     * @param length_x X dimension
+     * @param length_y Y dimension
+     * @param length_z Z dimension
+     */
+    void setGridDimensions(double length_x, double length_y, double length_z);
 
-		this->params.cell_dimensions[0] = this->params.grid_dimensions[0] / static_cast<double>(this->params.grid_cell_counts[0]); //mm
-		this->params.cell_dimensions[1] = this->params.grid_dimensions[1] / static_cast<double>(this->params.grid_cell_counts[1]); //mm
-		this->params.cell_dimensions[2] = this->params.grid_dimensions[2] / static_cast<double>(this->params.grid_cell_counts[2]); //mm
-	}
-	
+    /**
+     * @brief Update Grid
+     */
+    void updateGrid();
+
+    /**
+     * @brief Reset Grid
+     */
+    void resetGrid();
+
+    /**
+     * @brief Grid Is Full, i.e. every cell has at least one measurement
+     * @return True if grid is full; false if not full
+     */
+    bool gridIsFull();
+
+    /**
+     * @brief updateAccumulators
+     * @param traj_ptr
+     * @param current_particle
+     */
 	void updateAccumulators(lpt::Trajectory3d* traj_ptr, lpt::ParticleVectors& current_particle );
-	void resetGrid();
+
+    /**
+     * @brief Save Plane Data
+     * Save flow variables on 2-D planes (XY and XZ mid planes) to text files
+     * TODO: take parameters to determine which plane to save
+     */
 	void savePlaneData();
 
-	void updateGrid();
-	bool gridIsFull();
-
+    /**
+     * @brief Calculates Pressure using 2-step pressure poisson
+     */
 	void calcPressures();
+
+    /**
+     * @brief Calculates Pressure using Lagrangian pressure gradient
+     */
 	void calcPressuresLagrangian();
 
+    /**
+     * @brief Calculates Mass Residuals
+     */
 	void calcMassResiduals();
+
+    /**
+     * @brief Calculates Vorticity
+     */
 	void calcVorticity();
 
-	vtkSmartPointer<vtkLookupTable> getLookupTable() {
-		return lookuptable;
-	}
-
-	vtkSmartPointer<vtkScalarBarWidget> getScalarBarWidget() {
-		return scalarbar;
-	}
-
+    /**
+     * @brief Get Lookup Table
+     * @return Lookup Table
+     */
+    vtkSmartPointer<vtkLookupTable> getLookupTable();
+    /**
+     * @brief Get Scalar Bar Widget
+     * @return Scalar bar
+     */
+    vtkSmartPointer<vtkScalarBarWidget> getScalarBarWidget();
+    /**
+     * @brief Get Implicit Plane
+     * @return Implicit plane
+     */
+    vtkSmartPointer<vtkImplicitPlaneWidget> getImplicitPlane();
+    /**
+     * @brief Get Implicit Plane Actor
+     * @return Implicit plane actor
+     */
+    vtkSmartPointer<vtkActor> getImplicitPlaneActor();
+    /**
+     * @brief Set Cell Neighborhood
+     * @param neighborhood
+     */
 	inline void setCellNeighborhood(vector<array<int,3>>& neighborhood) {
 		cell_neighborhood.resize(neighborhood.size());
 		std::copy(neighborhood.begin(), neighborhood.end(), cell_neighborhood.begin());
 	}
 
+    /**
+     * @brief Add Implicit Plane
+     */
 	inline void addImplicitPlane() {
 		renderer->AddActor(planeactor);
 		plane_widget->On();
 		renderer->RemoveActor(glyphactor);
 	}
+    /**
+     * @brief Remove Implicit Plane
+     */
 	inline void removeImplicitPlane() {
 		renderer->RemoveActor(planeactor);
 		plane_widget->Off();
 		renderer->AddActor(glyphactor);
 	}
+
+    /**
+     * @brief Add To Renderer
+     */
 	inline void addToRenderer() {
 		renderer->AddActor(outlineactor);
 		if ( !getImplicitPlane()->GetEnabled() )
 			renderer->AddActor(glyphactor);
 		scalarbar->On();
 	}
+    /**
+     * @brief Remove From Renderer
+     */
 	inline void removeFromRenderer() {
 		renderer->RemoveActor(outlineactor);
 		if ( getImplicitPlane()->GetEnabled() )
@@ -471,36 +731,60 @@ public:
 		renderer->RemoveActor(glyphactor);
 		scalarbar->Off();
 	}
-
+    /**
+     * @brief Set Vector Mode
+     * Invoked when switched between vector modes (left and right button)
+     * @param mode
+     */
 	void setVectorMode(lpt::VectorMode mode);
-
+    /**
+     * @brief Get Vector Mode
+     * @return Vecotr mode
+     */
 	inline lpt::VectorMode getVectorMode() {return vector_mode;}
 	
+    /**
+     * @brief Set Fluid Properties
+     * @param props Fluid properties
+     */
 	inline void setFluidProperties(FluidProperties::Ptr props) { 
 		fluid_props = props; 
 		pressure_solver->setFluidProperties(fluid_props);
 		lagrangian_pressure_solver->setFluidProperties(fluid_props);
 	}
-
-	vtkSmartPointer<vtkImplicitPlaneWidget> getImplicitPlane() {return plane_widget;}
-	
-	vtkSmartPointer<vtkActor> getImplicitPlaneActor() { return planeactor;}
-	
+    /**
+     * @brief Get Bounds
+     * @return
+     */
 	inline double* getBounds() { return grid->GetBounds(); }
 	
+    /**
+     * @brief Set Shared Objects
+     * @param new_shared_objects
+     */
 	inline void setSharedObjects( std::shared_ptr < lpt::SharedObjects > new_shared_objects ) { 
 		shared_objects = new_shared_objects; 
 		pressure_solver->setSharedObjects(new_shared_objects);
 		lagrangian_pressure_solver->setSharedObjects(new_shared_objects);
 	}	
 	
-	~FiniteVolumeGrid() { }
-
 private:
+    /**
+     * @brief Get 1-D cell index from 3-D index
+     * @param i X cell index
+     * @param j Y cell index
+     * @param k Z cell index
+     * @return 1-D cell id
+     */
 	inline int getGridIndex(int i, int j, int k) {
 		return ( i + j * params.grid_cell_counts[0] + k * (params.grid_cell_counts[0] * params.grid_cell_counts[1]) );     //index of grid cell (i,j,k)
 	}
 	
+    /**
+     * @brief Compute 3-D Cell Coordinate from 1-D index
+     * @param cell_id 1-D cell index
+     * @param ijk 3-D array of cell coordinates
+     */
 	inline void computeCellCoordsIJK(const int cell_id, array<int,3>& ijk)
 	{
 		int ni  = params.grid_cell_counts[0]; 
@@ -556,11 +840,14 @@ private:
 	std::shared_ptr < lpt::SharedObjects > shared_objects;
 };
 
-
+/**
+ * @brief The ParticlesVTK class
+ * Manages particles display
+ */
 class ParticlesVTK {
 public:
 	typedef std::shared_ptr<ParticlesVTK> Ptr; 
-	static inline ParticlesVTK::Ptr create(vtkSmartPointer<vtkRenderer> renderer) { return ParticlesVTK::Ptr(new ParticlesVTK(renderer) ); }
+    static inline ParticlesVTK::Ptr create(vtkSmartPointer<vtkRenderer> renderer) { return std::make_shared<ParticlesVTK>(renderer); }
 	
 	class Parameters {
 	public:
@@ -571,47 +858,75 @@ public:
 		double scale;
 		array<double,2> velocity_range;
 		array<double,2> acceleration_range;
-	};
-	
-	Parameters params;
+    } params;
 
+    /**
+     * @brief ParticlesVTK constructor
+     * @param renderer
+     */
 	ParticlesVTK(vtkSmartPointer<vtkRenderer> renderer);
+    /**
+     * @brief ParticlesVTK destructor
+     */
+    ~ParticlesVTK();
 
-	void resizeGlyphArrays(int size) {
-		points->SetNumberOfPoints( size );
-		velocity_magnitudes->SetNumberOfTuples( size );
-		acceleration_magnitudes->SetNumberOfTuples( size );
-	}
+    /**
+     * @brief Resize Glyph Arrays
+     * @param size New size
+     */
+    void resizeGlyphArrays(int size);
 
-	void setScalarsModified() {
-		points->Modified();
-		velocity_magnitudes->Modified();
-		acceleration_magnitudes->Modified();
-	}
+    /**
+     * @brief Set Scalars when modified
+     */
+    void setScalarsModified();
 
-	void updateParticle( int id, lpt::ParticleVectors& current_particle);
+    /**
+     * @brief Updates Particle velocity and acceleration
+     * @param id The particle id
+     * @param current_particle The particle to be updated
+     */
+    void updateParticle(int id, lpt::ParticleVectors& current_particle);
 
+    /**
+     * @brief Set Lookup Table
+     * @param lut Lookup Table
+     */
 	inline void setLookupTable(vtkSmartPointer<vtkLookupTable> lut) {
 		lookuptable = lut;
 		glyph3Dmapper->SetLookupTable( lookuptable );
 		glyph3Dmapper->Update();
 	}
 
+    /**
+     * @brief Set Scalar Bar Widget
+     * @param bar Scalar bar
+     */
 	inline void setScalarBarWidget(vtkSmartPointer<vtkScalarBarWidget> bar) {
 		scalarbar = bar;
 	}
 
+    /**
+     * @brief Add To Renderer
+     */
 	inline void addToRenderer() {
 		renderer->AddActor(glyphactor);
 		//scalarbar->On();
 	}
 
+    /**
+     * @brief Remove From Renderer
+     */
 	inline void removeFromRenderer() {
 		renderer->RemoveActor(glyphactor);
 		//scalarbar->Off();
 	}
 
-	inline void setVectorMode(lpt::VectorMode mode);
+    /**
+     * @brief Set Vector Mode by which particles are colored
+     * @param mode Velocity or acceleration
+     */
+    void setVectorMode(lpt::VectorMode mode);
 
 	vtkSmartPointer<vtkRenderer> renderer;
 	vtkSmartPointer<vtkSphereSource> sphere;
@@ -627,11 +942,15 @@ public:
 	lpt::VectorMode vector_mode;
 };
 
+/**
+ * @brief The TrajectoryHandler class
+ * Manages Trajectories display
+ */
 class TrajectoryHandler : public vtkCommand
 {
 public:
 	typedef std::shared_ptr<TrajectoryHandler> Ptr; 
-	static inline TrajectoryHandler::Ptr create(vtkSmartPointer<vtkRenderer> renderer) { return TrajectoryHandler::Ptr(new TrajectoryHandler(renderer) ); }
+    static inline TrajectoryHandler::Ptr create(vtkSmartPointer<vtkRenderer> renderer) { return std::make_shared<TrajectoryHandler>(renderer); }
 	
 	class Parameters {
 	public:
@@ -641,24 +960,55 @@ public:
 		int queue_capacity;
 	} params;
 
-	TrajectoryHandler(vtkSmartPointer<vtkRenderer> renderer) : 
-		renderer(renderer), tick_count1(0), 
-		view_paths(false), clear_trajs(false), reset_volume_grid(false), update_volume_grid(false), 
-		add_vector_view(false), add_traj_view(true), remove_vector_view(false), 
-		remove_traj_view(false), add_cameras_view(true), remove_cameras_view(false), save_plane(false), view_mode(lpt::TRAJECTORIES) {}
+    /**
+     * @brief TrajectoryHandler constructor
+     * @param renderer
+     */
+    TrajectoryHandler(vtkSmartPointer<vtkRenderer> renderer);
+    /**
+     * @brief TrajectoryHandler destructor
+     */
+    virtual ~TrajectoryHandler();
 
+    /**
+     * @brief Execute
+     * @param caller
+     * @param eventId
+     * @param vtkNotUsed
+     */
 	virtual void Execute(vtkObject* caller, unsigned long eventId, void * vtkNotUsed(callData));
-	virtual inline void addControls();
 
+    /**
+     * @brief addControls
+     */
+    virtual void addControls();
+
+    /**
+     * @brief Clear Trajectory Paths
+     * Rests each trajectory and Clear the current trajectory list
+     */
 	void clearTrajectoryPaths();
-	void updateTrajectoryVisualization(  pair< vector <lpt::Trajectory3d*>, vector <lpt::ParticleVectors > >& traj_updates);
+
+    /**
+     * @brief Update Trajectory Visualization
+     * @param traj_updates
+     */
+    void updateTrajectoryVisualization(pair< vector <lpt::Trajectory3d*>, vector <lpt::ParticleVectors > >& traj_updates);
 	
+    /**
+     * @brief Push To Render Queue
+     * @param traj_update
+     */
 	inline void pushToRenderQueue( pair< vector < lpt::Trajectory3d* >, vector < ParticleVectors > >& traj_update ){
 		if (render_queue.size() < params.queue_capacity) 
 			render_queue.push(traj_update);
 	}
 
-	inline void setViewMode(ViewMode mode);
+    /**
+     * @brief Set View Mode
+     * @param mode New view mode
+     */
+    void setViewMode(ViewMode mode);
 	inline void setFiniteVolumeGrid(lpt::FiniteVolumeGrid* grid) { volume_grid = grid; }
 	inline void setTrajectoryGlyphs(lpt::ParticlesVTK* glyphs) { traj_glyphs = glyphs; }
 	inline int getQueueSize() { return render_queue.size(); }
@@ -669,8 +1019,9 @@ public:
 	inline void setUpdateVolumeGrid() { update_volume_grid = true; }
 	inline void setClearQueue() { clear_queue = true; }
 	inline void setCamerasVTK(vector<lpt::CameraVTK>& cameras) { camerasvtk = &cameras; }
-	inline lpt::ViewMode getViewMode(){return view_mode;}
+    inline lpt::ViewMode getViewMode() { return view_mode; }
 	
+
 	inline void setVectorMode(lpt::VectorMode mode) {
 		traj_glyphs->setVectorMode(mode);
 		volume_grid->setVectorMode(mode);
@@ -756,27 +1107,29 @@ private:
 	lpt::concurrent_queue< pair< vector< lpt::Trajectory3d*>, vector< ParticleVectors > > > render_queue;
 };
 
-
+/**
+ * @brief The VisualizerInteractorStyle class
+ * Defines keyboard interaction
+ */
 class VisualizerInteractorStyle : public vtkInteractorStyleTrackballCamera
 {
   public:
 	static VisualizerInteractorStyle* New();
 	vtkTypeMacro(VisualizerInteractorStyle, vtkInteractorStyleTrackballCamera);
 
-	VisualizerInteractorStyle() { 
-		vector_modes.push_back(lpt::VELOCITY);
-		vector_modes.push_back(lpt::ACCELERATION);
-		vector_modes.push_back(lpt::TURBULENT_KINETIC_ENERGY);
-		vector_modes.push_back(lpt::VORTICITY);
-		vector_modes.push_back(lpt::MASS_RESIDUAL);
-		vector_modes.push_back(lpt::VELOCITY_SD);
-		vector_modes.push_back(lpt::ACCELERATION_SD);
-		vector_modes.push_back(lpt::COUNT);
-		vector_modes.push_back(lpt::PRESSURE);
-		vector_modes.push_back(lpt::PRESSURE_LAGRANGIAN);
-		vector_mode_iter = vector_modes.begin();
-	}
+    /**
+     * @brief VisualizerInteractorStyle constructor
+     */
+    VisualizerInteractorStyle();
+    /**
+     * @brief VisualizerInteractorStyle destructor
+     */
+    virtual ~VisualizerInteractorStyle();
 
+    /**
+     * @brief On Key Press
+     * Defines the respond of each keyboard pressing
+     */
 	virtual void OnKeyPress();
 
 	lpt::FiniteVolumeGrid* grid;
@@ -787,6 +1140,9 @@ private:
 	vector<lpt::VectorMode>::iterator vector_mode_iter;
 };
 
+/**
+ * @brief The Visualizer class
+ */
 class Visualizer { 
 public: 
 	typedef std::shared_ptr<Visualizer> Ptr;
@@ -812,30 +1168,62 @@ public:
 		int min_traj_size;
 	} params;
 	
+    /**
+     * @brief Visualizer constructor
+     */
 	Visualizer();
+    /**
+     * @brief Visualizer destructor
+     */
+    virtual ~Visualizer();
 
+    /**
+     * @brief initialize
+     */
 	virtual inline void initialize(); 
-
+    /**
+     * @brief start
+     */
 	virtual inline void start();
-
+    /**
+     * @brief stop
+     */
 	virtual inline void stop();
-
+    /**
+     * @brief addControls
+     */
 	virtual inline void addControls();
 
+    /**
+     * @brief manage trajectory queue
+     * Calculates Lagrangian flow variables: velocity, accleration and pressure gradient
+     */
 	void manageQueue();
 
+    /**
+     * @brief Add Trajectories To Queue
+     * @param active_trajs Trajectory to be added
+     */
 	void addTrajectoriesToQueue( list<lpt::Trajectory3d_Ptr>& active_trajs );
-	
+
+    /**
+     * @brief Take Measurement
+     * Accumulate position, displacement, velocity and acceleration magnitude
+     * @param particle_vectors Vector of particles in the form of ParticleVectors
+     */
 	void takeMeasurement(const vector < lpt::ParticleVectors >& particle_vectors);
 
+    /**
+     * @brief Accumulate Centroid Detection Uncertainty
+     * @param matches
+     */
 	void accumulateCentroidDetectionUncertainty( vector<lpt::Match::Ptr>& matches );
 		
-	void setCameras(vector<lpt::Camera>& cameras) { 
-		for (int c = 0; c < cameras.size(); ++c)
-			camerasvtk.emplace_back(cameras[c]);
-		handler->setCamerasVTK(camerasvtk);
-		centroid_uncertainty_accumulators.resize(cameras.size());
-	}
+    /**
+     * @brief Set Cameras
+     * @param cameras
+     */
+    void setCameras(vector<lpt::Camera>& cameras);
 
 	inline bool getTakeMeasurement() const { return take_measurement; }
 	inline bool getTakeImageMeasurement() const { return image_measurement; }
@@ -863,7 +1251,7 @@ public:
 		cout << "Take measurement Status: " << ( state ? " ON " : " OFF ") << endl;
 	}	
 		
-	~Visualizer() {	cout << "Visualizer closed" << endl; }
+
 
 	friend void callbackSetVisualizationStatus( int state, void* data ) {
 		Visualizer* visualizer = static_cast<Visualizer*>(data);
@@ -923,129 +1311,29 @@ private:
 class HistogramVTK : vtkCommand {
 public:
 	typedef	shared_ptr<HistogramVTK> Ptr;
-	static HistogramVTK::Ptr create() { return HistogramVTK::Ptr(new HistogramVTK() ); }
+    static HistogramVTK::Ptr create() { return std::make_shared<HistogramVTK>(); }
 
-	HistogramVTK() : number_of_bins(100) {
-		view = vtkSmartPointer<vtkContextView>::New();
-		histogram = vtkSmartPointer<vtkChartXY>::New();
-		table = vtkSmartPointer<vtkTable>::New();
-		counts = vtkSmartPointer<vtkIntArray>::New();
-		bin_values = vtkSmartPointer<vtkDoubleArray>::New();
-		
-		counts->SetName("Counts");
-		bin_values->SetName("Bin Range");
-		table->AddColumn(bin_values);
-		table->AddColumn(counts);
-		bin_size = 1; //default value
-		view->GetRenderer()->SetBackground(1.0, 1.0, 1.0);
-		view->GetRenderWindow()->SetSize(400, 300);
-		view->GetScene()->AddItem(histogram);
-		histogram->SetTitle("Histogram");
-		histogram->GetTitleProperties()->BoldOn();
+    HistogramVTK();
 
-		histogram->GetAxis(1)->SetTitle("Residual level");
-		histogram->GetAxis(0)->SetTitle("Count");
-		vtkPlot* plot = histogram->AddPlot(vtkChart::BAR);
-		plot->SetInput(table, 0, 1);
-		plot->SetColor(0, 0, 255, 255);
-		//plot->GetYAxis()->SetLogScale(true);
-		histogram->SetAutoSize(false);
-		histogram->SetSize(vtkRectf(350, 0, 350, 250));
+    virtual void Execute(vtkObject* caller, unsigned long eventId, void * callData);
 
-		chart_scene = vtkSmartPointer<vtkContextScene>::New();
-		chart_actor = vtkSmartPointer<vtkContextActor>::New();
-		chart_scene->AddItem( histogram.GetPointer() );
-		chart_actor->SetScene( chart_scene.GetPointer() );
-		range[0] = 0;
-		range[1] = 100;
-		setBins(number_of_bins, range);
-		view->AddObserver(vtkCommand::UserEvent, this);
-	} 
+    void setBins(int num_bins, double bin_range[2]);
+
+    void setAxisColor(int color[3]);
+
+    void setTextStrings(string& title, string& x_title, string& y_title);
+
+    void updateData(vector<double>& data);
+
+    int getBinID(double value);
 	
-	virtual void Execute(vtkObject* caller, unsigned long eventId, void * callData)
-	{
-		vtkContextView* view_caller = static_cast<vtkContextView*>(caller);
-		if (eventId == vtkCommand::UserEvent) {
-			view_caller->Update();
-			view_caller->Render();
-		}
-	}
+    void addToRenderer(vtkSmartPointer<vtkRenderer> renderer);
 
-	void setBins(int num_bins, double bin_range[2]) {
-		number_of_bins = num_bins;
-		range[0] = bin_range[0];
-		range[1] = bin_range[1];
-		bins.resize(number_of_bins, 0);
-		count_data.resize(number_of_bins, 0);
-		bin_size = (range[1] - range[0]) / static_cast<double>(number_of_bins);
-		for (int i = 0; i < bins.size(); ++i) 
-			bins[i] = bin_size * (i+1);
-	}
+    void startChartWindow();
 
-	void setAxisColor(int color[3]) {
-		histogram->GetTitleProperties()->SetColor(color[0]/255.0, color[1]/255.0, color[2]/255.0);
-		histogram->GetAxis(0)->GetPen()->SetColor(color[0], color[1], color[2]);
-		histogram->GetAxis(1)->GetPen()->SetColor(color[0], color[1], color[2]);
-		histogram->GetAxis(0)->GetTitleProperties()->SetColor(color[0]/255.0, color[1]/255.0, color[2]/255.0);
-		histogram->GetAxis(1)->GetTitleProperties()->SetColor(color[0]/255.0, color[1]/255.0, color[2]/255.0);
-		histogram->GetAxis(1)->GetGridPen()->SetColor(color[0], color[1], color[2],255);
-		histogram->GetAxis(0)->GetGridPen()->SetColor(color[0], color[1], color[2],255);
-		histogram->GetAxis(1)->GetGridPen()->SetColor(color[0], color[1], color[2],255);
-		histogram->GetAxis(0)->GetLabelProperties()->SetColor(color[0]/255.0, color[1]/255.0, color[2]/255.0);
-		histogram->GetAxis(1)->GetLabelProperties()->SetColor(color[0]/255.0, color[1]/255.0, color[2]/255.0);
-	}
+    void stopChartWindow();
 
-	void setTextStrings(string& title, string& x_title, string& y_title) {
-		histogram->SetTitle( title.c_str() );
-		histogram->GetAxis(1)->SetTitle( x_title.c_str() );
-		histogram->GetAxis(0)->SetTitle( y_title.c_str() );
-	}
-
-	void updateData(vector<double>& data) {
-		for (int i = 0; i < data.size(); i++) 
-			count_data[ getBinID( data[i] ) ] = count_data[ getBinID( data[i] ) ] + 1 ;
-		
-		table->SetNumberOfRows( bins.size() );
-		for (int i = 0; i < bins.size(); i++) {
-			table->SetValue(i, 0, bins[i] - bin_size / 2);
-			table->SetValue(i, 1, count_data[i] );
-		}
-		counts->Modified();
-		bin_values->Modified();
-		table->Modified();		
-		histogram->RecalculateBounds();
-		histogram->Modified();
-		//view->InvokeEvent(vtkCommand::UserEvent);
-	}
-
-	int getBinID(double value) {
-		int id;
-		for ( id = 0; id < bins.size(); id++) {
-			if ( bins[id] > value ) 
-				break;
-		}
-		return id;
-	}
-	
-	void addToRenderer(vtkSmartPointer<vtkRenderer> renderer) {
-		renderer->AddActor( chart_actor.GetPointer() );
-		chart_scene->SetRenderer(renderer);
-	}
-
-	void startChartWindow() {
-		if (! view->GetInteractor()->GetEnabled() ) {
-			view->GetInteractor()->Initialize();
-			view->GetInteractor()->Start();
-		}
-	}
-	void stopChartWindow() {
-		if ( view->GetInteractor()->GetEnabled() ) {
-			cout <<" find a way to close the window without terminating the app" << endl;
-		}
-	}
-	void removeFromRenderer(vtkSmartPointer<vtkRenderer> renderer) {
-		renderer->RemoveActor( chart_actor.GetPointer() );
-	}
+    void removeFromRenderer(vtkSmartPointer<vtkRenderer> renderer);
 
 private:
 	double bin_size;
@@ -1065,38 +1353,10 @@ private:
 class StreamLines {
 public:
 	typedef std::shared_ptr<StreamLines> Ptr; 
-	static inline StreamLines::Ptr create(vtkAlgorithmOutput* output_port) { return StreamLines::Ptr(new StreamLines(output_port) ); }
-	StreamLines(vtkAlgorithmOutput* output_port) {
-		// Source of the streamlines
-		seeds = vtkSmartPointer<vtkPlaneSource>::New();
-		seeds->SetXResolution(8);
-		seeds->SetYResolution(8);
-		
-		// Streamline itself
-		streamline = vtkSmartPointer<vtkStreamLine>::New();
-		//streamline->SetSource(seeds->GetOutput());
-		streamline->SetInputConnection(output_port);
-		
-		//streamLine->SetStartPosition(2,-2,30);
-		// as alternative to the SetSource(), which can handle multiple
-		// streamlines, you can set a SINGLE streamline from
-		// SetStartPosition()
-		streamline->SetStartPosition(0,0,0);
-		streamline->SetMaximumPropagationTime(1000);
-		streamline->SetIntegrationStepLength(0.5);
-		streamline->SetStepLength(0.5);
-		streamline->SetIntegrationDirectionToIntegrateBothDirections(); 
-		streamline->SetNumberOfThreads(1);
-		streamline->VorticityOn();
-		streamline->Update();
+    static inline StreamLines::Ptr create(vtkAlgorithmOutput* output_port) { return std::make_shared<StreamLines>(output_port); }
 
-		streamline_mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-		streamline_mapper->SetInputConnection( streamline->GetOutputPort() );
+    StreamLines(vtkAlgorithmOutput* output_port);
 
-		streamline_actor = vtkSmartPointer<vtkActor>::New();
-		streamline_actor->SetMapper(streamline_mapper);
-		streamline_actor->VisibilityOn();
-	}
 	inline void setSeedPlane(double origin[3], double point1[3], double point2[3]) {
 		seeds->SetOrigin(origin);
 		seeds->SetPoint1(point1);
@@ -1104,6 +1364,7 @@ public:
 		seeds->Modified();
 		seeds->Update();
 	}
+
 	inline void addToRenderer(vtkSmartPointer<vtkRenderer> renderer) {
 		streamline->Modified();
 		streamline->Update();
@@ -1111,9 +1372,11 @@ public:
 		renderer->AddActor(streamline_actor);
 		
 	}
+
 	inline void removeFromRenderer(vtkSmartPointer<vtkRenderer> renderer) {
 		renderer->RemoveActor(streamline_actor);
 	}
+
 private:
 	vtkSmartPointer<vtkPlaneSource> seeds;
 	vtkSmartPointer<vtkStreamLine> streamline;
@@ -1124,80 +1387,12 @@ private:
 class PickDim : public vtkCommand {
 public:
 	typedef std::shared_ptr<PickDim> Ptr; 
-	static inline PickDim::Ptr create() { return PickDim::Ptr(new PickDim() ); }
+    static inline PickDim::Ptr create() { return std::make_shared<PickDim>(); }
 	
-	PickDim() {
-		index = 0;
-		initial = true;
-		text = vtkSmartPointer<vtkVectorText>::New();
-		mapper = vtkSmartPointer<vtkPolyDataMapper>::New();
-		mapper->SetInputConnection( text->GetOutputPort() );
-		follower = vtkSmartPointer<vtkFollower>::New();
-		follower->SetMapper( mapper );
-		follower->GetProperty()->SetColor( 1, 0, 0 ); // red
-		points.resize(2);
-	}
-	virtual void Execute(vtkObject* caller, unsigned long eventId, void * vtkNotUsed(callData))
-	{
-		switch (eventId) {
-		case vtkCommand::EndPickEvent: 
-			{
-				vtkRenderWindowInteractor* interactor = static_cast<vtkRenderWindowInteractor*>(caller);
-				double* clickPos = interactor->GetPicker()->GetSelectionPoint();
-				vtkSmartPointer<vtkPropPicker>  picker =
-					vtkSmartPointer<vtkPropPicker>::New();
-				picker->Pick(clickPos, interactor->GetInteractorStyle()->GetDefaultRenderer() );
-				vtkActor* actor = picker->GetActor();
-				if (actor) { 
-					points[index] = actor;
-					//double* pos = points[index]->GetPosition();
-					//textstream.str("");
-					//textstream << "["<< pos[0] << " " << pos[1] << " " << pos[2] << "]";
-					//cout << textstream.str() << endl;
-					//text->SetText( textstream.str().c_str() );					
-					if (index == 0) {
-						if (initial == true ) {
-							follower->SetPosition( 100, 100 , 0 );//points[index]->GetPosition()[0] + 10, points[index]->GetPosition()[1] + 10, points[index]->GetPosition()[2]); 
-							follower->SetCamera( interactor->GetInteractorStyle()->GetDefaultRenderer()->GetActiveCamera() );
-						}
-						follower->SetScale( 5 * (*actor->GetScale()) );
-						follower->Modified();
-						++index;
-					}
-					else {
-						interactor->GetInteractorStyle()->GetDefaultRenderer()->AddActor( follower );
-						index = 0;
-						if (initial == true ) {
-							interactor->AddObserver(vtkCommand::TimerEvent, this);
-							initial = false;
-						}
-					}
-					//interactor->Render();
-				}
-			break;
-			} 
-		case vtkCommand::TimerEvent: {
-			vtkRenderWindowInteractor* interactor = static_cast<vtkRenderWindowInteractor*>(caller);
-			if (points[0]->GetReferenceCount() > 1 && points[1]->GetReferenceCount() > 1) {
-				double* pos1 = points[0]->GetPosition();
-				double* pos2 = points[1]->GetPosition();
-				double dist = sqrt( (pos1[0] - pos2[0]) * (pos1[0] - pos2[0]) + (pos1[1] - pos2[1]) * (pos1[1] - pos2[1]) + (pos1[2] - pos2[2]) * (pos1[2] - pos2[2]) ); 
-				textstream.str("");
-				textstream << "Distance = " << dist << " mm";
-				//cout << textstream.str() << endl;
-				text->SetText( textstream.str().c_str() );
-				//follower->SetPosition( pos1[0] + 10, pos1[1] + 10, pos1[2]); 
-			} else {
-				textstream.str("");
-				//interactor->RemoveObserver(this);
-				interactor->GetInteractorStyle()->GetDefaultRenderer()->RemoveActor( follower );
-			}
-									  }
-		break;
-		default:
-			break;
-		}
-	}
+    PickDim();
+
+    virtual void Execute(vtkObject* caller, unsigned long eventId, void * vtkNotUsed(callData));
+
 private:
 	int index;
 	bool initial;
@@ -1208,7 +1403,7 @@ private:
 	vtkSmartPointer<vtkPolyDataMapper> mapper;
 };
 
-}/* NAMESPACE_PT */
+}/* NAMESPACE_LPT */
 
 #endif /*VISUALIZATION_H_*/
 
