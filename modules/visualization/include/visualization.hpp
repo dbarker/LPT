@@ -243,6 +243,10 @@ public:
      * @param renderer
      */
     TrajectoryPathVTK(vtkRenderer* renderer);
+    /**
+     * @brief TrajectoryPathVTK destructor
+     */
+    virtual ~TrajectoryPathVTK();
 
     /**
      * @brief Initialize Lookup Table
@@ -288,11 +292,6 @@ public:
      * @brief Remove actors from renderer
      */
 	void removeFromRenderer();
-
-    /**
-     * @brief TrajectoryPathVTK destructor
-     */
-	virtual ~TrajectoryPathVTK() { removeFromRenderer(); }
 
 private:
 	vector<vtkIdType> point_ids;
@@ -1047,42 +1046,15 @@ public:
 		cout << "Camera Display: " << ( state ? " ON " : " OFF ") << endl;
 	}
 	
-	void addCamerasToRenderer() {
-		for (int c = 0; c < camerasvtk->size(); ++c)
-				camerasvtk->operator[](c).addToRenderer(renderer);
-		add_cameras_view = false;
-	}
+    void addCamerasToRenderer();
 	
-	void removeCamerasFromRenderer() {
-		for (int c = 0; c < camerasvtk->size(); ++c)
-				camerasvtk->operator[](c).removeFromRenderer(renderer);
-		remove_cameras_view = false;
-	}
-
-	virtual ~TrajectoryHandler() {}
+    void removeCamerasFromRenderer();
 	
-	friend void callbackResetVolumeGrid( int state, void* data ) {
-		TrajectoryHandler* trajhandler = static_cast<TrajectoryHandler*>(data);
-		trajhandler->setResetVolumeGrid();
-	}
-	friend void callbackUpdateVolumeGrid( int state, void* data ) {
-		TrajectoryHandler* trajhandler = static_cast<TrajectoryHandler*>(data);
-		trajhandler->setUpdateVolumeGrid();
-	}
-	friend void callbackClearTrajView( int state, void* data ) {
-		TrajectoryHandler* trajhandler = static_cast<TrajectoryHandler*>(data);
-		trajhandler->setClearView();
-	}
-	
-	friend void callbackSetDisplayCameras( int state, void* data ) {
-		TrajectoryHandler* trajhandler = static_cast<TrajectoryHandler*>(data);
-		trajhandler->setDisplayCameras(state);
-	}
-
-	friend void callbackSavePlane( int state, void* data ) {
-		TrajectoryHandler* trajhandler = static_cast<TrajectoryHandler*>(data);
-		trajhandler->setSavePlane(true);
-	}
+    friend void callbackResetVolumeGrid( int state, void* data );
+    friend void callbackUpdateVolumeGrid( int state, void* data );
+    friend void callbackClearTrajView( int state, void* data );
+    friend void callbackSetDisplayCameras( int state, void* data );
+    friend void callbackSavePlane( int state, void* data );
 	
 private:
 	vtkSmartPointer < vtkRenderer > renderer;
@@ -1251,28 +1223,11 @@ public:
 		cout << "Take measurement Status: " << ( state ? " ON " : " OFF ") << endl;
 	}	
 		
+    friend void callbackSetVisualizationStatus( int state, void* data );
+    friend void callbackSetStride(int state, void* data);
+    friend void callbackSetAccumulate( int state, void* data );
+    friend void callbackTakeMeasurement( int state, void* data );
 
-
-	friend void callbackSetVisualizationStatus( int state, void* data ) {
-		Visualizer* visualizer = static_cast<Visualizer*>(data);
-		visualizer->setVisualizationStatus(state);
-	}
-
-	friend void callbackSetStride(int state, void* data) {
-		Visualizer* visualizer = static_cast<Visualizer*>(data);
-	}
-
-	friend void callbackSetAccumulate( int state, void* data ) {
-		Visualizer* visualizer = static_cast<Visualizer*>(data);
-		visualizer->setAccumulate(state);
-	}
-	
-	friend void callbackTakeMeasurement( int state, void* data ) {
-		Visualizer* visualizer = static_cast<Visualizer*>(data);
-		visualizer->setTakeMeasurement(true);
-	}
-
-	
 private:
 	lpt::concurrent_queue< vector< pair<lpt::Trajectory3d*, vector<lpt::Particle3d_Ptr>::iterator > > > traj_queue;
 	boost::thread queue_manager;

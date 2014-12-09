@@ -15,6 +15,8 @@ bool TrajectoryPathVTK::show_paths = false;
 
 vtkStandardNewMacro(VisualizerInteractorStyle);
 
+/***** Definitions of global functions *****/
+
 void getVectorField(vector<array<lpt::boost_accumulator, 3> >& accumulators, lpt::VectorField& vector_field)
 {
     vector_field.resize( accumulators.size() );
@@ -83,11 +85,15 @@ array<double, 3>  calcPressureGradiantBernoulli( array<double,3>& U0, array<doub
     return dP_dX;
 }
 
+/***** Definition of FluidProperties class *****/
+
 FluidProperties::FluidProperties()
   : rho(1.225), Td(15), Tw(15), mu(1.78E-5), P_ref(101325) {}
 
 FluidProperties::FluidProperties(double n_rho, double n_Td, double n_Tw, double n_mu, double n_P_ref)
   : rho(n_rho), Td(n_Td), Tw(n_Tw), mu(n_mu), P_ref(n_P_ref) {}
+
+/***** Definition of CoordinateArrows class *****/
 
 CoordinateArrows::CoordinateArrows( vtkSmartPointer<vtkRenderWindowInteractor> iren, double scale) : interactor(iren), scale(scale)
 {
@@ -124,6 +130,8 @@ CoordinateArrows::CoordinateArrows( vtkSmartPointer<vtkRenderWindowInteractor> i
 CoordinateArrows::~CoordinateArrows()
 {
 }
+
+/***** Definition of CameraVTK class *****/
 
 array<double, 3> CameraVTK::getRandomColor()
 {
@@ -295,6 +303,8 @@ void CameraVTK::removeFromRenderer(vtkSmartPointer<vtkRenderer> renderer)
     renderer->RemoveActor(follower);
 }
 
+/***** Definition of TrajectoryPathVTK class *****/
+
 TrajectoryPathVTK::TrajectoryPathVTK(vtkRenderer* renderer)
     : renderer(renderer)
 {
@@ -341,6 +351,11 @@ TrajectoryPathVTK::TrajectoryPathVTK(vtkRenderer* renderer)
     renderer->AddActor(trajactor);
 }
 	
+TrajectoryPathVTK::~TrajectoryPathVTK()
+{
+    removeFromRenderer();
+}
+
 void TrajectoryPathVTK::addNextPoint(lpt::ParticleVectors& current_particle)
 {
     position_queue.push_back( current_particle[0] );
@@ -386,6 +401,8 @@ void TrajectoryPathVTK::removeFromRenderer()
 }
 
 //Pressure Calculation
+/***** Definition of PressureFieldSolver *****/
+
 PressureFieldSolver::PressureFieldSolver()
   : dt(0), dx(0), dy(0), dz(0), initial_pressure(0)
 {
@@ -420,6 +437,8 @@ void PressureFieldSolver::setGridProperties(array<int, 3> &grid_cell_counts, arr
 
     this->resetPressureField();
 }
+
+/***** Definition of PressurePoissonSolver2Step class *****/
 
 PressurePoissonSolver2Step::PressurePoissonSolver2Step()
 {
@@ -839,6 +858,8 @@ void  PressurePoissonSolver2Step::calcCellPressureGradientsSteadyRANS(int i, int
     pressure_gradients[p][2] = -1.0 * fluid_props->rho *  U_grad_w + fluid_props->mu * dw_dXX -  fluid_props->rho * dt3_dX;
 }
 
+/***** Definition of LagrangianPressureFieldSolver class *****/
+
 LagrangianPressureFieldSolver::LagrangianPressureFieldSolver()
 {
 }
@@ -1025,6 +1046,8 @@ void LagrangianPressureFieldSolver::addControls()
 {
 }
 	
+/***** Definition of FiniteVolumeGrid class *****/
+
 FiniteVolumeGrid::FiniteVolumeGrid (vtkSmartPointer < vtkRenderer > renderer) : renderer(renderer), vector_mode(lpt::VELOCITY)
 {
     fluid_props = lpt::FluidProperties::create();
@@ -2350,6 +2373,8 @@ vtkSmartPointer<vtkActor> FiniteVolumeGrid::getImplicitPlaneActor()
     return planeactor;
 }
 
+/***** Definition of ParticlesVTK class *****/
+
 ParticlesVTK::ParticlesVTK(vtkSmartPointer<vtkRenderer> renderer) : renderer(renderer), vector_mode(lpt::VELOCITY)
 {
     sphere = vtkSmartPointer<vtkSphereSource>::New();
@@ -2457,6 +2482,8 @@ void ParticlesVTK::setVectorMode(lpt::VectorMode mode)
     }
     polydata->Modified();
 }
+
+/***** Definition of TrajectoryHandler class *****/
 
 TrajectoryHandler::TrajectoryHandler(vtkSmartPointer<vtkRenderer> renderer)
   : renderer(renderer), tick_count1(0),
@@ -2617,6 +2644,54 @@ void TrajectoryHandler::setViewMode(ViewMode mode)
     }
 }
 
+void TrajectoryHandler::addCamerasToRenderer()
+{
+    for (size_t c = 0; c < camerasvtk->size(); ++c)
+        camerasvtk->operator [](c).addToRenderer(renderer);
+    add_cameras_view = false;
+}
+
+void TrajectoryHandler::removeCamerasFromRenderer()
+{
+    for (size_t c = 0; c < camerasvtk->size(); ++c)
+        camerasvtk->operator [](c).removeFromRenderer(renderer);
+    remove_cameras_view = false;
+}
+
+/***** call back functions of TrajectoryHandler class *****/
+
+void callbackResetVolumeGrid(int state, void* data)
+{
+    TrajectoryHandler* traj_handler = static_cast<TrajectoryHandler*>(data);
+    traj_handler->setResetVolumeGrid();
+}
+
+void callbackUpdateVolumeGrid(int state, void* data)
+{
+    TrajectoryHandler* traj_handler = static_cast<TrajectoryHandler*>(data);
+    traj_handler->setUpdateVolumeGrid();
+}
+
+void callbackClearTrajView(int state, void* data)
+{
+    TrajectoryHandler* traj_handler = static_cast<TrajectoryHandler*>(data);
+    traj_handler->setClearView();
+}
+
+void callbackSetDisplayCameras(int state, void* data)
+{
+    TrajectoryHandler* traj_handler = static_cast<TrajectoryHandler*>(data);
+    traj_handler->setDisplayCameras(state);
+}
+
+viod callbackSavePlane(int state, void* data)
+{
+    TrajectoryHandler* traj_handler = static_cast<TrajectoryHandler*>(data);
+    traj_handler->setSavePlane(true);
+}
+
+/***** Definition of VisualizerInteractorStyle class *****/
+
 VisualizerInteractorStyle::VisualizerInteractorStyle()
 {
     vector_modes.push_back(lpt::VELOCITY);
@@ -2703,6 +2778,8 @@ void VisualizerInteractorStyle::OnKeyPress()
     // Forward events
     vtkInteractorStyleTrackballCamera::OnKeyPress();
 }
+
+/***** Definition of Visualizer class *****/
 
 Visualizer::Visualizer()
   : visualization_status(false), accumulate_status(false), take_measurement(false), image_measurement(false), measurement_count(0)
@@ -3104,6 +3181,33 @@ void Visualizer::setCameras(vector<Camera> &cameras)
     centroid_uncertainty_accumulators.resize(cameras.size());
 }
 
+/***** call back functions of Visualizer class *****/
+
+void callbackSetVisualizationStatus(int state, void* data)
+{
+    Visualizer* visualizer = static_cast<Visualizer*>(data);
+    visualizer->setVisualizationStatus(state);
+}
+
+void callbackSetStride(int state, void* data)
+{
+    Visualizer* visualizer = static_cast<Visualizer*>(data);
+}
+
+void callbackSetAccumulate(int state, void* data)
+{
+    Visualizer* visualizer = static_cast<Visualizer*>(data);
+    visualizer->setAccumulate(state);
+}
+
+void callbackTakeMeasurement(int state, void*data)
+{
+    Visualizer* visualizer = static_cast<Visualizer*>(data);
+    visualizer->setTakeMeasurement(true);
+}
+
+/***** Definition of HistogramVTK class *****/
+
 HistogramVTK::HistogramVTK() : number_of_bins(100)
 {
     view = vtkSmartPointer<vtkContextView>::New();
@@ -3238,6 +3342,8 @@ void HistogramVTK::removeFromRenderer(vtkSmartPointer<vtkRenderer> renderer)
     renderer->RemoveActor(chart_actor.GetPointer());
 }
 
+/***** Definition of Streamlines class *****/
+
 StreamLines::StreamLines(vtkAlgorithmOutput *output_port)
 {
     // Source of the streamlines
@@ -3270,6 +3376,8 @@ StreamLines::StreamLines(vtkAlgorithmOutput *output_port)
     streamline_actor->SetMapper(streamline_mapper);
     streamline_actor->VisibilityOn();
 }
+
+/***** Implementation of PickDim class *****/
 
 PickDim::PickDim()
 {
@@ -3346,4 +3454,4 @@ void PickDim::Execute(vtkObject *caller, unsigned long eventId, void *)
     }
 }
 
-} /*NAMESPACE_LPT_*/
+} /*NAMESPACE_LPT*/
