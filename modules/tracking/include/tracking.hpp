@@ -180,8 +180,8 @@ public:
 
     TestTracker(vector<Trajectory3d_Ptr>& trajs, vector<Trajectory3d_Ptr>& gold_trajs);
 
-    void testTrajectories(int maxframes) const;
-    void printTestResults() const;
+    void testTrajectories(int maxframes);
+    void printTestResults();
 };
 
 } /* NAMESPACE_PT */
