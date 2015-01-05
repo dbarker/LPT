@@ -186,10 +186,10 @@ void Tracker::setTrajectoryViews(vector<lpt::Camera>& cameras, cv::Mat image_typ
 		
 void Tracker::drawTrajectories(vector<lpt::Camera>& cameras)
 {
-    vector<cv::Point3f> object_points2( active_trajs.size() );
-    vector<cv::Point3f> object_points1( active_trajs.size() );
-    vector<cv::Point2f> image_points1( active_trajs.size() );
-    vector<cv::Point2f> image_points2( active_trajs.size() );
+    vector<cv::Point3d> object_points2( active_trajs.size() );
+    vector<cv::Point3d> object_points1( active_trajs.size() );
+    vector<cv::Point2d> image_points1( active_trajs.size() );
+    vector<cv::Point2d> image_points2( active_trajs.size() );
     vector<lpt::Particle3d_Ptr>::iterator object_iter;
 
     int id = 0;
@@ -235,7 +235,7 @@ TestTracker::TestTracker(vector<Trajectory3d_Ptr> &trajs, vector<Trajectory3d_Pt
 {
 }
 
-void TestTracker::testTrajectories(int maxframes)
+void TestTracker::testTrajectories(size_t maxframes)
 {
     cout << endl <<"-------Running gold test------" << endl;
 	vector<vector<bool>> matches( gold_trajectories.size() );

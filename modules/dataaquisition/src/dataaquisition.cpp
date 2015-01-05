@@ -524,7 +524,7 @@ void callbackSetFrameRate(int value, void* data) {
 void callbackSetImageViewStatus( int state, void* data ) {
 	StreamingPipeline* system = static_cast< StreamingPipeline*> (data);
 	if (system)
-		system->setImageViewStatus( static_cast<bool>(state) );
+		system->setImageViewStatus( (state != 0) );
 	else
 		cout << "---INVALID pointer to CameraSystem:  Cannot Set ImageViewStatus" << endl;
 
@@ -533,7 +533,7 @@ void callbackSetImageViewStatus( int state, void* data ) {
 void callbackSetCompositeView(int state, void* data) {
 	StreamingPipeline* system = static_cast< StreamingPipeline*> (data);
 	if (system)
-		system->setCompositeView( static_cast<bool>(state) );
+		system->setCompositeView( (state != 0) );
 	else
 		cout << "---INVALID pointer to CameraSystem:  Cannot Set CompositeView" << endl;
 }
@@ -541,7 +541,7 @@ void callbackSetCompositeView(int state, void* data) {
 void callbackSetDetectionView(int state, void* data) {
 	StreamingPipeline* system = static_cast< StreamingPipeline*> (data);
 	if (system)
-		system->setDetectionView( static_cast<bool>(state) );
+		system->setDetectionView( (state != 0) );
 	else
 		cout << "---INVALID pointer to CameraSystem:  Cannot Set DetectionView" << endl;
 }
@@ -549,7 +549,7 @@ void callbackSetDetectionView(int state, void* data) {
 void callbackSetReprojectionView( int state, void* data ) {
 	StreamingPipeline* system = static_cast< StreamingPipeline*> (data);
 	if (system)
-		system->setReprojectionView( static_cast<bool>(state) );
+		system->setReprojectionView( (state != 0) );
 	else
 		cout << "---INVALID pointer to CameraSystem:  Cannot Set ReprojectionView" << endl;
 }
@@ -558,7 +558,7 @@ void callbackSetTrajectoryView( int state, void* data ) {
 	StreamingPipeline* system = static_cast< StreamingPipeline*> (data);
 	if (system) {
 		system->tracker->clear_drawings = true;
-		system->setTrajectoryView( static_cast<bool>(state) );
+		system->setTrajectoryView( (state != 0) );
 	}
 	else
 		cout << "---INVALID pointer to CameraSystem:  Cannot Set TrajectoryView" << endl;
@@ -657,7 +657,7 @@ void StreamingPipeline::initializeControlWindow() {
 	void* system_void_ptr = static_cast<void*> ( this );
 	void* recorder_void_ptr = static_cast<void*> ( this->recorder.get() );
 	cv::namedWindow( camera_system->getWindowName() );
-	cv::createTrackbar("Camera", camera_system->getWindowName() , &camera_displayed, cameras.size() - 1, 0);
+	cv::createTrackbar("Camera", camera_system->getWindowName() , &camera_displayed, static_cast<int>(cameras.size() - 1), 0);
 	
 	cv::createButton("Record Video Clip", callbackRecordVideo, recorder_void_ptr, CV_PUSH_BUTTON, 0 );
 	cv::createButton("Take Snapshot", callbackTakeSnapshot, recorder_void_ptr, CV_PUSH_BUTTON, 0 );

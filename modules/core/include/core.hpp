@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <iterator>
 #include <numeric>
+#include <memory>
 
 #include <opencv2/opencv.hpp>
 #include <boost/thread.hpp>
@@ -110,7 +111,7 @@ public:
 		return ispushed;
 	}
 
-	inline int size() const	{ return m_queue.size();	}
+	inline size_t size() const	{ return m_queue.size();	}
 
 	bool empty()
 	{
@@ -182,14 +183,14 @@ public:
 	typedef std::shared_ptr<Match> Ptr;
     static inline Match::Ptr create() { return std::make_shared<Match>(); }
 
-    vector < pair < ParticleImage::Ptr, int > > particles;
+    vector < pair < ParticleImage::Ptr, size_t > > particles;
 	double residual;
 	//array<ParticleImage*,4> p;
 	//array<int, 4> i;
 	//int id;
 	Match():residual(0)/*, id(0)*/{}
 	
-    inline void addParticle(lpt::ParticleImage::Ptr new_particle, int camera_id) {
+    inline void addParticle(lpt::ParticleImage::Ptr new_particle, size_t camera_id) {
         new_particle->match_count++;
         particles.push_back( std::move(std::make_pair(new_particle, camera_id)) );
 		//p[id] = added_particle;
@@ -530,7 +531,7 @@ class Particle_ {
 public:
 	typedef FLOATTYPE float_type;
 	array<float_type, DIM> X;
-	array<int, 4> camera_ids;
+    array<size_t, 4> camera_ids;
 	int id, frame_index;
 	static const int dim = DIM;
 	

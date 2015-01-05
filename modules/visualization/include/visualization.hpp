@@ -6,7 +6,7 @@
 #ifndef VISUALIZATION_H_
 #define VISUALIZATION_H_
 
-#include <core.hpp>  //LPT core module
+#include <core.hpp>
 
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics.hpp>
@@ -128,7 +128,7 @@ array<double, 3>  calcPressureGradiantBernoulli( array<double,3>& U0, array<doub
 class FluidProperties {
 public:
 	typedef	shared_ptr<FluidProperties> Ptr;
-	static inline FluidProperties::Ptr create() { return FluidProperties::Ptr( new FluidProperties() ); }
+    static inline FluidProperties::Ptr create() { return std::make_shared<FluidProperties>(); }
 
     ///< Default air at 15 C
     FluidProperties();
@@ -231,7 +231,7 @@ private:
 class TrajectoryPathVTK : public lpt::TrajectoryVTKBase {
 public:
 	typedef std::shared_ptr<TrajectoryPathVTK> Ptr; 
-    static inline TrajectoryPathVTK::Ptr create(vtkRenderer* renderer) { return std::make_shared<TrajectoryPathVTK>(renderer); }
+    static inline TrajectoryPathVTK::Ptr create(vtkRenderer* renderer) { return std::make_shared<lpt::TrajectoryPathVTK>(renderer); }
 	
 	static vtkSmartPointer<vtkLookupTable> lookuptable;
 	static int max_points;
@@ -873,7 +873,7 @@ public:
      * @brief Resize Glyph Arrays
      * @param size New size
      */
-    void resizeGlyphArrays(int size);
+    void resizeGlyphArrays(size_t size);
 
     /**
      * @brief Set Scalars when modified
@@ -949,7 +949,7 @@ class TrajectoryHandler : public vtkCommand
 {
 public:
 	typedef std::shared_ptr<TrajectoryHandler> Ptr; 
-    static inline TrajectoryHandler::Ptr create(vtkSmartPointer<vtkRenderer> renderer) { return std::make_shared<TrajectoryHandler>(renderer); }
+    static inline TrajectoryHandler::Ptr create(vtkSmartPointer<vtkRenderer> renderer) { return TrajectoryHandler::Ptr(new TrajectoryHandler(renderer)); }
 	
 	class Parameters {
 	public:
@@ -1010,7 +1010,7 @@ public:
     void setViewMode(ViewMode mode);
 	inline void setFiniteVolumeGrid(lpt::FiniteVolumeGrid* grid) { volume_grid = grid; }
 	inline void setTrajectoryGlyphs(lpt::ParticlesVTK* glyphs) { traj_glyphs = glyphs; }
-	inline int getQueueSize() { return render_queue.size(); }
+	inline size_t getQueueSize() { return render_queue.size(); }
 	inline void setViewPaths(bool state) {view_paths = state;}
 	inline bool getViewPaths(){return view_paths;}
 	inline void setClearView() { clear_trajs = true; }
@@ -1086,7 +1086,7 @@ private:
 class VisualizerInteractorStyle : public vtkInteractorStyleTrackballCamera
 {
   public:
-	static VisualizerInteractorStyle* New();
+    static VisualizerInteractorStyle* New();
 	vtkTypeMacro(VisualizerInteractorStyle, vtkInteractorStyleTrackballCamera);
 
     /**
@@ -1201,8 +1201,8 @@ public:
 	inline bool getTakeImageMeasurement() const { return image_measurement; }
 	inline bool getVisualizationStatus() const { return visualization_status; }
 	inline void setAccumulate(bool status) { accumulate_status = status;}
-	inline int getQueueSize() { return traj_queue.size(); }
-	inline int getRenderQueueSize() { return handler->getQueueSize(); }
+	inline size_t getQueueSize() { return traj_queue.size(); }
+	inline size_t getRenderQueueSize() { return handler->getQueueSize(); }
 	inline lpt::FiniteVolumeGrid::Ptr getVolumeGrid() { return volume_grid; }
 
 	inline void setSharedObjects( std::shared_ptr < lpt::SharedObjects > new_shared_objects ) { 
@@ -1263,12 +1263,13 @@ private:
 
 // Potential new functionality 
 
-class HistogramVTK : vtkCommand {
+class HistogramVTK : public vtkCommand {
 public:
 	typedef	shared_ptr<HistogramVTK> Ptr;
-    static HistogramVTK::Ptr create() { return std::make_shared<HistogramVTK>(); }
+    static inline HistogramVTK::Ptr create() { return HistogramVTK::Ptr( new HistogramVTK() ); }
 
     HistogramVTK();
+    virtual ~HistogramVTK();
 
     virtual void Execute(vtkObject* caller, unsigned long eventId, void * callData);
 
@@ -1342,9 +1343,10 @@ private:
 class PickDim : public vtkCommand {
 public:
 	typedef std::shared_ptr<PickDim> Ptr; 
-    static inline PickDim::Ptr create() { return std::make_shared<PickDim>(); }
+    static inline PickDim::Ptr create() { return PickDim::Ptr( new PickDim() ); }
 	
     PickDim();
+    virtual ~PickDim();
 
     virtual void Execute(vtkObject* caller, unsigned long eventId, void * vtkNotUsed(callData));
 

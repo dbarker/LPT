@@ -167,10 +167,10 @@ void ImageCreator::createImage(lpt::ImageFrame& frame) {
 		else
 			I = frame.particles[p]->intensity;		
 		if ( r >= 1 ) {
-			cv::Point center(x, y);
-			cv::circle(frame.image, center, r, cv::Scalar( I, I, I ), -1, 8 );
+			cv::Point center(static_cast<int>(x), static_cast<int>(y));
+			cv::circle(frame.image, center, static_cast<int>(r), cv::Scalar( I, I, I ), -1, 8 );
 		} else {
-			frame.image.at<uchar>(y,x) = I;
+			frame.image.at<uchar>(static_cast<int>(y), static_cast<int>(x)) = static_cast<unsigned char>(I);
 		}
 	}
 	cv::GaussianBlur( frame.image, frame.image, cv::Size( blur_ksize, blur_ksize ), 0, 0 );
@@ -194,7 +194,7 @@ void DataSetGenerator::read3DTrajectoryFile(string filename, lpt::InputFormat fo
 					double z = trajs[i]->particles[j]->z;
 					int id = trajs[i]->particles[j]->id;
 					int frame_index = trajs[i]->particles[j]->frame_index;
-					cv::Point3f newparticle(x,y,z);
+					cv::Point3d newparticle(x,y,z);
 					this->frames[frame_index].first.push_back(id);             //vector of particle ids
 					this->frames[frame_index].second.push_back(newparticle);   //vector of particles (cv::Point3f)
 				}

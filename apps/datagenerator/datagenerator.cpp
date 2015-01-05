@@ -334,7 +334,7 @@ int main(int argc, char** argv) {
 	auto image_creator = std::make_shared<lpt::ImageCreator>();
 	image_creator->radius = 0;
 	image_creator->intensity = 0;
-	image_creator->object_intensity = 5E8;
+	image_creator->object_intensity = static_cast<int>(5E8);
 	image_creator->object_size = 3;
 	image_creator->blur_ksize = 3;
 	//creator.image_type = cv::Mat::zeros( cv::Size(1280, 1024), CV_8UC1 );

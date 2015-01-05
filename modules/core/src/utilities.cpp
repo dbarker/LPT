@@ -586,7 +586,7 @@ void Input::readTrajectoryFile(string filename, vector<Trajectory3d_Ptr>& trajec
 		  if (newTraj->objects.empty() == false){
 			  newTraj->id = newTraj->objects[0]->id;//GoldTrajs.size()+1;
 			  newTraj->startframe = newTraj->objects[0]->frame_index;//FIXME: uncomment
-			  int fcount = newTraj->startframe + newTraj->objects.size();
+			  int fcount = newTraj->startframe + static_cast<int>( newTraj->objects.size() );
 			  if(fcount > this->maxframes){
 				  this->maxframes = fcount;
 			  }
@@ -633,7 +633,7 @@ vector<Trajectory::Ptr> Input::trajinput (string filename) {
 		  if (newTraj->particles.empty() == false){
 			  newTraj->id = newTraj->particles[0]->id;//GoldTrajs.size()+1;
 			  newTraj->startframe = newTraj->particles[0]->frame_index;//FIXME: uncomment
-			  int fcount = newTraj->startframe + newTraj->particles.size();
+			  int fcount = newTraj->startframe + static_cast<int>( newTraj->particles.size() );
 			  if(fcount > this->maxframes){
 				  this->maxframes = fcount;
 			  }

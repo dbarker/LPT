@@ -65,9 +65,9 @@ bool ThreePointLine::find(lpt::ImageFrame& frame) {
 }
 
 void ThreePointLine::draw(vector<lpt::ParticleImage::Ptr>& particles, cv::Mat& image) {
-	vector<cv::Point2f> points( particles.size() );
+	vector<cv::Point2d> points( particles.size() );
 	for (int i = 0; i < points.size(); ++i)
-		points[i] = cv::Point2f(particles[i]->x, particles[i]->y);
+		points[i] = cv::Point2d(particles[i]->x, particles[i]->y);
 
 	cv::line( image, points[0], points[2], cv::Scalar(0,255,0), 1, 8 );
 	cv::circle( image, points[0], 3, cv::Scalar(0,0,255), -1 );

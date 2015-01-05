@@ -1321,7 +1321,7 @@ void FiniteVolumeGrid::updateGrid()
 
             for(vtkIdType i = 0; i < grid->GetNumberOfCells(); i++)
             {
-                int total_count = extract_result<tag::count>( acceleration_accumulators[(int)i][0] );
+                size_t total_count = extract_result<tag::count>( acceleration_accumulators[(int)i][0] );
                 if ( total_count > 0)
                         arrow_source_ids->SetTuple1(i, 0);
                 vec[0] = extract_result<tag::weighted_mean>( velocity_accumulators[(int)i][0] );
@@ -1472,7 +1472,7 @@ void FiniteVolumeGrid::updateGrid()
 
             for(vtkIdType i = 0; i < grid->GetNumberOfCells(); i++)
             {
-                int total_count = extract_result<tag::count>( acceleration_accumulators[(int)i][0] );
+                size_t total_count = extract_result<tag::count>( acceleration_accumulators[(int)i][0] );
                 if ( total_count > 0)
                         arrow_source_ids->SetTuple1(i, 0);
                 vec[0] = extract_result<tag::weighted_mean>( acceleration_accumulators[(int)i][0] );
@@ -1505,7 +1505,7 @@ void FiniteVolumeGrid::updateGrid()
 
             for(vtkIdType i = 0; i < grid->GetNumberOfCells(); i++)
             {
-                int total_count = extract_result<tag::count>( acceleration_accumulators[(int)i][0] );
+                size_t total_count = extract_result<tag::count>( acceleration_accumulators[(int)i][0] );
                 if (total_count > 10) {
                     vec[0] = extract_result<tag::weighted_variance>( velocity_accumulators[(int)i][0] );
                     vec[1] = extract_result<tag::weighted_variance>( velocity_accumulators[(int)i][1] );
@@ -1541,7 +1541,7 @@ void FiniteVolumeGrid::updateGrid()
 
             for(vtkIdType i = 0; i < grid->GetNumberOfCells(); i++)
             {
-                int total_count = extract_result<tag::count>( acceleration_accumulators[(int)i][0] );
+                size_t total_count = extract_result<tag::count>( acceleration_accumulators[(int)i][0] );
                 if (total_count > 10) {
                     vec[0] = extract_result<tag::weighted_variance>( acceleration_accumulators[(int)i][0] );
                     vec[1] = extract_result<tag::weighted_variance>( acceleration_accumulators[(int)i][1] );
@@ -1576,7 +1576,7 @@ void FiniteVolumeGrid::updateGrid()
 
             for(vtkIdType i = 0; i < grid->GetNumberOfCells(); i++)
             {
-                int total_count = extract_result<tag::count>( acceleration_accumulators[(int)i][0] );
+                size_t total_count = extract_result<tag::count>( acceleration_accumulators[(int)i][0] );
                 if (total_count == total_count ) { // check for NaN values
                     count_stats(total_count);
                     magnitudes->SetTuple1(i, total_count );
@@ -2434,7 +2434,7 @@ ParticlesVTK::~ParticlesVTK()
 {
 }
 
-void ParticlesVTK::resizeGlyphArrays(int size)
+void ParticlesVTK::resizeGlyphArrays(size_t size)
 {
     points->SetNumberOfPoints(size);
     velocity_magnitudes->SetNumberOfTuples(size);
@@ -2647,14 +2647,14 @@ void TrajectoryHandler::setViewMode(ViewMode mode)
 void TrajectoryHandler::addCamerasToRenderer()
 {
     for (size_t c = 0; c < camerasvtk->size(); ++c)
-        camerasvtk->operator [](c).addToRenderer(renderer);
+        camerasvtk->operator[](c).addToRenderer(renderer);
     add_cameras_view = false;
 }
 
 void TrajectoryHandler::removeCamerasFromRenderer()
 {
     for (size_t c = 0; c < camerasvtk->size(); ++c)
-        camerasvtk->operator [](c).removeFromRenderer(renderer);
+        camerasvtk->operator[](c).removeFromRenderer(renderer);
     remove_cameras_view = false;
 }
 
@@ -2681,10 +2681,10 @@ void callbackClearTrajView(int state, void* data)
 void callbackSetDisplayCameras(int state, void* data)
 {
     TrajectoryHandler* traj_handler = static_cast<TrajectoryHandler*>(data);
-    traj_handler->setDisplayCameras(state);
+    traj_handler->setDisplayCameras( (state != 0) );
 }
 
-viod callbackSavePlane(int state, void* data)
+void callbackSavePlane(int state, void* data)
 {
     TrajectoryHandler* traj_handler = static_cast<TrajectoryHandler*>(data);
     traj_handler->setSavePlane(true);
@@ -2824,7 +2824,6 @@ void Visualizer::initialize()
 
     window_interactor->SetInteractorStyle(style);
     coordinates = lpt::CoordinateArrows::create(window_interactor, params.scale);
-
 }
 
 void Visualizer::start()
@@ -3007,7 +3006,7 @@ void Visualizer::takeMeasurement(const vector < lpt::ParticleVectors >& particle
             stdev = stdev != 0 ? sqrt(stdev) : 0;
             double max = extract_result<tag::max>(distance_accumulator);
             double min = extract_result<tag::min>(distance_accumulator);
-            int num = extract_result<tag::count>(distance_accumulator);
+            size_t num = extract_result<tag::count>(distance_accumulator);
             cout << "\n\nMeasurement Complete: Mean distance = " << mean << " +- " << stdev << " max, min = " << max << ", " << min << endl;
             fout << this->shared_objects->frame_rate << "\t" << mean << "\t" << stdev << "\t" << max << "\t" << min << "\t" << num << "\t\n";
             fout.close();
@@ -3032,7 +3031,7 @@ void Visualizer::takeMeasurement(const vector < lpt::ParticleVectors >& particle
                 uncertainty_accumulator(uncertainty);
             }
             double mean_uncertainty = extract_result<tag::mean>(uncertainty_accumulator);
-            int num_sample = extract_result<tag::count>(uncertainty_accumulator);
+            size_t num_sample = extract_result<tag::count>(uncertainty_accumulator);
             cout << "3D Position uncertainty = " << mean_uncertainty << endl;
 
             fout << mean_uncertainty << "\t" << num_sample << endl;
@@ -3071,7 +3070,7 @@ void Visualizer::takeMeasurement(const vector < lpt::ParticleVectors >& particle
             stdev = stdev != 0 ? sqrt(stdev) : 0;
             double max = extract_result<tag::max>(scalar_accumulator[0]);
             double min = extract_result<tag::min>(scalar_accumulator[0]);
-            int num = extract_result<tag::count>(scalar_accumulator[0]);
+            size_t num = extract_result<tag::count>(scalar_accumulator[0]);
             cout << "\n\nMeasurement Complete: Mean velocity = " << mean << " +- " << stdev << " max, min = " << max << ", " << min << endl;
             fout << mean << "\t" << stdev << "\t" << max << "\t" << min << "\t" << num << "\t\t";
 
@@ -3105,7 +3104,7 @@ void Visualizer::accumulateCentroidDetectionUncertainty( vector<lpt::Match::Ptr>
                 centroid_uncertainty_accumulators[match_id].resize( matches[match_id]->particles.size() );
 
                 for (int j = 0; j < matches[match_id]->particles.size(); ++j ) {
-                    int cam_id = matches[match_id]->particles[j].second;
+                    size_t cam_id = matches[match_id]->particles[j].second;
                     lpt::ParticleImage::Ptr particle = matches[match_id]->particles[j].first;
 
                     centroid_uncertainty_accumulators[match_id][j][0]( particle->x );
@@ -3115,7 +3114,7 @@ void Visualizer::accumulateCentroidDetectionUncertainty( vector<lpt::Match::Ptr>
         } else if ( matches.size() == centroid_uncertainty_accumulators.size() ) {
             for (int match_id = 0; match_id < matches.size(); ++match_id) {
                 for (int j = 0; j < matches[match_id]->particles.size(); ++j ) {
-                    int cam_id = matches[match_id]->particles[j].second;
+                    size_t cam_id = matches[match_id]->particles[j].second;
                     lpt::ParticleImage::Ptr particle = matches[match_id]->particles[j].first;
 
                     for (int p = 0; p < matches.size(); ++p) {
@@ -3142,7 +3141,7 @@ void Visualizer::accumulateCentroidDetectionUncertainty( vector<lpt::Match::Ptr>
             for (int i = 0; i < centroid_uncertainty_accumulators.size(); ++i) {
                 fout << this->shared_objects->frame_rate << "\t" << i << "\t";
                 for (int c = 0; c < centroid_uncertainty_accumulators[i].size(); c++) {
-                    int cam_id = matches[i]->particles[c].second;
+                    size_t cam_id = matches[i]->particles[c].second;
 
                     fout << cam_id << "\t" << extract_result<tag::count>(centroid_uncertainty_accumulators[i][c][0]) << "\t";
                     double pixel_uncertainty = 0;
@@ -3161,7 +3160,7 @@ void Visualizer::accumulateCentroidDetectionUncertainty( vector<lpt::Match::Ptr>
                 fout << endl;
             }
             double mean_uncertainty = extract_result<tag::mean>(uncertainty_accumulator);
-            int num_sample = extract_result<tag::count>(uncertainty_accumulator);
+            size_t num_sample = extract_result<tag::count>(uncertainty_accumulator);
             cout << "2D centroid uncertainty = " << mean_uncertainty << endl;
 
             fout << mean_uncertainty << "\t" << num_sample << endl;
@@ -3186,7 +3185,7 @@ void Visualizer::setCameras(vector<Camera> &cameras)
 void callbackSetVisualizationStatus(int state, void* data)
 {
     Visualizer* visualizer = static_cast<Visualizer*>(data);
-    visualizer->setVisualizationStatus(state);
+    visualizer->setVisualizationStatus( (state != 0) );
 }
 
 void callbackSetStride(int state, void* data)
@@ -3197,7 +3196,7 @@ void callbackSetStride(int state, void* data)
 void callbackSetAccumulate(int state, void* data)
 {
     Visualizer* visualizer = static_cast<Visualizer*>(data);
-    visualizer->setAccumulate(state);
+    visualizer->setAccumulate( (state != 0) );
 }
 
 void callbackTakeMeasurement(int state, void*data)
@@ -3205,6 +3204,7 @@ void callbackTakeMeasurement(int state, void*data)
     Visualizer* visualizer = static_cast<Visualizer*>(data);
     visualizer->setTakeMeasurement(true);
 }
+
 
 /***** Definition of HistogramVTK class *****/
 
@@ -3244,6 +3244,10 @@ HistogramVTK::HistogramVTK() : number_of_bins(100)
     range[1] = 100;
     setBins(number_of_bins, range);
     view->AddObserver(vtkCommand::UserEvent, this);
+}
+
+HistogramVTK::~HistogramVTK()
+{
 }
 
 void HistogramVTK::Execute(vtkObject *caller, unsigned long eventId, void *callData)
@@ -3306,7 +3310,7 @@ void HistogramVTK::updateData(vector<double> &data)
     //view->InvokeEvent(vtkCommand::UserEvent);
 }
 
-void HistogramVTK::getBinID(double value)
+int HistogramVTK::getBinID(double value)
 {
     int id;
     for ( id = 0; id < bins.size(); id++) {
@@ -3377,7 +3381,7 @@ StreamLines::StreamLines(vtkAlgorithmOutput *output_port)
     streamline_actor->VisibilityOn();
 }
 
-/***** Implementation of PickDim class *****/
+/***** Definition of PickDim class *****/
 
 PickDim::PickDim()
 {
@@ -3390,6 +3394,10 @@ PickDim::PickDim()
     follower->SetMapper( mapper );
     follower->GetProperty()->SetColor( 1, 0, 0 ); // red
     points.resize(2);
+}
+
+PickDim::~PickDim()
+{
 }
 
 void PickDim::Execute(vtkObject *caller, unsigned long eventId, void *)

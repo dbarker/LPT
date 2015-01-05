@@ -86,9 +86,9 @@ public:
 	class Parameters {
 	public:
 		Parameters(double max_radius = 20, double min_radius = 2, double alpha = 1.0) : max_radius(max_radius), min_radius(min_radius), alpha(alpha) {
-			max_radius_level = max_radius;
-			min_radius_level = min_radius;
-			alpha_level = alpha * 100;
+			max_radius_level = static_cast<int>(max_radius);
+			min_radius_level = static_cast<int>(min_radius);
+			alpha_level = static_cast<int>(alpha) * 100;
 		}
 		
 		double max_radius;
@@ -174,13 +174,13 @@ public:
 
 	double correct_ratio;
 	double cover_ratio;
-	int links_created;
-	int links_total;
-	int links_correct;
+	size_t links_created;
+	size_t links_total;
+	size_t links_correct;
 
     TestTracker(vector<Trajectory3d_Ptr>& trajs, vector<Trajectory3d_Ptr>& gold_trajs);
 
-    void testTrajectories(int maxframes);
+    void testTrajectories(size_t maxframes);
     void printTestResults();
 };
 

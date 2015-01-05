@@ -11,7 +11,7 @@ using namespace std;
 
 void undistortPoints(const lpt::Camera& camera, lpt::ImageFrame& frame) {
 	if (frame.particles.size() > 0) {
-		vector<cv::Point2f> image_points(frame.particles.size());
+		vector<cv::Point2d> image_points(frame.particles.size());
 		
 		for (int j = 0; j < frame.particles.size(); ++j) {
 			image_points[j].x = frame.particles[j]->x;
@@ -160,7 +160,7 @@ void Detector::drawResult(ImageFrame &frame)
 {
     cv::cvtColor(frame.image, frame.image, CV_GRAY2BGR);
     for (int i = 0; i < frame.particles.size(); i++) {
-        cv::circle( frame.image, cv::Point( (int) (frame.particles[i]->x + 0.5), (int) (frame.particles[i]->y) + 0.5), 5, cv::Scalar(0, 255, 0), 1, 8, 2);
+        cv::circle( frame.image, cv::Point( static_cast<int>(frame.particles[i]->x + 0.5), static_cast<int>(frame.particles[i]->y) + 0.5), 5, cv::Scalar(0, 255, 0), 1, 8, 2);
     }
 }
 
@@ -185,7 +185,7 @@ void FindContoursDetector::detectFeatures(const cv::Mat &image, vector<ParticleI
         //if( area > (double)params.min_contour_area  && area < (double)params.max_contour_area) {
             cv::Moments mom = cv::moments( cv::Mat(contours[c]) );
             if( mom.m00 > 0 ) {
-                features.push_back( ParticleImage::create(features.size(), mom.m10 / mom.m00, mom.m01 / mom.m00) );
+                features.push_back( ParticleImage::create(static_cast<int>(features.size()), mom.m10 / mom.m00, mom.m01 / mom.m00) );
             }
         }
     }
@@ -287,7 +287,7 @@ void processImages( Camera& camera, ImageProcessor& processor, Detector& detecto
 	detector.addControls();
 	cv::waitKey(10);
 
-	int number_of_frames = camera.imagelist.size();
+	size_t number_of_frames = camera.imagelist.size();
 	camera.frames.resize( number_of_frames );
 	for (int i = 0; i < number_of_frames; ++i) {
 		cv::Mat temp_image = camera.frames[i].image.clone();

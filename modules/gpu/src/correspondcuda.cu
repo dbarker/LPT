@@ -240,7 +240,7 @@ void PointMatcherCUDA::findEpipolarMatches(const lpt::ImageFrameGroup& frame_gro
 			particles_y_h[p] = frame_group[0].particles[p]->y;
 	}
 
-	int max_particles = num_particles_h[0];
+	size_t max_particles = num_particles_h[0];
 	for(int i = 1; i < frame_group.size(); ++i) {
 		num_particles_h[i] = frame_group[i].particles.size() + num_particles_h[i-1];
 		for(int p = 0; p < frame_group[i].particles.size(); ++p) {
@@ -265,7 +265,7 @@ void PointMatcherCUDA::findEpipolarMatches(const lpt::ImageFrameGroup& frame_gro
 
 	cudaMemcpyAsync(thrust::raw_pointer_cast(&num_matches_d[0]), thrust::raw_pointer_cast(&num_matches_h[0]), num_matches_h.size() * sizeof(int), cudaMemcpyHostToDevice, streams[0]);
 	
-	int num_pairs = camera_pairs_h.size();
+	size_t num_pairs = camera_pairs_h.size();
 
 	dim3 dimblock(128,1,1);
 	dim3 dimgrid( num_pairs, (max_particles / dimblock.x ) + 1 );
@@ -308,7 +308,7 @@ void PointMatcherCUDA::findEpipolarMatches(const lpt::ImageFrameGroup& frame_gro
 }
 
 void PointMatcherCUDA::findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches) {
-	vector<int> num_particles(frame_group.size());
+	vector<size_t> num_particles(frame_group.size());
 		num_particles[0] = frame_group[0].particles.size();
 		for(int i = 1; i < frame_group.size(); ++i) 
 			num_particles[i] = frame_group[i].particles.size() + num_particles[i-1];
@@ -383,7 +383,7 @@ void PointMatcherCUDA::findEpipolarMatchesStreams(lpt::ImageFrameGroup& frame_gr
 			particles_y_h[p] = frame_group[0].particles[p]->y;
 	}
 
-	int max_particles = num_particles_h[0];
+	size_t max_particles = num_particles_h[0];
 	for(int i = 1; i < frame_group.size(); ++i) {
 		num_particles_h[i] = frame_group[i].particles.size() + num_particles_h[i-1];
 		for(int p = 0; p < frame_group[i].particles.size(); ++p) {
@@ -398,9 +398,9 @@ void PointMatcherCUDA::findEpipolarMatchesStreams(lpt::ImageFrameGroup& frame_gr
 	cudaMemcpyAsync(thrust::raw_pointer_cast(&particles_x_d[0]), thrust::raw_pointer_cast(&particles_x_h[0]), *num_particles_h.rbegin() * sizeof(float), cudaMemcpyHostToDevice, streams[0]);
 	cudaMemcpyAsync(thrust::raw_pointer_cast(&particles_y_d[0]), thrust::raw_pointer_cast(&particles_y_h[0]), *num_particles_h.rbegin() * sizeof(float), cudaMemcpyHostToDevice, streams[0]);
 
-	int num_pairs = camera_pairs_h.size();
+	size_t num_pairs = camera_pairs_h.size();
 	dim3 dimblock(128,1,1);
-	dim3 dimgrid( num_pairs / streams.size(), (max_particles / dimblock.x ) + 1, 1 );
+	dim3 dimgrid( num_pairs / streams.size(), (static_cast<unsigned int>(max_particles) / dimblock.x ) + 1, 1 );
 	 
 	num_matches_h[0] = frame_group[camera_pairs_h[0].cam_b_id].particles.size(); 
 	for(int i = 1; i < this->camera_pairs_h.size(); ++i ) {
@@ -419,7 +419,7 @@ void PointMatcherCUDA::findEpipolarMatchesStreams(lpt::ImageFrameGroup& frame_gr
 	}
 	
 	int match_overload = 0;
-	for (int i = 0; i < streams.size(); ++i) {
+	for (unsigned int i = 0; i < streams.size(); ++i) {
 		cudaStreamSynchronize(streams[i]);
 		for (int p = i * dimgrid.x; p < (i + 1) * dimgrid.x; ++p) {
 			int match_id = (p == 0 ? 0 : num_matches_h[p-1]);
@@ -461,7 +461,7 @@ void PointMatcherCUDA::findEpipolarMatchesManyThreads(lpt::ImageFrameGroup& fram
 			particles_y_h[p] = frame_group[0].particles[p]->y;
 	}
 
-	int max_particles = num_particles_h[0];
+	size_t max_particles = num_particles_h[0];
 	for(int i = 1; i < frame_group.size(); ++i) {
 		num_particles_h[i] = frame_group[i].particles.size() + num_particles_h[i-1];
 		for(int p = 0; p < frame_group[i].particles.size(); ++p) {
@@ -476,11 +476,11 @@ void PointMatcherCUDA::findEpipolarMatchesManyThreads(lpt::ImageFrameGroup& fram
 	cudaMemcpyAsync(thrust::raw_pointer_cast(&particles_x_d[0]), thrust::raw_pointer_cast(&particles_x_h[0]), *num_particles_h.rbegin() * sizeof(float), cudaMemcpyHostToDevice);
 	cudaMemcpyAsync(thrust::raw_pointer_cast(&particles_y_d[0]), thrust::raw_pointer_cast(&particles_y_h[0]), *num_particles_h.rbegin() * sizeof(float), cudaMemcpyHostToDevice);
 
-	int num_pairs = camera_pairs_h.size();
+	size_t num_pairs = camera_pairs_h.size();
 	dim3 dimblock(256);
 	dim3 dimgrid( num_pairs, (max_particles / dimblock.x ) + 1 );
 
-	thrust::host_vector<int> num_lines_h(camera_pairs_h.size(), 0);
+	thrust::host_vector<size_t> num_lines_h(camera_pairs_h.size(), 0);
 	num_lines_h[0] = frame_group[camera_pairs_h[0].cam_b_id].particles.size();
 	for(int i = 1; i < this->camera_pairs_h.size(); ++i ) 
 		num_lines_h[i] = frame_group[camera_pairs_h[i].cam_b_id].particles.size() + num_lines_h[i-1];

@@ -56,7 +56,7 @@ namespace lpt {
 		Video(string path = "./") : file_path(path) {}
 		inline void setFilePath(string path) { file_path = path; }
 		inline void addImageToVideo(cv::Mat image) { video_frames.push_back(image); }
-		inline int getVideoLength() const { return video_frames.size(); }
+		inline size_t getVideoLength() const { return video_frames.size(); }
 		void writeAVI(int playback_fps, int codec);
 		void writeImages(string basename, string filetype = ".jpg");
 		void readAVI();
@@ -110,8 +110,8 @@ namespace lpt {
 		inline void requestSnapShot() { snapshot_requested = true; }
 		inline bool isSnapShotRequested() const { return snapshot_requested; }
 		inline bool isVideoRecording() const { return record_video; }
-		inline int getVideoCount() const { return videos[0].size(); }
-		inline int getSnapShotCount() const { return imagelists[0].size(); }
+		inline size_t getVideoCount() const { return videos[0].size(); }
+		inline size_t getSnapShotCount() const { return imagelists[0].size(); }
 		void takeSnapShot( vector<cv::Mat>& frames );
 		void writeSnapShotImageLists();
 		void createVideos();
