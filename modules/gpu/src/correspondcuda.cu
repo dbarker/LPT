@@ -268,7 +268,7 @@ void PointMatcherCUDA::findEpipolarMatches(const lpt::ImageFrameGroup& frame_gro
 	size_t num_pairs = camera_pairs_h.size();
 
 	dim3 dimblock(128,1,1);
-	dim3 dimgrid( num_pairs, (max_particles / dimblock.x ) + 1 );
+	dim3 dimgrid( static_cast<unsigned int>(num_pairs), (static_cast<unsigned int>(max_particles) / dimblock.x ) + 1 );
 	
 	calcEpipolarResidualAllInOne_kernel <<< dimgrid, dimblock, 0, streams[0] >>> (params.match_threshold, particles_x_d, particles_y_d, num_particles_d, matches2way_d, num_matches_d);
 	
@@ -276,15 +276,15 @@ void PointMatcherCUDA::findEpipolarMatches(const lpt::ImageFrameGroup& frame_gro
 	
 	cudaStreamSynchronize(streams[0]);
 	
-	int match_overload = 0;
+	size_t match_overload = 0;
 	for (int p = 0; p < camera_pairs_h.size(); ++p) {
-		int match_id = (p == 0 ? 0 : num_matches_h[p-1]);
+		size_t match_id = (p == 0 ? 0 : num_matches_h[p-1]);
 		int cam_b = camera_pairs_h[p].cam_b_id; 
 		int cam_a = camera_pairs_h[p].cam_a_id;
-		int b_end = num_particles_h[cam_b];
-		int b_start = (cam_b !=0 ? num_particles_h[cam_b-1] : 0);
-		int a_start = (cam_a !=0 ? num_particles_h[cam_a-1] : 0);
-		for (int b_id = b_start; b_id < b_end; ++b_id, ++match_id) {
+		size_t b_end = num_particles_h[cam_b];
+		size_t b_start = (cam_b !=0 ? num_particles_h[cam_b-1] : 0);
+		size_t a_start = (cam_a !=0 ? num_particles_h[cam_a-1] : 0);
+		for (size_t b_id = b_start; b_id < b_end; ++b_id, ++match_id) {
 			for (int m = 0; m < NUM_MATCHES; ++m) {
 				int a_id = matches2way_h[match_id].ids[m];
 				if (a_id >= 0) {
@@ -293,8 +293,8 @@ void PointMatcherCUDA::findEpipolarMatches(const lpt::ImageFrameGroup& frame_gro
 					auto itb = std::find(matchmap[b_id][cam_a].begin(), matchmap[b_id][cam_a].end(), -1);
 					auto ita = std::find(matchmap[a_id][cam_b].begin(), matchmap[a_id][cam_b].end(), -1);
 					if (itb != matchmap[b_id][cam_a].end() && ita != matchmap[a_id][cam_b].end() ) {
-						*itb = a_id - a_start;
-						*ita = b_id - b_start;
+						*itb = a_id - static_cast<int>(a_start);
+						*ita = static_cast<int>(b_id - b_start);
 					} else
 						match_overload++;
 				}
@@ -314,12 +314,12 @@ void PointMatcherCUDA::findUniqueMatches(const lpt::ImageFrameGroup& frame_group
 			num_particles[i] = frame_group[i].particles.size() + num_particles[i-1];
 
         for (int cam_a = 0; cam_a < frame_group.size() - 1; ++cam_a) {
-			int a_start = (cam_a !=0 ? num_particles[cam_a - 1] : 0);
+			size_t a_start = (cam_a !=0 ? num_particles[cam_a - 1] : 0);
 			for (int a = 0; a < frame_group[cam_a].particles.size(); ++a) {
                 lpt::ParticleImage::Ptr Pa = frame_group[cam_a].particles[a];
 				if( ! Pa->is_4way_matched ) 
                 for (int cam_b = cam_a + 1; cam_b < frame_group.size() - 1; ++cam_b) {
-					int b_start = (cam_b !=0 ? num_particles[cam_b-1] : 0);
+					size_t b_start = (cam_b !=0 ? num_particles[cam_b-1] : 0);
                     for(int match_ab = 0; match_ab < NUM_MATCHES; ++match_ab) { //loop through all A,B matches
 						int b = matchmap[a + a_start][cam_b][match_ab]; 
 						if (b < 0)
@@ -328,7 +328,7 @@ void PointMatcherCUDA::findUniqueMatches(const lpt::ImageFrameGroup& frame_group
 						
 						if( ! Pb->is_4way_matched ) 
 						for (int cam_c = cam_b + 1; cam_c < frame_group.size(); ++cam_c) {
-                            int c_start = (cam_c !=0 ? num_particles[cam_c-1] : 0);
+                            size_t c_start = (cam_c !=0 ? num_particles[cam_c-1] : 0);
 							for (int match_bc = 0; match_bc < NUM_MATCHES; ++match_bc) {
                                 int c = matchmap[b + b_start][cam_c][match_bc];
 								if (c < 0) 
@@ -339,7 +339,7 @@ void PointMatcherCUDA::findUniqueMatches(const lpt::ImageFrameGroup& frame_group
 								if( ! Pc->is_4way_matched && std::count(matchmap[a + a_start][cam_c].begin(), matchmap[a + a_start][cam_c].end(), c) )  
                                 for (int cam_d = cam_c + 1; cam_d < frame_group.size(); ++cam_d) {
 									vector<lpt::Match::Ptr> matches4way;
-                                    int d_start = (cam_d !=0 ? num_particles[cam_d-1] : 0);
+                                    size_t d_start = (cam_d !=0 ? num_particles[cam_d-1] : 0);
 									for (int match_cd = 0; match_cd < NUM_MATCHES; ++match_cd) {
 										int d = matchmap[c + c_start][cam_d][match_cd];
 										if (d < 0)
@@ -400,7 +400,7 @@ void PointMatcherCUDA::findEpipolarMatchesStreams(lpt::ImageFrameGroup& frame_gr
 
 	size_t num_pairs = camera_pairs_h.size();
 	dim3 dimblock(128,1,1);
-	dim3 dimgrid( num_pairs / streams.size(), (static_cast<unsigned int>(max_particles) / dimblock.x ) + 1, 1 );
+	dim3 dimgrid( static_cast<unsigned int>(num_pairs / streams.size()), (static_cast<unsigned int>(max_particles) / dimblock.x ) + 1, 1 );
 	 
 	num_matches_h[0] = frame_group[camera_pairs_h[0].cam_b_id].particles.size(); 
 	for(int i = 1; i < this->camera_pairs_h.size(); ++i ) {
@@ -413,22 +413,22 @@ void PointMatcherCUDA::findEpipolarMatchesStreams(lpt::ImageFrameGroup& frame_gr
 		calcEpipolarResidualAllInOneStreams_kernel <<< dimgrid, dimblock, 0, streams[i] >>> (i * dimgrid.x , params.match_threshold, particles_x_d, particles_y_d, num_particles_d, matches2way_d, num_matches_d);
 
 	for(int i = 0; i < streams.size(); i++) {
-		 int index = (i == 0 ? 0 : num_matches_h[ i * dimgrid.x - 1]);
-		 int nbytes = ( i == 0 ?  num_matches_h[dimgrid.x - 1] :  num_matches_h[(i+1)*dimgrid.x - 1] -  num_matches_h[i*dimgrid.x - 1]) * sizeof(MatchIDs);
+		 size_t index = (i == 0 ? 0 : num_matches_h[ i * dimgrid.x - 1]);
+		 size_t nbytes = ( i == 0 ?  num_matches_h[dimgrid.x - 1] :  num_matches_h[(i+1)*dimgrid.x - 1] -  num_matches_h[i*dimgrid.x - 1]) * sizeof(MatchIDs);
 		 cudaMemcpyAsync(thrust::raw_pointer_cast(&matches2way_h[index]), thrust::raw_pointer_cast(&matches2way_d[index]), nbytes, cudaMemcpyDeviceToHost, streams[i]);
 	}
 	
 	int match_overload = 0;
 	for (unsigned int i = 0; i < streams.size(); ++i) {
 		cudaStreamSynchronize(streams[i]);
-		for (int p = i * dimgrid.x; p < (i + 1) * dimgrid.x; ++p) {
-			int match_id = (p == 0 ? 0 : num_matches_h[p-1]);
+		for (unsigned int p = i * dimgrid.x; p < (i + 1) * dimgrid.x; ++p) {
+			size_t match_id = (p == 0 ? 0 : num_matches_h[p-1]);
 			int cam_b = camera_pairs_h[p].cam_b_id; 
 			int cam_a = camera_pairs_h[p].cam_a_id;
-			int b_end = num_particles_h[cam_b];
-			int b_start = (cam_b !=0 ? num_particles_h[cam_b-1] : 0);
-			int a_start = (cam_a !=0 ? num_particles_h[cam_a-1] : 0);
-			for (int b_id = b_start; b_id < b_end; ++b_id, ++match_id) {
+			size_t b_end = num_particles_h[cam_b];
+			size_t b_start = (cam_b !=0 ? num_particles_h[cam_b-1] : 0);
+			size_t a_start = (cam_a !=0 ? num_particles_h[cam_a-1] : 0);
+			for (size_t b_id = b_start; b_id < b_end; ++b_id, ++match_id) {
 				for (int m = 0; m < NUM_MATCHES; ++m) {
 					int a_id = matches2way_h[match_id].ids[m];
 					if (a_id >= 0) {
@@ -437,8 +437,8 @@ void PointMatcherCUDA::findEpipolarMatchesStreams(lpt::ImageFrameGroup& frame_gr
 						auto itb = std::find(matchmap[b_id][cam_a].begin(), matchmap[b_id][cam_a].end(), -1);
 						auto ita = std::find(matchmap[a_id][cam_b].begin(), matchmap[a_id][cam_b].end(), -1);
 						if (itb != matchmap[b_id][cam_a].end() && ita != matchmap[a_id][cam_b].end() ) {
-							*itb = a_id - a_start;
-							*ita = b_id - b_start;
+							*itb = a_id - static_cast<int>(a_start);
+							*ita = static_cast<int>(b_id - b_start);
 						} else
 							match_overload++;
 					}
@@ -478,7 +478,7 @@ void PointMatcherCUDA::findEpipolarMatchesManyThreads(lpt::ImageFrameGroup& fram
 
 	size_t num_pairs = camera_pairs_h.size();
 	dim3 dimblock(256);
-	dim3 dimgrid( num_pairs, (max_particles / dimblock.x ) + 1 );
+	dim3 dimgrid( static_cast<unsigned int>(num_pairs), (static_cast<unsigned int>(max_particles) / dimblock.x ) + 1 );
 
 	thrust::host_vector<size_t> num_lines_h(camera_pairs_h.size(), 0);
 	num_lines_h[0] = frame_group[camera_pairs_h[0].cam_b_id].particles.size();
@@ -505,7 +505,7 @@ void PointMatcherCUDA::findEpipolarMatchesManyThreads(lpt::ImageFrameGroup& fram
 	cudaStreamSynchronize(0);
 	
 	dim3 dimblock2(512,1,1);
-	dim3 dimgrid2( *num_lines_h.rbegin(), ( max_particles / dimblock2.x ) + 1, 1 );
+	dim3 dimgrid2( static_cast<unsigned int>(*num_lines_h.rbegin()), ( static_cast<unsigned int>(max_particles) / dimblock2.x ) + 1, 1 );
 	//cout <<"K2 Grid = " << dimgrid2.x << " x " << dimgrid2.y << " x " << dimgrid2.z << endl;
 	//cout <<"K2 Block = " << dimblock2.x << " x " << dimblock2.y << " x " << dimblock2.z << endl;
 	
