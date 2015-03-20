@@ -160,7 +160,7 @@ void Detector::drawResult(ImageFrame &frame)
 {
     cv::cvtColor(frame.image, frame.image, CV_GRAY2BGR);
     for (int i = 0; i < frame.particles.size(); i++) {
-        cv::circle( frame.image, cv::Point( static_cast<int>(frame.particles[i]->x + 0.5), static_cast<int>(frame.particles[i]->y) + 0.5), 5, cv::Scalar(0, 255, 0), 1, 8, 2);
+        cv::circle( frame.image, cv::Point( static_cast<int>(frame.particles[i]->x + 0.5), static_cast<int>(frame.particles[i]->y + 0.5)), 5, cv::Scalar(0, 255, 0), 1, 8, 2);
     }
 }
 

@@ -541,7 +541,8 @@ void Calibrator::calibrateCamera() {
 
 	if (ok){
 		storeCameraParameters(cameras[current_camera], camera_matrix, dist_coeffs, total_avg_err );
-		double aperature_width, aperature_height, fovx, fovy, focal_length, aspect_ratio;
+		//double aperature_width, aperature_height;
+		double fovx, fovy, focal_length, aspect_ratio;
 		cv::Point2d principal_point;
 		cout << camera_matrix << endl;
 		cout << cameras[current_camera].getCameraMatrix() << endl;
@@ -1233,7 +1234,8 @@ bool Calibration::runCalibration( vector<Camera> &cameras) {
 			storeCameraParameters(cameras[c], image_points,
 					rotation_vecs, translation_vecs, camera_matrix,
 					dist_coeffs, error_stats );
-			double aperature_width, aperature_height, fovx, fovy, focal_length, aspect_ratio;
+			//double aperature_width, aperature_height;
+			double fovx, fovy, focal_length, aspect_ratio;
 			cv::Point2d principal_point;
 			cv::calibrationMatrixValues(camera_matrix, image_size,
 					cameras[c].sensor_size[0], cameras[c].sensor_size[1], fovx, fovy,

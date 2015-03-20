@@ -1135,8 +1135,8 @@ void FiniteVolumeGrid::initialize()
 
     grid->GetCellData()->SetActiveScalars("magnitudes");
     grid->GetCellData()->SetActiveVectors("vectors");
-    grid->SetActiveAttribute(grid->GetInformation(), vtkDataObject::FieldAssociations::FIELD_ASSOCIATION_CELLS, "magnitudes", vtkDataSetAttributes::AttributeTypes::SCALARS);
-    grid->SetActiveAttribute(grid->GetInformation(), vtkDataObject::FieldAssociations::FIELD_ASSOCIATION_CELLS, "vectors", vtkDataSetAttributes::AttributeTypes::VECTORS);
+    grid->SetActiveAttribute(grid->GetInformation(), vtkDataObject::FIELD_ASSOCIATION_CELLS, "magnitudes", vtkDataSetAttributes::SCALARS);
+    grid->SetActiveAttribute(grid->GetInformation(), vtkDataObject::FIELD_ASSOCIATION_CELLS, "vectors", vtkDataSetAttributes::VECTORS);
     grid->Modified();
 
     std::cout << "There are "
@@ -1672,7 +1672,7 @@ void FiniteVolumeGrid::resetGrid()
     renderer->RemoveActor(glyphactor);
     for(vtkIdType i = 0; i < grid->GetNumberOfCells(); i++)
     {
-        double vec[3];
+        //double vec[3];
         //boost_accumulator newx, newy, newz;
         velocity_accumulators[(int)i][0] = boost_weighted_accumulator();
         velocity_accumulators[(int)i][1] = boost_weighted_accumulator();
@@ -2457,7 +2457,7 @@ void ParticlesVTK::updateParticle(int id, lpt::ParticleVectors& current_particle
     vec[2] = current_particle[1][2];
     velocity_magnitudes->SetTuple1(id, sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]) );
 
-    vec[0] = current_particle[2][0]; // m/s
+    vec[0] = current_particle[2][0]; // m/s^2
     vec[1] = current_particle[2][1];
     vec[2] = current_particle[2][2];
     acceleration_magnitudes->SetTuple1(id, sqrt(vec[0]*vec[0] + vec[1]*vec[1] + vec[2]*vec[2]) );
@@ -2473,7 +2473,7 @@ void ParticlesVTK::setVectorMode(lpt::VectorMode mode)
             lookuptable->SetRange( params.velocity_range.data() );
             break;
     case lpt::ACCELERATION:
-            scalarbar->GetScalarBarActor()->SetTitle("Acceleration Magnitude (m/s2)");
+            scalarbar->GetScalarBarActor()->SetTitle("Acceleration Magnitude (m/s^2)");
             polydata->GetPointData()->SetActiveScalars("acceleration_mag");
             lookuptable->SetRange( params.acceleration_range.data() );
             break;
@@ -2861,7 +2861,7 @@ void Visualizer::manageQueue()
 {
     int count = 0;
     while(true) {
-        vector < pair < lpt::Trajectory3d*, vector<lpt::Particle3d_Ptr>::iterator > > traj_updates;
+        vector < pair < lpt::Trajectory3d*, vector<pair< lpt::Particle3d_Ptr, array<double, 9> > >::iterator > > traj_updates;
 
         traj_queue.wait_and_pop( traj_updates );
 
@@ -2876,38 +2876,58 @@ void Visualizer::manageQueue()
             auto iter_next = object_iter + 1;
             auto iter_previous = object_iter - 1;
 
-            auto& X0 = iter_previous->get()->X; // previous particle, index 0
-            auto& X1 = object_iter->get()->X;   // current particle, index 1
-            auto& X2 = iter_next->get()->X;     // next particle, index 2
-
             lpt::ParticleVectors new_vectors;
+
+            array<double, 3> Xm1, X0, X1, X2, X3, U0, U1, U2, A, dX, dPdX;
+
+            dX[0] = volume_grid->params.cell_dimensions[0] / 1000.0;
+            dX[1] = volume_grid->params.cell_dimensions[1] / 1000.0;
+            dX[2] = volume_grid->params.cell_dimensions[2] / 1000.0;
 
             auto& frame_rate = this->shared_objects->frame_rate;
 
-            for (int d = 0; d < X0.size(); ++d) {
-                new_vectors[0][d] = X1[d];                                                                  // Coordinate
-                new_vectors[1][d] = ( ( X2[d] - X0[d] ) * frame_rate ) / 2.0 / 1000.0;                      // Velocity
-                new_vectors[2][d] = ( X2[d] - 2.0 * X1[d] + X0[d] ) * frame_rate * frame_rate / 1000.0;     // Acceleration
-                new_vectors[3][d] = 0;                                                                      // Pressure gradient
+            if (this->shared_objects->KF_isOn) {
+                for (int i=0; i<X1.size(); i++) {
+                    X1[i] = object_iter->second.at(i);
+                    U0[i] = iter_previous->second.at(i+3) / 1000.0;
+                    U1[i] = object_iter->second.at(i+3) / 1000.0;
+                    U2[i] = iter_next->second.at(i+3) / 1000.0;
+                    A[i] = object_iter->second.at(i+6) / 1000.0;
+                }
             }
 
-            if (iter_next != ( current_traj->objects.end() - 1 ) && iter_previous != current_traj->objects.begin() ) {
-                auto& Xm1 = (iter_previous - 1)->get()->X;  // previous^2 particle, index -1
-                auto& X3 = (iter_next + 1)->get()->X;       // next^2 particle, index 3
-                array<double,3> U0, U2, dX;
+            else {
+                X0 = iter_previous->first->X; // previous particle, index 0
+                X1 = object_iter->first->X;   // current particle, index 1
+                X2 = iter_next->first->X;     // next particle, index 2
+
                 for (int d = 0; d < X0.size(); ++d) {
-                    U0[d] =  ( X1[d] - Xm1[d] ) * frame_rate / 2.0 / 1000.0;
-                    U2[d] =  ( X3[d] - X1[d] ) * frame_rate / 2.0 / 1000.0;
+                    object_iter->second.at(d) = X1[d];
+                    U1[d] = ( ( X2[d] - X0[d] ) * frame_rate ) / 2.0 / 1000.0;                      // Velocity
+                    object_iter->second.at(d+3) = U1[d] * 1000.0;
+                    A[d] = ( X2[d] - 2.0 * X1[d] + X0[d] ) * frame_rate * frame_rate / 1000.0;     // Acceleration
+                    object_iter->second.at(d+6) = A[d] * 1000.0;
                 }
 
-                dX[0] = volume_grid->params.cell_dimensions[0] / 1000.0;
-                dX[1] = volume_grid->params.cell_dimensions[1] / 1000.0;
-                dX[2] = volume_grid->params.cell_dimensions[2] / 1000.0;
+                if (iter_next != ( current_traj->objects.end() - 1 ) && iter_previous != current_traj->objects.begin() ) {
+                    Xm1 = (iter_previous - 1)->first->X;  // previous^2 particle, index -1
+                    X3 = (iter_next + 1)->first->X;       // next^2 particle, index 3
 
-                array<double,3> dPdX = lpt::calcPressureGradiantNavierStokes(U0, new_vectors[1], U2, new_vectors[2], *fluid_props, dX);
-                new_vectors[3][0] = dPdX[0];  // Pressure gradient
-                new_vectors[3][1] = dPdX[1];
-                new_vectors[3][2] = dPdX[2];
+                    for (int d = 0; d < X0.size(); ++d) {
+                        U0[d] =  ( X1[d] - Xm1[d] ) * frame_rate / 2.0 / 1000.0;
+                        U2[d] =  ( X3[d] - X1[d] ) * frame_rate / 2.0 / 1000.0;
+                    }
+                }
+
+            }
+
+            dPdX = lpt::calcPressureGradiantNavierStokes(U0, U1, U2, A, *fluid_props, dX);
+
+            for (int d = 0; d < X1.size(); ++d) {
+                new_vectors[0][d] = X1[d];          // Coordinate
+                new_vectors[1][d] = U1[d];          // Velocity
+                new_vectors[2][d] = A[d];           // Acceleration
+                new_vectors[3][d] = dPdX[d];		// Pressure gradient
             }
 
             if (accumulate_status) {
@@ -2915,7 +2935,7 @@ void Visualizer::manageQueue()
             }
 
             traj_pointers[id] = current_traj;
-            particle_vectors[id] = std::move( new_vectors);
+            particle_vectors[id] = std::move(new_vectors);
         }
 
         if (take_measurement)
@@ -2930,9 +2950,75 @@ void Visualizer::manageQueue()
     }
 }
 
+//void Visualizer::manageQueue()
+//{
+//    int count = 0;
+//    while(true) {
+//        vector < pair < lpt::Trajectory3d*, vector<array<double, 9>>::iterator > > traj_updates;
+//
+//        traj_queue.wait_and_pop( traj_updates );
+//
+//        vector < lpt::Trajectory3d*> traj_pointers( traj_updates.size() );
+//        vector < lpt::ParticleVectors > particle_vectors ( traj_updates.size() );
+//
+//        int id = 0;
+//        for ( auto traj_iter = traj_updates.begin(); traj_iter != traj_updates.end(); ++traj_iter, ++id) {
+//            auto current_traj = traj_iter->first;
+//            auto state_iter = traj_iter->second;
+//
+//            auto next_iter = state_iter + 1;
+//            auto previous_iter = state_iter - 1;
+//
+//			array<double, 3> X, U0, U1, U2, A, dX;
+//
+//			for (int i=0; i<X.size(); i++) {
+//				X[i] = state_iter->at(i);
+//				U0[i] = previous_iter->at(i+3);
+//				U1[i] = state_iter->at(i+3);
+//				U2[i] = next_iter->at(i+3);
+//				A[i] = state_iter->at(i+6);
+//			}
+//
+//			dX[0] = volume_grid->params.cell_dimensions[0] / 1000.0;
+//            dX[1] = volume_grid->params.cell_dimensions[1] / 1000.0;
+//            dX[2] = volume_grid->params.cell_dimensions[2] / 1000.0;
+//
+//			array<double,3> dPdX = lpt::calcPressureGradiantNavierStokes(U0, U1, U2, A, *fluid_props, dX);
+//
+//            lpt::ParticleVectors new_vectors;
+//
+//            auto& frame_rate = this->shared_objects->frame_rate;
+//
+//            for (int d = 0; d < X.size(); ++d) {
+//                new_vectors[0][d] = X[d];               // Coordinate
+//                new_vectors[1][d] = U1[d] / 1000.0;     // Velocity
+//                new_vectors[2][d] = A[d] / 1000.0;		// Acceleration
+//                new_vectors[3][d] = dPdX[d];			// Pressure gradient
+//            }
+//          
+//            if (accumulate_status) {
+//                volume_grid->updateAccumulators(current_traj, new_vectors);
+//            }
+//
+//            traj_pointers[id] = current_traj;
+//            particle_vectors[id] = std::move(new_vectors);
+//        }
+//
+//        if (take_measurement)
+//            this->takeMeasurement(particle_vectors);
+//
+//        if (count >= params.stride ) {
+//            handler->pushToRenderQueue(std::move( std::make_pair( traj_pointers, particle_vectors ) ) );
+//            count = 0;
+//        }
+//        count++;
+//        boost::this_thread::interruption_point();
+//    }
+//}
+
 void Visualizer::addTrajectoriesToQueue( list<lpt::Trajectory3d_Ptr>& active_trajs )
 {
-    vector< pair<lpt::Trajectory3d*, vector<lpt::Particle3d_Ptr>::iterator > > traj_updates;
+    vector< pair<lpt::Trajectory3d*, vector<pair< lpt::Particle3d_Ptr, array<double, 9> > >::iterator > > traj_updates;
 
     if ( ! traj_queue.full() ) {
         list<lpt::Trajectory3d_Ptr>::iterator traj_iter;
@@ -2948,6 +3034,23 @@ void Visualizer::addTrajectoriesToQueue( list<lpt::Trajectory3d_Ptr>& active_tra
     }
     this->traj_queue.push( std::move( traj_updates ) );
 }
+
+//void Visualizer::addTrajectoriesToQueue( list<lpt::Trajectory3d_Ptr>& active_trajs )
+//{
+//    vector< pair<lpt::Trajectory3d*, vector<array<double, 9>>::iterator > > traj_updates;
+//
+//    if ( ! traj_queue.full() ) {
+//        list<lpt::Trajectory3d_Ptr>::iterator traj_iter;
+//        for (traj_iter = active_trajs.begin(); traj_iter != active_trajs.end(); ++traj_iter) {
+//            auto current_traj = traj_iter->get();
+//            if (current_traj->obj_state.size() > 3) {
+//				auto current_state_iter = current_traj->obj_state.end() - 2;
+//				traj_updates.push_back( std::move( make_pair( current_traj, current_state_iter ) ) );
+//			}
+//        }
+//    }
+//    this->traj_queue.push( std::move( traj_updates ) );
+//}
 	
 void Visualizer::takeMeasurement(const vector < lpt::ParticleVectors >& particle_vectors)
 {
@@ -3461,5 +3564,59 @@ void PickDim::Execute(vtkObject *caller, unsigned long eventId, void *)
         break;
     }
 }
+
+/*
+KalmanFilter::KalmanFilter(std::shared_ptr<SharedObjects> new_shared_objects)
+  : shared_objects(new_shared_objects)
+{
+    F = Eigen::Matrix<double, 6, 6>::Identity();
+    H = Eigen::Matrix<double, 6, 6>::Identity();
+    P = 100 * Eigen::Matrix<double, 6, 6>::Identity();
+    for (i=0; i<3; i++)
+        F(i,i+3) = 1.0 / shared_objects->frame_rate;
+    //Q,R
+}
+
+KalmanFilter::~KalmanFilter()
+{
+}
+
+void KalmanFilter::filter()
+{
+    Eigen::Matrix<double, 6, 1> temp_s, residual;
+    Eigen::Matrix<double, 6, 6> S, K;
+    auto I = Eigen::Matrix<double, 6, 6>::Identity();
+
+    //predict
+    temp_s = F * s;
+    P = F * P * F.transpose() + Q;
+
+    //update
+    residual = z - H * temp_s;
+    S = H * P * H.transpose() + R;
+    K = P * H.transpose() * S.fullPivLu().solve(I);
+    s = temp_s + K * residual;
+    P = (I - K * H) * P;
+}
+
+Eigen::Matrix<double, 6, 1> KalmanFilter::GetState() const
+{
+    return s;
+}
+
+void KalmanFilter::setState(Eigen::Matrix<double, 6, 1> new_state)
+{
+    s = new_state;
+}
+
+void KalmanFilter::setObservation(Eigen::Matrix<double, 6, 1> new_observation)
+{
+    z = new_observation;
+}
+
+void KalmanFilter::setSharedObjects(std::shared_ptr<SharedObjects> new_shared_objects)
+{
+    shared_objects = new_shared_objects;
+} */
 
 } /*NAMESPACE_LPT*/

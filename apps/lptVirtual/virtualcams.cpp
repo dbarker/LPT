@@ -43,11 +43,15 @@ int main(int argc, char** argv) {
 	matcher_cuda->params.match_thresh_level = 20;
 
 	lpt::Tracker::Ptr tracker = lpt::Tracker::create();
-    tracker->setCostCalculator(lpt::CostNearestNeighbor::create());
+    tracker->setCostCalculator(lpt::CostMinimumAcceleration::create());
 	tracker->params.min_radius = 4.0; //mm
 	tracker->params.min_radius_level = 4;
 	tracker->params.max_radius = 25.0; //mm
 	tracker->params.max_radius_level = 25;
+	tracker->params.KF_sigma_a = 1E-5;
+	tracker->params.KF_sigma_z = 1E-1;
+
+	bool KalmanFilter = true;
 
 	lpt::Visualizer::Ptr visualizer = lpt::Visualizer::create();
 	visualizer->getVolumeGrid()->setGridOrigin(0,0,0);
@@ -56,10 +60,11 @@ int main(int argc, char** argv) {
 	visualizer->params.queue_capacity = 10;
 	pipeline.setInputDataPath(input);
 	pipeline.setOutputDataPath(output);
+	pipeline.setKalmanFilter(KalmanFilter);
 	pipeline.attachCameraSystem(camera_system);
 	pipeline.attachImageProcessor(processor);
 	pipeline.attachDetector(detector);
-	pipeline.attachMatcher(matcher);
+	pipeline.attachMatcher(matcher_cuda);
 	pipeline.attachTracker(tracker);
 	pipeline.attachVisualizer(visualizer);
 

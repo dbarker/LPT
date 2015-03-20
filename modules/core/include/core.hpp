@@ -26,6 +26,7 @@
 #include <iterator>
 #include <numeric>
 #include <memory>
+#include <limits>
 
 #include <opencv2/opencv.hpp>
 #include <boost/thread.hpp>
@@ -53,6 +54,7 @@ class Match;
 class ImageFrame;
 class Camera;
 class CameraPair;
+class KalmanFilter;
 
 typedef vector<ImageFrame> ImageFrameGroup;
 
@@ -372,7 +374,7 @@ public:
     typedef std::shared_ptr<SharedObjects> Ptr;
     static inline SharedObjects::Ptr create() {return std::make_shared<SharedObjects>();}
 
-    SharedObjects() : frame_rate(0), input_path("./"), output_path("./") { }
+    SharedObjects() : frame_rate(0), input_path("./"), output_path("./"), KF_isOn(false) { }
 		
     vector<lpt::Camera> cameras;
     vector<lpt::CameraPair> camera_pairs;
@@ -382,6 +384,7 @@ public:
     int frame_rate;
     string input_path;
     string output_path;
+    bool KF_isOn;
 };
 
 class Particle {
@@ -576,6 +579,35 @@ public:
 	virtual ~TrajectoryVTKBase() {}
 };
 
+class KalmanFilter {
+public:
+    typedef std::shared_ptr<KalmanFilter> Ptr;
+    static inline KalmanFilter::Ptr create(cv::Mat stateIni)
+    { return std::make_shared<KalmanFilter>(stateIni); }
+
+    KalmanFilter(cv::Mat stateIni)
+      : sigma_a(1E-5), sigma_z(0.1), dt(1.0/120)
+    {
+		KF = cv::KalmanFilter(9, 9, 0, CV_64F);
+		KF.statePre = stateIni;
+		cv::setIdentity(KF.measurementMatrix);
+		cv::setIdentity(KF.errorCovPost);
+		cv::setIdentity(KF.processNoiseCov, cv::Scalar::all(sigma_a));
+		cv::setIdentity(KF.measurementNoiseCov, cv::Scalar::all(sigma_z));
+    }
+
+    ~KalmanFilter() {}
+
+	cv::KalmanFilter KF;
+private:
+
+    double sigma_a;                     // accleration standard deviation
+    double sigma_z;                     // measurement uncertanty
+    double dt;                          // time step size (inverse of frame rate)
+
+    //std::shared_ptr<SharedObjects> shared_objects;
+};
+
 template <class Object_T>
 class Trajectory_{
 public:
@@ -584,9 +616,28 @@ public:
 	
 	static inline std::shared_ptr<Trajectory_<Object_T>> create() { 
         return std::make_shared<Trajectory_<Object_T>>();
+    }
+
+    static int count;
+
+    void initializeKF(cv::Mat stateIni, double sigma_a, double sigma_z) {
+		kalman_filter = cv::KalmanFilter(9, 9, 0, CV_64F);
+		kalman_filter.statePost = stateIni;
+		cv::setIdentity(kalman_filter.transitionMatrix);
+		for (int i=0; i<9; i++) {
+			if (i < 6)
+				kalman_filter.transitionMatrix.at<float_type>(i,i+3) = 1.0/120;
+			if (i < 3)
+				kalman_filter.transitionMatrix.at<float_type>(i,i+6) = 0.5/120/120;
+		}
+		cv::setIdentity(kalman_filter.measurementMatrix);
+		cv::setIdentity(kalman_filter.errorCovPost);
+		cv::setIdentity(kalman_filter.processNoiseCov, cv::Scalar::all(sigma_a));
+		cv::setIdentity(kalman_filter.measurementNoiseCov, cv::Scalar::all(sigma_z));
 	}
 
-	vector<std::shared_ptr<Object_T>> objects;
+    vector<std::pair<std::shared_ptr<Object_T>, array<double, 9> > > objects;
+    //vector<array<double, 9>> obj_state;
 	
 	array<float_type, Object_T::dim> V;
 	array<float_type, Object_T::dim> A;
@@ -596,8 +647,10 @@ public:
 	float_type search_radius;
 	Object_T extrap_object;
 	lpt::TrajectoryVTKBase::Ptr trajvtk_ptr;
+    cv::KalmanFilter kalman_filter;
 
-	Trajectory_() : search_radius(0.0), id(-1), gap(0), startframe(0), last_cell_id(-1) {}		
+    Trajectory_() : search_radius(0.0), id(-1), gap(0), startframe(0), last_cell_id(-1) {}
+    ~Trajectory_() {}
 };
 
 template<class Object_T>
@@ -612,14 +665,14 @@ template<class Object_T>
 inline void extrapolatePosition(lpt::Trajectory_<Object_T>& traj)
 {
 	typedef typename Object_T::float_type float_type;
-	
-	Object_T& t2 = *(*traj.objects.rbegin());
-	Object_T& t1 = *(*(++traj.objects.rbegin()));
+
+	Object_T& t2 = *(traj.objects.rbegin()->first);
+	Object_T& t1 = *((++traj.objects.rbegin())->first);
 	for (int d = 0; d < Object_T::dim; ++d) {
 		traj.V[d] = t2.X[d] - t1.X[d];
 		traj.extrap_object.X[d] = t2.X[d] + ( traj.V[d] );
 		traj.V[d] *= 120; //FIXME: This may not be in use ....This should be varialble based on frame rate and number of frames between points -- (t2.frame_index -  t1.frame_index) );
-		traj.A[d] = 0.0;
+		traj.A[d] = 0;
 	}
 
 	traj.search_radius = lpt::calculateDistance(t2, t1);  

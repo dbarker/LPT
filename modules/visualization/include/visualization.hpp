@@ -102,7 +102,7 @@ typedef array < array <double, 3> , 4 > ParticleVectors;
 
 
 enum ViewMode {TRAJECTORIES, VECTORGRID, VECTORGRID_AND_TRAJECTORIES, NONE};
-enum VectorMode {VELOCITY, CORRECTED_VELOCITY, ACCELERATION, TURBULENT_KINETIC_ENERGY, TURBULENCE_DISSIPATION_RATE, MASS_RESIDUAL, VELOCITY_SD, ACCELERATION_SD, COUNT, PRESSURE, PRESSURE_LAGRANGIAN, VORTICITY};
+enum VectorMode {VELOCITY, ACCELERATION, TURBULENT_KINETIC_ENERGY, VORTICITY, MASS_RESIDUAL, VELOCITY_SD, ACCELERATION_SD, COUNT, PRESSURE, PRESSURE_LAGRANGIAN, CORRECTED_VELOCITY, TURBULENCE_DISSIPATION_RATE};
 
 class PickDim;
 class CoordinateArrows;
@@ -540,22 +540,22 @@ public:
 			scalar_range[0] = 0; 
 			scalar_range[1] = 2.5;
 
-			grid_cell_counts[0] = 27;//35;//65;// 
-			grid_cell_counts[1] = 37;//25;//31;// 
-			grid_cell_counts[2] = 37;//25;//31;// 
+			grid_cell_counts[0] = 50;
+			grid_cell_counts[1] = 50;
+			grid_cell_counts[2] = 50; 
 			
-			double length_size = 300.0;//160; ////
-			grid_dimensions[0] = grid_cell_counts[0] * length_size / grid_cell_counts[1]; // mm
-			grid_dimensions[1] = length_size; // mm
-			grid_dimensions[2] = length_size; // mm
+			double length_size = 500;			// mm
+			grid_dimensions[0] = length_size;	// mm
+			grid_dimensions[1] = length_size;	// mm
+			grid_dimensions[2] = length_size;	// mm
 
-			cell_dimensions[0] = grid_dimensions[0] / static_cast<double>(grid_cell_counts[0]); //mm
-			cell_dimensions[1] = grid_dimensions[1] / static_cast<double>(grid_cell_counts[1]); //mm
-			cell_dimensions[2] = grid_dimensions[2] / static_cast<double>(grid_cell_counts[2]); //mm
+			cell_dimensions[0] = grid_dimensions[0] / static_cast<double>(grid_cell_counts[0]);		//mm
+			cell_dimensions[1] = grid_dimensions[1] / static_cast<double>(grid_cell_counts[1]);		//mm
+			cell_dimensions[2] = grid_dimensions[2] / static_cast<double>(grid_cell_counts[2]);		//mm
 			
-			grid_origin[0] = 137; //-1.0*length_size/2.0; //  //mm 
-			grid_origin[1] = -1.0*length_size/2.0 + 83; //mm
-			grid_origin[2] = -1.0*length_size/2.0; //mm
+			grid_origin[0] = 0;		//mm 
+			grid_origin[1] = 0;		//mm
+			grid_origin[2] = 0;		//mm
 
 			fixed_scale_factor = 0.65 * (*std::max_element(cell_dimensions.begin(), cell_dimensions.end())); 
 		}
@@ -910,7 +910,7 @@ public:
      */
 	inline void addToRenderer() {
 		renderer->AddActor(glyphactor);
-		//scalarbar->On();
+        //scalarbar->On();
 	}
 
     /**
@@ -918,7 +918,7 @@ public:
      */
 	inline void removeFromRenderer() {
 		renderer->RemoveActor(glyphactor);
-		//scalarbar->Off();
+        //scalarbar->Off();
 	}
 
     /**
@@ -1022,8 +1022,8 @@ public:
 	
 
 	inline void setVectorMode(lpt::VectorMode mode) {
-		traj_glyphs->setVectorMode(mode);
-		volume_grid->setVectorMode(mode);
+        traj_glyphs->setVectorMode(mode);
+        volume_grid->setVectorMode(mode);
 		lpt::TrajectoryPathVTK::setVectorMode(mode);
 	}
 		
@@ -1229,7 +1229,8 @@ public:
     friend void callbackTakeMeasurement( int state, void* data );
 
 private:
-	lpt::concurrent_queue< vector< pair<lpt::Trajectory3d*, vector<lpt::Particle3d_Ptr>::iterator > > > traj_queue;
+	//lpt::concurrent_queue< vector< pair<lpt::Trajectory3d*, vector<array<double, 9>>::iterator > > > traj_queue;
+    lpt::concurrent_queue< vector< pair< lpt::Trajectory3d*, vector< pair< lpt::Particle3d_Ptr, array<double, 9> > >::iterator > > > traj_queue;
 	boost::thread queue_manager;
 	
 	lpt::TrajectoryHandler::Ptr handler;
@@ -1359,6 +1360,38 @@ private:
 	vtkSmartPointer<vtkFollower> follower;
 	vtkSmartPointer<vtkPolyDataMapper> mapper;
 };
+
+/*
+class KalmanFilter {
+public:
+    typedef std::shared_ptr<KalmanFilter> Ptr;
+    static inline KalmanFilter::Ptr create(std::shared_ptr<SharedObjects> new_shared_objects)
+    { return std::make_shared<KalmanFilter>(new_shared_objects); }
+
+    KalmanFilter(std::shared_ptr<SharedObjects> new_shared_objects);
+    ~KalmanFilter();
+
+    void filter();
+
+    Eigen::Matrix<double, 6, 1> getState() const;
+
+    void setState(Eigen::Matrix<double, 6, 1> new_state);
+
+    void setObservation(Eigen::Matrix<double, 6, 1> new_observation);
+
+    void setSharedObjects(std::shared_ptr<SharedObjects> new_shared_objects);
+
+private:
+    Eigen::Matrix<double, 6, 1> s;      //state vector
+    Eigen::Matrix<double, 6, 1> z;      //observation
+    Eigen::Matrix<double, 6, 6> F;      //transition model
+    Eigen::Matrix<double, 6, 6> H;      //observation model
+    Eigen::Matrix<double, 6, 6> P;      //error matrix
+    Eigen::Matrix<double, 6, 6> Q;      //prediction uncertanty
+    Eigen::Matrix<double, 6, 6> R;      //observation uncertanty
+
+    std::shared_ptr<SharedObjects> shared_objects;
+}; */
 
 }/* NAMESPACE_LPT */
 

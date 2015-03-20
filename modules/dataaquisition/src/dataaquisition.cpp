@@ -326,7 +326,7 @@ bool Optitrack::grabFrameGroup(lpt::ImageFrameGroup& frame_group) {
 
 			frame_group[camera_id].image = image_type.clone();
 			optitrack_frames[camera_id]->Rasterize(image_type.size().width, image_type.size().height, 
-				image_type.step, 8, frame_group[camera_id].image.data);
+				static_cast<unsigned int>(image_type.step), 8, frame_group[camera_id].image.data);
 
 			frame_group[camera_id].frame_index = optitrack_frames[camera_id]->FrameID();
 			frame_group[camera_id].particles.clear();
