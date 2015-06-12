@@ -28,10 +28,10 @@ void convertCameraCoordinatesToWorld(const lpt::Camera& cam, const array<double,
 class Regression {
 public:
 	double eval(double *coeff, int degree, double x);
-	double mult(double *A, double *B,int m);
-	double Norm(double *A, int m);
-	void Householder(double **A, double *b, int m, int n);
-	void Backsub(double **A, double *b, int n, double *X);
+    double mult(double *A, double *B, size_t m);
+    double Norm(double *A, size_t m);
+    void Householder(double **A, double *b, size_t m, size_t n);
+    void Backsub(double **A, double *b, size_t n, double *X);
 	void Polyfit(double *t, double *y, int m, int degree, double *X);
 };
 //

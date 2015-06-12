@@ -498,7 +498,7 @@ vector<Frame::Ptr> Input::frameinputPIVSTD (const char* str, int numframes) {
 
   for (int f = 0; f < numframes; f++){
 
-	  sprintf(filename, "%s%03d.dat",str,f);
+	  sprintf_s(filename, "%s%03d.dat",str,f);
 	  printf("%s\n",filename);
 
 	  string line;
@@ -567,49 +567,50 @@ vector<Trajectory::Ptr> Input::frames2trajsPIVSTD(vector<Frame::Ptr> &frames){
 
 //*********************************************
 
-void Input::readTrajectoryFile(string filename, vector<Trajectory3d_Ptr>& trajectories) {
-	
-  this->maxframes = 0;
-  
-  string line;
-  ifstream fin( filename.c_str() );
+void Input::readTrajectoryFile(string filename, vector<Trajectory3d_Ptr>& trajectories)
+{
+    this->maxframes = 0;
 
-  if(!fin){
-    cerr << "Cannot find/open the input file \n" << filename << "\n Program exiting ( Input::trajinput(string filename) )" << endl;
-    exit(1);
-  }
-  	
-  Trajectory3d_Ptr newTraj = Trajectory3d::create();
+    string line;
+    ifstream fin( filename.c_str() );
 
-  while (getline(fin,line)){
-	  if (line == "" || line.length() < 10){
-		  if (newTraj->objects.empty() == false){
-			  newTraj->id = newTraj->objects[0]->id;//GoldTrajs.size()+1;
-			  newTraj->startframe = newTraj->objects[0]->frame_index;//FIXME: uncomment
-			  int fcount = newTraj->startframe + newTraj->objects.size();
-			  if(fcount > this->maxframes){
-				  this->maxframes = fcount;
-			  }
-			  trajectories.push_back(newTraj);
-			  
-			  newTraj = Trajectory3d::create();
-		  }
-	  }else{
-		  Particle3d_Ptr newPart = Particle3d::create();
-		  	stringstream ss(line);
-			ss >> newPart->id;          //FIXME uncomment
-			ss >> newPart->frame_index; //FIXME uncomment
-			ss >> newPart->X[0];           //set x value
-			ss >> newPart->X[1];           //set y value
-			ss >> newPart->X[2];           //set z value
-			newTraj->objects.push_back(newPart);
-	  }
-  }
- //Pickup last trajectory if no blank line at the end of file
- if (newTraj->objects.empty() == false)
-      trajectories.push_back(newTraj);
+    if(!fin){
+        cerr << "Cannot find/open the input file \n" << filename << "\n Program exiting ( Input::trajinput(string filename) )" << endl;
+        exit(1);
+    }
 
- fin.close(); 
+    Trajectory3d_Ptr newTraj = Trajectory3d::create();
+
+    while (getline(fin,line)){
+        if (line == "" || line.length() < 10){
+            if (newTraj->objects.empty() == false){
+                newTraj->id = newTraj->objects[0].first->id;//GoldTrajs.size()+1;
+                newTraj->startframe = newTraj->objects[0].first->frame_index;//FIXME: uncomment
+                int fcount = newTraj->startframe + static_cast<int>( newTraj->objects.size() );
+                if(fcount > this->maxframes){
+                    this->maxframes = fcount;
+                }
+                trajectories.push_back(std::move(newTraj));
+
+                newTraj = Trajectory3d::create();
+            }
+        }else{
+            Particle3d_Ptr newPart = Particle3d::create();
+            stringstream ss(line);
+            ss >> newPart->id;          //FIXME uncomment
+            ss >> newPart->frame_index; //FIXME uncomment
+            ss >> newPart->X[0];           //set x value
+            ss >> newPart->X[1];           //set y value
+            ss >> newPart->X[2];           //set z value
+			array<double, 9> temp;
+            newTraj->objects.push_back(std::move(std::make_pair(newPart,temp)));
+        }
+    }
+    //Pickup last trajectory if no blank line at the end of file
+    if (newTraj->objects.empty() == false)
+        trajectories.push_back(newTraj);
+
+    fin.close();
 
 }
 
@@ -633,7 +634,7 @@ vector<Trajectory::Ptr> Input::trajinput (string filename) {
 		  if (newTraj->particles.empty() == false){
 			  newTraj->id = newTraj->particles[0]->id;//GoldTrajs.size()+1;
 			  newTraj->startframe = newTraj->particles[0]->frame_index;//FIXME: uncomment
-			  int fcount = newTraj->startframe + newTraj->particles.size();
+			  int fcount = newTraj->startframe + static_cast<int>( newTraj->particles.size() );
 			  if(fcount > this->maxframes){
 				  this->maxframes = fcount;
 			  }
@@ -667,7 +668,7 @@ void Input::convertTrajectoriesToFrames(vector<Trajectory3d_Ptr>& trajectories, 
      
   for(int j = 0; j < trajectories.size(); ++j){
 	for(int p = 0; p < trajectories[j]->objects.size();p++){
-	        Particle3d_Ptr P1 = trajectories[j]->objects[p];
+	        Particle3d_Ptr P1 = trajectories[j]->objects[p].first;
 		int index = P1->frame_index;
 		frames[index]->objects.push_back(P1);
 	}

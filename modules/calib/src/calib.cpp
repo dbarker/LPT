@@ -19,9 +19,9 @@ void compute3DPositionUncertainties(vector<lpt::Camera>& cameras, vector<lpt::Pa
 
 	vector<vector<cv::Point2f>> image_points_distorted( cameras.size() );
 	vector<vector<cv::Point2f>> image_points( cameras.size() );
-	vector<vector< vector < cv::Point2f > > > distortion_sensitivities( cameras.size() ); 
+	vector<vector< vector < cv::Point2d > > > distortion_sensitivities( cameras.size() ); 
 
-	vector<cv::Point3f> points3D( particles.size() );
+	vector<cv::Point3d> points3D( particles.size() );
 	for( int i = 0; i < points3D.size(); ++i ) {
 		points3D[i].x = particles[i]->X[0];
 		points3D[i].y = particles[i]->X[1];
@@ -99,8 +99,8 @@ void compute3DPositionUncertainties(vector<lpt::Camera>& cameras, vector<lpt::Pa
 	fout << "uc\tx\ty\tz" << endl;
 	
 	for( int i = 0; i < points3D.size(); ++i ) {
-		cv::Mat A = cv::Mat::zeros( 2 * cameras.size(), 3, CV_64F );
-		cv::Mat B = cv::Mat::zeros( 2 * cameras.size(), 1, CV_64F );
+		cv::Mat A = cv::Mat::zeros( 2 * static_cast<int>(cameras.size()), 3, CV_64F );
+		cv::Mat B = cv::Mat::zeros( 2 * static_cast<int>(cameras.size()), 1, CV_64F );
 		cv::Mat X = cv::Mat::zeros( 3, 1, CV_64F );
 		//cout << "\n" << i << "\t";
 		for(int c = 0; c < cameras.size(); ++c) {
@@ -214,8 +214,8 @@ void compute3DPositionUncertainties(vector<lpt::Camera>& cameras, vector<lpt::Pa
 			if ( cameras[cam_id].X_u[0] != 0 && cameras[cam_id].X_u[1] != 0) {
 				for (int dim = 0; dim < 2; ++dim) {
 
-					cv::Mat delta_B = cv::Mat::zeros( 2 * cameras.size(), 1, CV_64F );
-					cv::Mat E = cv::Mat::zeros( 2 * cameras.size(), 3, CV_64F );
+					cv::Mat delta_B = cv::Mat::zeros( 2 * static_cast<int>(cameras.size()), 1, CV_64F );
+					cv::Mat E = cv::Mat::zeros( 2 * static_cast<int>(cameras.size()), 3, CV_64F );
 
 					int s = (dim == 0 ? cam_id * 2 : cam_id * 2 + 1);
 
@@ -242,7 +242,7 @@ void compute3DPositionUncertainties(vector<lpt::Camera>& cameras, vector<lpt::Pa
 				double T_u[3] = {0};
 				T_u[t] = cameras[cam_id].T_u[t];
 
-				cv::Mat delta_B = cv::Mat::zeros( 2 * cameras.size(), 1, CV_64F );
+				cv::Mat delta_B = cv::Mat::zeros( 2 * static_cast<int>(cameras.size()), 1, CV_64F );
 
 				int s = cam_id * 2;
 				int e = s + 1;
@@ -263,8 +263,8 @@ void compute3DPositionUncertainties(vector<lpt::Camera>& cameras, vector<lpt::Pa
 			// 3D position uncertainty due to Rotation vector r_vec
 		
 			
-			cv::Mat A_u = cv::Mat::zeros( 2 * cameras.size(), 3, CV_64F );
-			cv::Mat B_u = cv::Mat::zeros( 2 * cameras.size(), 1, CV_64F );
+			cv::Mat A_u = cv::Mat::zeros( 2 * static_cast<int>(cameras.size()), 3, CV_64F );
+			cv::Mat B_u = cv::Mat::zeros( 2 * static_cast<int>(cameras.size()), 1, CV_64F );
 			cv::Mat X_u = cv::Mat::zeros( 3, 1, CV_64F );
 			//cout << "\n" << i << "\t";
 			for(int c = 0; c < cameras.size(); ++c) {
@@ -392,7 +392,7 @@ Chessboard::Chessboard(cv::Size board_size, double square_size) {
 	this->object_type = lpt::CHESSBOARD;
 	for( int i = 0; i < board_size.height; ++i ) {
 		for( int j = 0; j < board_size.width; ++j ) {
-			object_points.push_back(cv::Point3f(double(j * square_size),
+			object_points.push_back(cv::Point3d(double(j * square_size),
 				double(i * square_size), 0));
 		}
 	}
@@ -417,7 +417,7 @@ CirclesGrid::CirclesGrid(cv::Size board_size, double square_size) {
 	cout << "Calib Board: height = " << board_size.height << " , width = " << board_size.width << endl; 
 	for( int i = 0; i < board_size.height; i++ ) {
 		for( int j = 0; j < board_size.width; j++ ) {
-			object_points.push_back(cv::Point3f(double( (2 * j + i % 2) * square_size),
+			object_points.push_back(cv::Point3d(double( (2 * j + i % 2) * square_size),
 				double(i * square_size), 0));
 		}
 	}
@@ -493,7 +493,7 @@ double Calibrator::checkStereoCalibration(
 		cv::Mat& F)
 {
     double err = 0;
-    int npoints = pointsA.size();
+    size_t npoints = pointsA.size();
     vector<vector<cv::Vec3f> > lines(2);
     
     cv::Mat imgpt[2];
@@ -541,7 +541,8 @@ void Calibrator::calibrateCamera() {
 
 	if (ok){
 		storeCameraParameters(cameras[current_camera], camera_matrix, dist_coeffs, total_avg_err );
-		double aperature_width, aperature_height, fovx, fovy, focal_length, aspect_ratio;
+		//double aperature_width, aperature_height;
+		double fovx, fovy, focal_length, aspect_ratio;
 		cv::Point2d principal_point;
 		cout << camera_matrix << endl;
 		cout << cameras[current_camera].getCameraMatrix() << endl;
@@ -1022,8 +1023,8 @@ void Calibrator::findFundamentalMatrices() {
 			lpt::ImageFrameGroup& group = stereo_data_frames[f]; 
 			if (group[a_id].particles.size() == 3 && group[b_id].particles.size() == 3) {
 				for (int p = 0; p < 3; ++p) {
-					pointsA.push_back(cv::Point2f(group[a_id].particles[p]->x, group[a_id].particles[p]->y) );
-					pointsB.push_back(cv::Point2f(group[b_id].particles[p]->x, group[b_id].particles[p]->y) );
+					pointsA.push_back(cv::Point2d(group[a_id].particles[p]->x, group[a_id].particles[p]->y) );
+					pointsB.push_back(cv::Point2d(group[b_id].particles[p]->x, group[b_id].particles[p]->y) );
 				}
 			}
 		}
@@ -1040,13 +1041,13 @@ void Calibrator::findFundamentalMatrices() {
 
 void callbackSetStereoDataCollection(int state, void* data) {
 	lpt::Calibrator* calibrator = static_cast<lpt::Calibrator*>(data);
-	calibrator->setStereoDataCollection(state);
+	calibrator->setStereoDataCollection( (state != 0) );
 	cout << "started stereo data collection" << endl;
 }
 
 void callbackSetIntParamDataCollection(int state, void* data) {
 	lpt::Calibrator* calibrator = static_cast<lpt::Calibrator*>(data);
-	calibrator->setIntParamDataCollection(state);
+	calibrator->setIntParamDataCollection( (state != 0) );
 	cout << "started internal param data collection" << endl;
 }
 
@@ -1110,7 +1111,7 @@ void convertFrame(const vector<cv::Point2f>& image_points, ImageFrame& frame, in
 
 void convertFrame(const ImageFrame &frame, vector<cv::Point2f> &image_points) {
 	for (int j = 0; j < frame.particles.size(); ++j) {
-		cv::Point2f newparticle(frame.particles[j]->x, frame.particles[j]->y );
+		cv::Point2d newparticle(frame.particles[j]->x, frame.particles[j]->y );
 		image_points.push_back(newparticle);
 	}
 }
@@ -1233,7 +1234,8 @@ bool Calibration::runCalibration( vector<Camera> &cameras) {
 			storeCameraParameters(cameras[c], image_points,
 					rotation_vecs, translation_vecs, camera_matrix,
 					dist_coeffs, error_stats );
-			double aperature_width, aperature_height, fovx, fovy, focal_length, aspect_ratio;
+			//double aperature_width, aperature_height;
+			double fovx, fovy, focal_length, aspect_ratio;
 			cv::Point2d principal_point;
 			cv::calibrationMatrixValues(camera_matrix, image_size,
 					cameras[c].sensor_size[0], cameras[c].sensor_size[1], fovx, fovy,

@@ -56,7 +56,7 @@ namespace lpt {
 		Video(string path = "./") : file_path(path) {}
 		inline void setFilePath(string path) { file_path = path; }
 		inline void addImageToVideo(cv::Mat image) { video_frames.push_back(image); }
-		inline int getVideoLength() const { return video_frames.size(); }
+		inline size_t getVideoLength() const { return video_frames.size(); }
 		void writeAVI(int playback_fps, int codec);
 		void writeImages(string basename, string filetype = ".jpg");
 		void readAVI();
@@ -110,8 +110,8 @@ namespace lpt {
 		inline void requestSnapShot() { snapshot_requested = true; }
 		inline bool isSnapShotRequested() const { return snapshot_requested; }
 		inline bool isVideoRecording() const { return record_video; }
-		inline int getVideoCount() const { return videos[0].size(); }
-		inline int getSnapShotCount() const { return imagelists[0].size(); }
+		inline size_t getVideoCount() const { return videos[0].size(); }
+		inline size_t getSnapShotCount() const { return imagelists[0].size(); }
 		void takeSnapShot( vector<cv::Mat>& frames );
 		void writeSnapShotImageLists();
 		void createVideos();
@@ -328,11 +328,18 @@ namespace lpt {
 					
 		inline void setInputDataPath(string& path) { shared_objects->input_path = path; }
 		inline string getInputDataPath() { return shared_objects->input_path; }
+
 		inline void setOutputDataPath(string& path) { shared_objects->output_path = path; }
 		inline string getOutputDataPath() { return shared_objects->output_path; }
 		
 		inline void setImageType(cv::Mat image_type) {image_type = image_type;}
 		inline cv::Mat getImageType() {return shared_objects->image_type;}
+
+        inline void setFrameRate(int fps) { shared_objects->frame_rate = fps; }
+        inline int getFrameRate() { return shared_objects->frame_rate; }
+
+        inline void setKalmanFilter(bool state) { shared_objects->KF_isOn = state; }
+        inline bool getKalmanFilter() { return shared_objects->KF_isOn; }
 		
 		inline void setQueueCapacity(int capacity) {queue_capacity = capacity; }
 		
@@ -348,12 +355,6 @@ namespace lpt {
 		inline bool showTrajectoryView() const { return trajectory_view_status; }
 		inline void setTrajectoryView(bool state) { trajectory_view_status = state; }
 	 
-		inline void setFrameRate(int fps) { 
-			shared_objects->frame_rate = fps;
-		}
-
-		inline int getFrameRate() {return shared_objects->frame_rate;}
-
 		friend void callbackRecordVideo( int state, void* data );
 		friend void callbackTakeSnapshot( int state, void* data );
 		friend void callbackSetImageViewStatus( int state, void* data ); 

@@ -76,7 +76,7 @@ private:
 	int getNextComputeDeviceID();
 	thrust::host_vector<CameraPairCUDA> camera_pairs_h;
 	thrust::host_vector<int> num_matches_h;
-	thrust::device_vector<int> num_matches_d;
+    thrust::device_vector<int> num_matches_d;
 	thrust::host_vector< MatchIDs > matches2way_h;
 	thrust::device_vector< MatchIDs > matches2way_d;
 	
@@ -91,7 +91,7 @@ private:
 	thrust::device_vector<float> particles_y_d;
 
 	thrust::host_vector<int> num_particles_h;
-	thrust::device_vector<int> num_particles_d;
+    thrust::device_vector<int> num_particles_d;
 
 	boost::mutex mutex;
 	queue<int> compute_devices_available;

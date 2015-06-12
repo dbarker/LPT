@@ -85,10 +85,11 @@ public:
 	
 	class Parameters {
 	public:
-		Parameters(double max_radius = 20, double min_radius = 2, double alpha = 1.0) : max_radius(max_radius), min_radius(min_radius), alpha(alpha) {
-			max_radius_level = max_radius;
-			min_radius_level = min_radius;
-			alpha_level = alpha * 100;
+        Parameters(double max_radius = 20, double min_radius = 2, double alpha = 1.0, double sigma_a = 1E-5, double sigma_z = 1E-1)
+            : max_radius(max_radius), min_radius(min_radius), alpha(alpha) , KF_sigma_a(sigma_a), KF_sigma_z(sigma_z) {
+			max_radius_level = static_cast<int>(max_radius);
+			min_radius_level = static_cast<int>(min_radius);
+			alpha_level = static_cast<int>(alpha) * 100;
 		}
 		
 		double max_radius;
@@ -99,9 +100,20 @@ public:
 		
 		double alpha;
 		int alpha_level;
+
+        double KF_sigma_a;
+        double KF_sigma_z;
 	} params;
 
+    /**
+     * @brief Tracker constructor
+     */
     Tracker();
+
+    /**
+     * @brief Tracker destructor
+     */
+    ~Tracker();
 
     /**
      * @brief Track particles across consecutive frames
@@ -152,6 +164,8 @@ public:
      */
 	void drawTrajectories(vector<lpt::Camera>& cameras);
 
+    void saveTrajectory(ofstream& output, lpt::Trajectory3d_Ptr traj, int id);
+
 	bool clear_drawings;
 
 private:
@@ -161,6 +175,7 @@ private:
 	list<lpt::Particle3d_Ptr>					unmatched_particles;
 	vector<cv::Mat>								trajectory_views;
     std::shared_ptr<lpt::SharedObjects>         shared_objects;
+    bool                                        isSave;
 }; 
 
 /**
@@ -174,13 +189,13 @@ public:
 
 	double correct_ratio;
 	double cover_ratio;
-	int links_created;
-	int links_total;
-	int links_correct;
+	size_t links_created;
+	size_t links_total;
+	size_t links_correct;
 
     TestTracker(vector<Trajectory3d_Ptr>& trajs, vector<Trajectory3d_Ptr>& gold_trajs);
 
-    void testTrajectories(int maxframes);
+    void testTrajectories(size_t maxframes);
     void printTestResults();
 };
 

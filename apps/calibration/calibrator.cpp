@@ -26,7 +26,7 @@ int main(int argc, char** argv) {
 	cout << input_path << endl;
     int corners_height = 9;//11;//
     int corners_width = 6;//4;//
-    float squaresize = 30.3;//10.5; //mm
+    float squaresize = static_cast<float>(30.3);//10.5; //mm
 	lpt::CalibrationBoard* board = new lpt::Chessboard(cv::Size(corners_height, corners_width), squaresize);
     //board.readParameters(filepath); TODO: Make this work (ALSO write a YAML function to read and write a CalibrationBoard object!!
 

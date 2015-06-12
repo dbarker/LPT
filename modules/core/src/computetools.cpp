@@ -59,7 +59,7 @@ double Regression::eval(double *coeff, int degree, double x) {
 	return y;
 }
 
-double Regression::mult(double *A, double *B,int m) {
+double Regression::mult(double *A, double *B, size_t m) {
 	int i;
 	double C=0;
 
@@ -69,7 +69,7 @@ double Regression::mult(double *A, double *B,int m) {
 	return C;
 }
 
-double Regression::Norm(double *A, int m) {
+double Regression::Norm(double *A, size_t m) {
 	double norm, sum = 0;
 	for(int i = 0; i < m; i++)
 		sum += A[i] * A[i];
@@ -78,7 +78,7 @@ double Regression::Norm(double *A, int m) {
 
 	return norm;
 }
-void Regression::Householder(double **A, double *b, int m, int n) {
+void Regression::Householder(double **A, double *b, size_t m, size_t n) {
 	//Transforms the Vandermonde matrix into upper diagonal form
 	double* e, *vk, *aj, *ak;
 	double alphak, Bk, yj, norm, sign;
@@ -134,9 +134,9 @@ void Regression::Householder(double **A, double *b, int m, int n) {
 	delete[] ak;
 }
 
-void Regression::Backsub(double** A, double* b, int n, double* X) {
+void Regression::Backsub(double** A, double* b, size_t n, double* X) {
 	//solves the upper triangular matrix A using back substitution
-	for (int j = n-1; j >= 0; j--) {
+	for (int j = static_cast<int>(n)-1; j >= 0; j--) {
 		if(A[j][j] == 0) {
 			cout << "matrix is singular \n";
 			break;

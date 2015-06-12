@@ -124,11 +124,11 @@ void Correspondence::calculateEpiline(const lpt::ParticleImage& point, const dou
 
 void Correspondence::testMatches(const ImageFrameGroup &cameragroup, const vector<Match::Ptr> &matches) const
 {
-    int N_correct = 0;
-    int N_matched = 0;
-    int N_total = 100000000;
+    size_t N_correct = 0;
+    size_t N_matched = 0;
+    size_t N_total = 100000000;
     for(int c = 0; c < cameragroup.size(); c++) {
-        int temp = cameragroup[c].particles.size();
+        size_t temp = cameragroup[c].particles.size();
         if (temp < N_total)
             N_total = temp;
     }
@@ -136,7 +136,7 @@ void Correspondence::testMatches(const ImageFrameGroup &cameragroup, const vecto
     for (int m = 0; m < matches.size(); m++){
         if ( matches[m] ) {
             N_matched++;
-            vector<pair < lpt::ParticleImage::Ptr, int > >& particles = matches[m]->particles;
+            auto& particles = matches[m]->particles;
             bool matched = true;
             for (int j = 0; j < particles.size() - 1; j++){
                 matched &= particles[j].first->id == particles[j+1].first->id ? true : false;
@@ -229,8 +229,8 @@ void PointMatcher::addControls()
 void PointMatcher::findEpipolarMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap )
 {
 	auto& camera_pairs = shared_objects->camera_pairs;
-	int match_overload = 0;
-	vector<int> num_particles( frame_group.size(), 0 );
+	size_t match_overload = 0;
+	vector<size_t> num_particles(frame_group.size());
 	num_particles[0] = frame_group[0].particles.size();
 	for(int i = 1; i < frame_group.size(); ++i) 
 		num_particles[i] = frame_group[i].particles.size() + num_particles[i-1];
@@ -243,17 +243,17 @@ void PointMatcher::findEpipolarMatches(const lpt::ImageFrameGroup& frame_group, 
 		const vector<ParticleImage::Ptr>& cam_B_particles = frame_group[cam_b].particles;	
 
 	
-		int b_start = (cam_b !=0 ? num_particles[cam_b-1] : 0);
-		int b_end = num_particles[cam_b];
+		size_t b_start = (cam_b !=0 ? num_particles[cam_b-1] : 0);
+		size_t b_end = num_particles[cam_b];
 
-		int a_start = (cam_a !=0 ? num_particles[cam_a-1] : 0);
-		int a_end = num_particles[cam_a];
+		size_t a_start = (cam_a !=0 ? num_particles[cam_a-1] : 0);
+		size_t a_end = num_particles[cam_a];
 
-		for (int b_id = b_start; b_id < b_end; ++b_id) {
+		for (size_t b_id = b_start; b_id < b_end; ++b_id) {
 			double lineA[3];
 			calculateEpiline(*cam_B_particles[b_id - b_start], pair->F, lineA);
 
-			for (int a_id = a_start; a_id < a_end; ++a_id) {
+			for (size_t a_id = a_start; a_id < a_end; ++a_id) {
 				double residual = calculateEpipolarResidual(lineA, *cam_A_particles[a_id - a_start]);
 
 				if (residual <= params.match_threshold){
@@ -261,8 +261,8 @@ void PointMatcher::findEpipolarMatches(const lpt::ImageFrameGroup& frame_group, 
 					auto ita = std::find(matchmap[a_id][cam_b].begin(), matchmap[a_id][cam_b].end(), -1);
 					
 					if (itb != matchmap[b_id][cam_a].end() && ita != matchmap[a_id][cam_b].end() ) {
-						*itb = a_id - a_start;
-						*ita = b_id - b_start;
+						*itb = static_cast<int>(a_id - a_start);
+						*ita = static_cast<int>(b_id - b_start);
 					} else
 						match_overload++;
 				}
@@ -275,26 +275,26 @@ void PointMatcher::findEpipolarMatches(const lpt::ImageFrameGroup& frame_group, 
 void PointMatcher::findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches)
 {
 
-   vector<int> num_particles(frame_group.size());
+   vector<size_t> num_particles(frame_group.size());
    num_particles[0] = frame_group[0].particles.size();
    for(int i = 1; i < frame_group.size(); ++i)
       num_particles[i] = frame_group[i].particles.size() + num_particles[i-1];
 
-   int num_cameras = frame_group.size();
+   size_t num_cameras = frame_group.size();
    matches.clear();
 
-   for (int cam_a = 0; cam_a < num_cameras - 3; ++cam_a)
+   for (size_t cam_a = 0; cam_a < num_cameras - 3; ++cam_a)
    {
-      int a_start = (cam_a !=0 ? num_particles[cam_a - 1] : 0);
+      size_t a_start = (cam_a !=0 ? num_particles[cam_a - 1] : 0);
       for (int a = 0; a < frame_group[cam_a].particles.size(); ++a)
       {
          lpt::ParticleImage::Ptr Pa = frame_group[cam_a].particles[a];
          if( ! Pa->is_4way_matched )
          {
-            for (int cam_b = cam_a + 1; cam_b < num_cameras - 2; ++cam_b)
+            for (size_t cam_b = cam_a + 1; cam_b < num_cameras - 2; ++cam_b)
             {
-               int b_start = (cam_b !=0 ? num_particles[cam_b-1] : 0);
-               for(int match_ab = 0; match_ab < NUM_MATCHES; ++match_ab) { //loop through all A,B matches
+               size_t b_start = (cam_b !=0 ? num_particles[cam_b-1] : 0);
+               for(size_t match_ab = 0; match_ab < NUM_MATCHES; ++match_ab) { //loop through all A,B matches
                   int b = matchmap[a + a_start][cam_b][match_ab];
                   if (b < 0)
                      break;
@@ -302,9 +302,9 @@ void PointMatcher::findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lp
 
                   if( ! Pb->is_4way_matched )
                   {
-                     for (int cam_c = cam_b + 1; cam_c < num_cameras - 1; ++cam_c)
+                     for (size_t cam_c = cam_b + 1; cam_c < num_cameras - 1; ++cam_c)
                      {
-                        int c_start = (cam_c !=0 ? num_particles[cam_c-1] : 0);
+                        size_t c_start = (cam_c !=0 ? num_particles[cam_c-1] : 0);
                         for (int match_bc = 0; match_bc < NUM_MATCHES; ++match_bc)
                         {
                            int c = matchmap[b + b_start][cam_c][match_bc];
@@ -315,9 +315,9 @@ void PointMatcher::findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lp
 
                            if( ! Pc->is_4way_matched && std::count(matchmap[a + a_start][cam_c].begin(), matchmap[a + a_start][cam_c].end(), c) )
                            {
-                              for (int cam_d = cam_c + 1; cam_d < num_cameras; ++cam_d)
+                              for (size_t cam_d = cam_c + 1; cam_d < num_cameras; ++cam_d)
                               {
-                                 int d_start = (cam_d !=0 ? num_particles[cam_d-1] : 0);
+                                 size_t d_start = (cam_d !=0 ? num_particles[cam_d-1] : 0);
                                  for (int match_cd = 0; match_cd < NUM_MATCHES; ++match_cd)
                                  {
                                     int d = matchmap[c + c_start][cam_d][match_cd];
@@ -461,7 +461,7 @@ void Reconstruct3D::reconstruct3DFrame(vector<lpt::Match::Ptr>& matches, lpt::Fr
 	auto& cameras = shared_objects->cameras;
 	for (int m = 0; m < matches.size(); ++m) {
 		if ( matches[m] ) {
-			int number_of_cams = matches[m]->particles.size();
+			size_t number_of_cams = matches[m]->particles.size();
 			if ( number_of_cams >= 2 ) {
 				double empty[3] = {0};
 				double empty1 = 0;
@@ -476,7 +476,7 @@ void Reconstruct3D::reconstruct3DFrame(vector<lpt::Match::Ptr>& matches, lpt::Fr
 					A[s] = new double[3];
 					A[e] = new double[3];
 					lpt::ParticleImage::Ptr P = matches[m]->particles[i].first;
-					int camID = matches[m]->particles[i].second;
+                    size_t camID = matches[m]->particles[i].second;
 					double x = ( P->x - cameras[camID].c[0] ) / (1. * cameras[camID].f[0]);    // FIXME: May need -1 multiplier for pixel coordinate system (upper left corner origin)
 					double y = ( P->y - cameras[camID].c[1] ) / (1. * cameras[camID].f[1]);    // Convert P.x and P.y to normalized coordinates through intrinsic parameters
 					id = P->id;
@@ -516,8 +516,8 @@ void Reconstruct3D::reconstruct3DFrame(vector<lpt::Match::Ptr>& matches, lpt::Fr
 void Reconstruct3D::draw(lpt::Frame3d& frame)
 {
 	auto& cameras = shared_objects->cameras;
-	vector<cv::Point3f> object_points(frame.objects.size()); 
-	vector<cv::Point2f> image_points(frame.objects.size());
+	vector<cv::Point3d> object_points(frame.objects.size()); 
+	vector<cv::Point2d> image_points(frame.objects.size());
 	for (int p = 0; p < frame.objects.size(); ++p) {
 		object_points[p].x = frame.objects[p]->X[0];
 		object_points[p].y = frame.objects[p]->X[1];
@@ -549,10 +549,10 @@ void Reconstruct3DwithSVD::reconstruct3DFrame(vector<lpt::Match::Ptr>& matches, 
 	auto& cameras = shared_objects->cameras;
 	for (int m = 0; m < matches.size(); ++m) {
 		if ( matches[m] ) {
-			int number_of_cams = matches[m]->particles.size();
+            size_t number_of_cams = matches[m]->particles.size();
 			if ( number_of_cams >= 2 ) {
-				cv::Mat A = cv::Mat::zeros( 2 * cameras.size(), 3, CV_64F );
-				cv::Mat B = cv::Mat::zeros( 2 * cameras.size(), 1, CV_64F );
+				cv::Mat A = cv::Mat::zeros( 2 * static_cast<int>( cameras.size() ), 3, CV_64F );
+				cv::Mat B = cv::Mat::zeros( 2 * static_cast<int>( cameras.size() ), 1, CV_64F );
 				cv::Mat X = cv::Mat::zeros( 3, 1, CV_64F );
 				lpt::Particle3d_Ptr newparticle = lpt::Particle3d::create();
 
@@ -562,7 +562,7 @@ void Reconstruct3DwithSVD::reconstruct3DFrame(vector<lpt::Match::Ptr>& matches, 
 					int e = s + 1;
 				
 					lpt::ParticleImage::Ptr P = matches[m]->particles[i].first;
-					int cam_id = matches[m]->particles[i].second;              
+					size_t cam_id = matches[m]->particles[i].second;              
 					newparticle->camera_ids[i] = cam_id;								//WARNING this will cause a segfault if number_of_cameras is greater than four;
 					id = P->id;
 
