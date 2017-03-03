@@ -51,7 +51,7 @@ int main(int argc, char** argv) {
 	tracker->params.KF_sigma_a = 1E-5;
 	tracker->params.KF_sigma_z = 1E-1;
 
-	bool KalmanFilter = true;
+	bool KalmanFilter = false;
 
 	lpt::Visualizer::Ptr visualizer = lpt::Visualizer::create();
 	visualizer->getVolumeGrid()->setGridOrigin(0,0,0);

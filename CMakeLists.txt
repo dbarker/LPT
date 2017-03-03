@@ -35,6 +35,8 @@ set(Boost_USE_MULTITHREADED      ON)
 set(Boost_USE_STATIC_RUNTIME     OFF)
 set(Boost_NO_BOOST_CMAKE         ON)
 set(Boost_ADDITIONAL_VERSIONS "1.48" "1.48.0")
+set(Boost_INCLUDE_DIR $ENV{Boost_INCLUDE_DIR})
+
 find_package( Boost COMPONENTS thread chrono random date_time system REQUIRED )
 message(STATUS "Boost information: BOOST_ROOT = $ENV{BOOST_ROOT}") 
 message(STATUS "Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}") 
@@ -42,7 +44,7 @@ message(STATUS "Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
 
 if (WIN32)
     find_package( NP_CAMERASDK )
-	add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
+	#add_definitions(${Boost_LIB_DIAGNOSTIC_DEFINITIONS})
     include_directories($ENV{MSMPI_INC})
 endif()
 

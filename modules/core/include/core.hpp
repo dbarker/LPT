@@ -109,7 +109,7 @@ public:
 		}
 
 		lock.unlock();
-			m_condition_variable.notify_one();
+        m_condition_variable.notify_one();
 		return ispushed;
 	}
 
@@ -219,6 +219,7 @@ public:
 	int frame_index;
 	cv::Mat image;
 	vector<ParticleImage::Ptr> particles;
+	vector<vector<cv::Point>> contours;
 
 	ImageFrame():frame_index(-1){}
 	ImageFrame(int f):frame_index(f){}
@@ -374,7 +375,7 @@ public:
     typedef std::shared_ptr<SharedObjects> Ptr;
     static inline SharedObjects::Ptr create() {return std::make_shared<SharedObjects>();}
 
-    SharedObjects() : frame_rate(0), input_path("./"), output_path("./"), KF_isOn(false) { }
+    SharedObjects() : frame_rate(0), input_path("./"), output_path("./"), KF_isOn(false), isRotation_Correction(false) { }
 		
     vector<lpt::Camera> cameras;
     vector<lpt::CameraPair> camera_pairs;
@@ -385,6 +386,9 @@ public:
     string input_path;
     string output_path;
     bool KF_isOn;
+	array<array<double, 3>, 3> S;
+	array<double, 3> P;
+	bool isRotation_Correction;
 };
 
 class Particle {

@@ -29,13 +29,14 @@ copyright: Douglas Barker 2011
 
 #ifdef USE_NP_CAMERASDK
 #include <windows.h>
-#include <cameralibrary.h>
+#include "cameralibrary.h"
 #endif
 
 
 namespace lpt {
 
 	using namespace std;
+	using namespace CameraLibrary;
 		
 	class Video;
 	class Recorder;
@@ -138,7 +139,7 @@ namespace lpt {
 	public:	
 		typedef std::shared_ptr < lpt::CameraSystem > Ptr;
 
-		CameraSystem() : collect_particledata_from_camera(false) { }
+		CameraSystem() : collect_particledata_from_camera(true) { }
 
 		virtual void addControls()=0;
 		virtual bool initializeCameras()=0;
@@ -238,7 +239,7 @@ namespace lpt {
 		friend void callbackSetFrameRate( int value, void* data );
 
 	private:
-		std::shared_ptr<CameraLibrary::cModuleSync> sync;
+		cModuleSync* sync;
 		cv::Size sensor_dim;
 		vector<CameraLibrary::Camera*> optitrack_cameras;
 		vector<CameraLibrary::Frame*> optitrack_frames;
@@ -365,6 +366,8 @@ namespace lpt {
 		friend void callbackSetDetectionView( int state, void* data );
 		friend void callbackSetReprojectionView( int state, void* data );
 		friend void callbackSetTrajectoryView( int state, void* data );
+
+		void load_Rotation_Matrix();
 
 	protected:
 

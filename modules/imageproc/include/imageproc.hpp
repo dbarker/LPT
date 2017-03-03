@@ -352,7 +352,7 @@ class Detector {
 public:
 	typedef std::shared_ptr<Detector> Ptr;
 
-    virtual void detectFeatures( const cv::Mat& image, vector<lpt::ParticleImage::Ptr>& features ) = 0;
+    virtual void detectFeatures( const cv::Mat& image, vector<lpt::ParticleImage::Ptr>& features, vector<vector<cv::Point>>& contours ) = 0;
 	virtual void addControls() = 0;
 
     /**
@@ -361,6 +361,8 @@ public:
      * @param frame
      */
     void drawResult(ImageFrame& frame);
+
+	void drawContours( cv::Mat& image, vector<vector<cv::Point>> contours );
 
     /**
      * @brief Detector destructor
@@ -411,7 +413,9 @@ public:
      * @param image The image to be processed
      * @param features The vector holding detected features
      */
-    void detectFeatures(const cv::Mat &image, vector<lpt::ParticleImage::Ptr>& features );
+    void detectFeatures(const cv::Mat &image, vector<lpt::ParticleImage::Ptr>& features, vector<vector<cv::Point>>& contours );
+
+	//void detectFeatures(const cv::Mat &image, vector<lpt::ParticleImage::Ptr>& features, vector<vector<cv::Point>>& contours);
 
     /**
      * @brief addControls
@@ -424,7 +428,7 @@ public:
      * @param result_image The image with contours drawn
      * @param contours The contours to be drawn
      */
-    void drawContours(cv::Mat& result_image, vector<vector<cv::Point> > contours);
+    //void drawContours(cv::Mat& result_image, vector<vector<cv::Point> > contours);
 
     /**
      * @brief FindContoursDetector destructor
@@ -480,7 +484,7 @@ public:
      * @param image The image to be processed
      * @param features The vector holding detected features
      */
-    void detectFeatures( const cv::Mat& image, vector<lpt::ParticleImage::Ptr>& features );
+    void detectFeatures( const cv::Mat& image, vector<lpt::ParticleImage::Ptr>& features, vector<vector<cv::Point>>& contours );
 
     /**
      * @brief addControls

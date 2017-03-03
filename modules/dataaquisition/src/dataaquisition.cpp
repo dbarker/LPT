@@ -10,6 +10,7 @@ copyright: Douglas Barker 2011
 namespace lpt {
 
 using namespace std;
+using namespace CameraLibrary;
 
 /*****lpt::Video class implementation*****/
 
@@ -272,18 +273,22 @@ bool Optitrack::initializeCameras() {
 
 		//Set some initial camera operating parameters
 		optitrack_cameras[camera_id]->SetFrameRate(100);   // Percentage for V120-SLIM Cameras
-		optitrack_cameras[camera_id]->SetVideoType(CameraLibrary::SegmentMode);
+		optitrack_cameras[camera_id]->SetVideoType(Core::ObjectMode);
 		optitrack_cameras[camera_id]->SetLateMJPEGDecompression(false); 
 		optitrack_cameras[camera_id]->SetAEC(false);
 		optitrack_cameras[camera_id]->SetAGC(true);
 		optitrack_cameras[camera_id]->SetExposure(40);
 		optitrack_cameras[camera_id]->SetThreshold(40);
 		optitrack_cameras[camera_id]->SetIntensity(0);   //IR LED intensity if available
-		optitrack_cameras[camera_id]->SetTextOverlay(true);
+		optitrack_cameras[camera_id]->SetTextOverlay(false);
 		optitrack_cameras[camera_id]->SetObjectColor(255);
+		optitrack_cameras[camera_id]->SetIRFilter(true);
 	}
+
+	shared_objects->frame_rate = optitrack_cameras[0]->ActualFrameRate();
 	cout << "\t Actual Frame Rate = " << this->getFrameRate() << endl;
-	sync = std::make_shared<CameraLibrary::cModuleSync>();
+	
+	sync = CameraLibrary::cModuleSync::Create();
 	for ( int i = 0; i < optitrack_cameras.size(); ++i) 
 		sync->AddCamera(optitrack_cameras[i]);
 
@@ -297,8 +302,6 @@ bool Optitrack::initializeCameras() {
 
 	for ( int i = 0; i < optitrack_cameras.size(); ++i) 
 		optitrack_cameras[i]->Start();
-	
-	shared_objects->frame_rate = optitrack_cameras[0]->ActualFrameRate();
 
 	return true;
 }
@@ -307,10 +310,11 @@ void Optitrack::shutdown() {
 	
 	cout << "------------Shutting Down Cameras------------" << endl;
 	sync->RemoveAllCameras();
+	cModuleSync::Destroy( sync );
 
 	for ( int i = 0; i < optitrack_cameras.size(); ++i) {
 		optitrack_cameras[i]->Release();
-		cout << i << " ";
+		//cout << i << " ";
 	}
 	CameraLibrary::CameraManager::X().Shutdown();
 	cout << "\t---Optitrack Shutdown Complete" << endl;
@@ -319,33 +323,33 @@ void Optitrack::shutdown() {
 bool Optitrack::grabFrameGroup(lpt::ImageFrameGroup& frame_group) {
 			
 	CameraLibrary::FrameGroup* native_frame_group = sync->GetFrameGroup();
-	if(native_frame_group) {
+	if(native_frame_group && native_frame_group->Count() == shared_objects->cameras.size()) {
 		auto& image_type = shared_objects->image_type;
 		for ( int camera_id = 0; camera_id < native_frame_group->Count(); ++camera_id ) { 
 			optitrack_frames[camera_id] = native_frame_group->GetFrame(camera_id);
 
 			frame_group[camera_id].image = image_type.clone();
-			optitrack_frames[camera_id]->Rasterize(image_type.size().width, image_type.size().height, 
-				static_cast<unsigned int>(image_type.step), 8, frame_group[camera_id].image.data);
 
 			frame_group[camera_id].frame_index = optitrack_frames[camera_id]->FrameID();
-			frame_group[camera_id].particles.clear();
 
 			if( this->collect_particledata_from_camera ) {
 				frame_group[camera_id].particles.clear();
 				for (int object_id = 0; object_id < optitrack_frames[camera_id]->ObjectCount(); object_id++) {
+					auto object = optitrack_frames[camera_id]->Object(object_id);
 					frame_group[camera_id].particles.push_back
 						(
 							std::move( 
-								lpt::ParticleImage::create( 
-									object_id, 
-									optitrack_frames[camera_id]->Object(object_id)->X(),
-									optitrack_frames[camera_id]->Object(object_id)->Y(), 
-									optitrack_frames[camera_id]->Object(object_id)->Radius() 
-								) 
+								lpt::ParticleImage::create( object_id, object->X(), object->Y(), object->Radius() ) 
 							) 
 						);
 				}
+			}
+			else {
+				cv::Mat temp = image_type.clone();
+				optitrack_frames[camera_id]->Rasterize(image_type.size().width, image_type.size().height, 
+					static_cast<unsigned int>(temp.step), 8, temp.data);
+				cv::Rect ROI(0, 0, image_type.size().width/2, image_type.size().height/2);
+				cv::resize(temp(ROI), frame_group[camera_id].image, image_type.size());
 			}
 			optitrack_frames[camera_id]->Release();
 		}
@@ -363,23 +367,28 @@ bool Optitrack::grabFrameGroup(lpt::ImageFrameGroup& frame_group) {
 }
 
 void Optitrack::addControls() {
-	string null;  
-	init_video_mode = 1;		// {0 = Precision, 1 = Segment, 2 = Object, 3 = MJPEG Mode}
-	init_threshold = 40; 
-	init_exposure = 40;
-	init_intensity = 5; 
-	init_framerate_mode = 2;    //Mode number: {2 = 100%, 1 = 50%, 0 = 25%} for V120:SLIM cameras 
-	
 	void* optitrack_void_ptr = static_cast<void*> ( this );
 	void* cameras_void_ptr = static_cast<void*> ( &optitrack_cameras );
+
+	string null;
+	auto camera = optitrack_cameras[0];
+	init_video_mode = 2;		// {0 = Precision, 1 = Segment, 2 = Object, 3 = MJPEG Mode}
+	init_threshold = 40;
+	int max_threshold = camera->MaximumThreshold();
+	int min_threshold = camera->MinimumThreshold();
+	init_exposure = 40;
+	int max_exposure = camera->MaximumExposureValue();
+	int min_exposure = camera->MinimumExposureValue();
+	init_intensity = 5;
+	init_framerate_mode = 2;    //Mode number: {2 = 100%, 1 = 50%, 0 = 25%} for V120:SLIM cameras 
 	
 	cv::createButton("IR Filter", callbackSetIRFilter, cameras_void_ptr ,CV_CHECKBOX, 1 );
 	cv::createButton("Automatic Gain Control", callbackSetAGC, cameras_void_ptr, CV_CHECKBOX, 1 );
 	cv::createButton("Autoamtic Exposure Control", callbackSetAEC, cameras_void_ptr, CV_CHECKBOX, 0 );
-	cv::createButton("Text Overlay", callbackSetTextOverlay, cameras_void_ptr, CV_CHECKBOX, 1 );
+	cv::createButton("Text Overlay", callbackSetTextOverlay, cameras_void_ptr, CV_CHECKBOX, 0 );
 	cv::createTrackbar("VideoMode", null , &init_video_mode, 3, callbackSetVideoType, optitrack_void_ptr);
-	cv::createTrackbar("Threshold", null , &init_threshold, 255, callbackSetThreshold, cameras_void_ptr);
-	cv::createTrackbar("Exposure", null , &init_exposure, 480, callbackSetExposure, cameras_void_ptr);
+	cv::createTrackbar("Threshold", null , &init_threshold, max_threshold-min_threshold, callbackSetThreshold, cameras_void_ptr);
+	cv::createTrackbar("Exposure", null , &init_exposure, max_exposure-min_exposure, callbackSetExposure, cameras_void_ptr);
 	cv::createTrackbar("FrameRateMode", null , &init_framerate_mode, 2, callbackSetFrameRate, optitrack_void_ptr);
 }
 
@@ -388,36 +397,37 @@ void callbackSetVideoType( int mode, void* data )
 {
 	Optitrack* system = static_cast< Optitrack*> (data);
 	vector<CameraLibrary::Camera*>& optitrack_cameras = system->optitrack_cameras;
-	CameraLibrary::eVideoMode new_mode;
+	Core::eVideoMode new_mode;
+
 	cout << "Setting Camera Mode: ";
 	switch (mode) {
 	case 0:
 		cout << "Precision" << endl;
-		new_mode = CameraLibrary::PrecisionMode;
-		system->setParticleCollectionFromCamera(false);
+		new_mode = Core::PrecisionMode;
+		system->setParticleCollectionFromCamera(true);
 		break;
 	case 1:
 		cout << "Segment" << endl;
-		new_mode = CameraLibrary::SegmentMode;
-		system->setParticleCollectionFromCamera(false);
+		new_mode = Core::SegmentMode;
+		system->setParticleCollectionFromCamera(true);
 		break;
 	case 2:
 		cout << "Object" << endl;
-		new_mode = CameraLibrary::ObjectMode;
+		new_mode = Core::ObjectMode;
 		system->setParticleCollectionFromCamera(true);
 		break;
 	case 3:
 		cout << "MJPEG" << endl;
-		new_mode = CameraLibrary::MJPEGMode;
+		new_mode = Core::MJPEGMode;
 		system->setParticleCollectionFromCamera(false);
 		break;
 	default:
-		new_mode = CameraLibrary::MJPEGMode;
+		new_mode = Core::ObjectMode;
 		break;
 	}
 
 	for (int id = 0; id < optitrack_cameras.size(); id++) { 
-		if (new_mode == CameraLibrary::MJPEGMode && optitrack_cameras[id]->IsMJPEGAvailable() == false)
+		if (new_mode == Core::MJPEGMode && optitrack_cameras[id]->IsMJPEGAvailable() == false)
 			cout << "Camera " << id << " does not support MJPEG Mode" << endl;
 		else
 			optitrack_cameras[id]->SetVideoType(new_mode);
@@ -426,7 +436,10 @@ void callbackSetVideoType( int mode, void* data )
 
 void callbackSetThreshold( int value, void* data) {
 	vector<CameraLibrary::Camera*>& optitrack_cameras = *static_cast< vector<CameraLibrary::Camera*>* > (data);
+	
+	value += optitrack_cameras[0]->MinimumThreshold();
 	cout << "Setting Threshold value: " << value << endl;
+
 	for (int id = 0; id < optitrack_cameras.size(); id++)
 		optitrack_cameras[id]->SetThreshold( value );
 }
@@ -460,7 +473,7 @@ void callbackSetAGC(int state, void* data) {
 }
 
 void callbackSetTextOverlay(int state, void* data) {
-	// Enable or Disable autmatic gain control AGC
+	// Enable or Disable text overlay
 	vector<CameraLibrary::Camera*>& optitrack_cameras = *static_cast< vector<CameraLibrary::Camera*>* > (data);
 	cout << "Setting Text Overlay: " << (state ? "on":"off") << endl;
 
@@ -471,13 +484,15 @@ void callbackSetTextOverlay(int state, void* data) {
 void callbackSetExposure(int value, void* data) {
 	// Sets Exposure manually when AEC is not activated
 	vector<CameraLibrary::Camera*>& optitrack_cameras = *static_cast< vector<CameraLibrary::Camera*>* > (data);
+
+	value += optitrack_cameras[0]->MinimumExposureValue();
 	cout << "Setting Exposure: Desired = " << value;
 
 	for (int id = 0; id < optitrack_cameras.size(); id++) 
 		optitrack_cameras[id]->SetExposure(value);
 	Sleep(2);
-	int actual = optitrack_cameras[0]->Exposure();
-	cout << ", Actual = "<<  actual << "("<< 17.13 * actual << " micro seconds)" << endl; //Only valid for V120:SLIM
+	//int actual = optitrack_cameras[0]->Exposure();
+	//cout << ", Actual = "<<  actual << "("<< 17.13 * actual << " micro seconds)" << endl; //Only valid for V120:SLIM
 }
 
 void callbackSetIntensity(int value, void* data) {
@@ -494,25 +509,25 @@ void callbackSetIntensity(int value, void* data) {
 void callbackSetFrameRate(int value, void* data) {
 	lpt::Optitrack* camera_system = static_cast< lpt::Optitrack* > ( data );
 	if (camera_system) {
-		int fps_percentage;
+		int fps;
 		switch(value) {
 		case 2:
-			fps_percentage = 100;
+			fps = 120;
 			break;
 		case 1:
-			fps_percentage = 50;
+			fps = 60;
 			break;
 		case 0:
-			fps_percentage = 25;
+			fps = 30;
 			break;
 		default:
-			fps_percentage = 100;
+			fps = 120;
 			break;
 		}
-		cout << "Setting Frame Rate: Desired % = " << fps_percentage;
+		cout << "Setting Frame Rate: Desired  = " << fps;
 		vector<CameraLibrary::Camera*>& optitrack_cameras = camera_system->getOptitrackCameras();
 		for (int id = 0; id < optitrack_cameras.size(); id++) 
-			optitrack_cameras[id]->SetFrameRate(fps_percentage);
+			optitrack_cameras[id]->SetFrameRate(fps);
 		Sleep(2);
 		cout << ", Actual FPS = " << optitrack_cameras[0]->ActualFrameRate() << endl;
 		camera_system->shared_objects->frame_rate = optitrack_cameras[0]->ActualFrameRate();
@@ -723,8 +738,9 @@ void StreamingPipeline::runControlWindow() {
 					calibrator->setGlobalReference(false);
 			}
 
-			if( this->showReprojectionView() && ! frame3d->objects.empty() )
+			if( this->showReprojectionView() && ! frame3d->objects.empty() ) {
 				reconstructor->draw( *frame3d );
+			}
 
 			if ( count2 >= shared_objects->frame_rate / 20 ) {
 				count2 = 0;
@@ -782,8 +798,10 @@ void StreamingPipeline::aquireImageData() {
 	while( camera_system->areCamerasRunning() ) {
 		lpt::ImageFrameGroup frame_group( cameras.size() );
 		bool good_frames = camera_system->grabFrameGroup( frame_group );
-		if ( good_frames && ! frame_queue.full() ) 
+
+		if ( good_frames && ! frame_queue.full() ) {
 			frame_queue.push( std::move(frame_group) );
+		}
 		else
 			boost::this_thread::sleep(sleeptime);
 	}
@@ -793,14 +811,14 @@ void StreamingPipeline::processImages(int index) {
 	auto& cameras = shared_objects->cameras;
 	auto& image_type = shared_objects->image_type;
 
-	cout << index << " Processing images" << endl;
+	cout << "Thread #" << index << " processing images" << endl;
 //	boost::chrono::system_clock::time_point start, stop;
 	cv::Mat map1, map2;
 	cv::Mat temp_image;
 	cv::Mat cam_mat = cameras[index].getCameraMatrix();
 	cv::Mat dist_coeffs = cameras[index].getDistCoeffs();
 	cv::Size image_size = image_type.size();
-	cv::initUndistortRectifyMap(cam_mat, dist_coeffs, cv::Mat(), cv::Mat(), image_size, CV_32FC1, map1, map2);   
+	//cv::initUndistortRectifyMap(cam_mat, dist_coeffs, cv::Mat(), cv::Mat(), image_size, CV_32FC1, map1, map2);   
 	bool first = true;
 	while( camera_system->areCamerasRunning() ) {
 		
@@ -823,11 +841,14 @@ void StreamingPipeline::processImages(int index) {
 		//start = boost::chrono::system_clock::now();		
 		if ( this->camera_system->getParticleCollectionFromCamera() == false ) {
 			temp_image = imageproc_frames[index].image.clone();
+			//cout << "empty? " << temp_image.empty() << endl;
 			processor->processImage( temp_image );
-			detector->detectFeatures( temp_image, imageproc_frames[index].particles );
+			detector->detectFeatures( temp_image, imageproc_frames[index].particles, imageproc_frames[index].contours );
 		}
-		if ( this->showDetectionView() )
+		if ( this->showDetectionView() ) {
 			detector->drawResult( imageproc_frames[index] );
+			//detector->drawContours( imageproc_frames[index].image, imageproc_frames[index].contours );
+		}
 		
 		lpt::undistortPoints(cameras[index], imageproc_frames[index] );
 	
@@ -838,6 +859,7 @@ void StreamingPipeline::processImages(int index) {
 }
 
 void StreamingPipeline::solveCorrespondence() {
+	cout << "Correspondence Thread started" << endl;
 //	boost::chrono::system_clock::time_point start, stop;
 //	start = boost::chrono::system_clock::now();
 	matcher->run(&processed_queue, &match_queue, 1,1); 
@@ -848,7 +870,7 @@ void StreamingPipeline::solveCorrespondence() {
 }
 
 void StreamingPipeline::reconstuct3DObjects() {
-	cout << "Reconstruct 3D Objects Thread" << endl;
+	cout << "Reconstruct 3D Objects Thread started" << endl;
 //	boost::chrono::system_clock::time_point start, stop;
 	
 	while( camera_system->areCamerasRunning() ) {	
@@ -955,6 +977,7 @@ void StreamingPipeline::run() {
 		cout << "need to set thread priorities for Linux systems" << endl;
 #endif
 
+	boost::this_thread::sleep( boost::posix_time::seconds(3) );
 	this->runControlWindow();
 	// All threads running...stop called when cameras are stopped
 	this->stop();	
@@ -979,6 +1002,23 @@ void StreamingPipeline::stop() {
 	this->camera_system->shutdown();
 
 	visualizer_thread.join();
+}
+
+void StreamingPipeline::load_Rotation_Matrix() 
+{
+	ifstream S_in, P_in;
+	string S = this->shared_objects->input_path + "S.txt";
+	string P = this->shared_objects->input_path + "P.txt";
+	S_in.open(S);
+	P_in.open(P);
+
+	for (int i=0; i<3; i++) {
+		for (int j=0; j<3; j++) {
+			S_in >> this->shared_objects->S[i][j];
+		}
+		P_in >> this->shared_objects->P[i];
+	}
+	this->shared_objects->isRotation_Correction = true;
 }
 
 } /*NAMESPACE PT*/

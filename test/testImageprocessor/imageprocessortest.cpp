@@ -79,7 +79,7 @@ int main(int argc, char** argv)
         for (size_t f = 0; f < true_frames.size(); ++f) {
             cout << "Frame " << f << ":";
             processor->processImage(cameras[c].frames[f].image);
-            detector->detectFeatures(cameras[c].frames[f].image, cameras[c].frames[f].particles);
+            detector->detectFeatures(cameras[c].frames[f].image, cameras[c].frames[f].particles, cameras[c].frames[f].contours);
             lpt::testDetectedParticles(true_frames[f].particles, cameras[c].frames[f].particles);
         }
    }

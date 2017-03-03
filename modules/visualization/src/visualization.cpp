@@ -1321,7 +1321,7 @@ void FiniteVolumeGrid::updateGrid()
 
             for(vtkIdType i = 0; i < grid->GetNumberOfCells(); i++)
             {
-                size_t total_count = extract_result<tag::count>( acceleration_accumulators[(int)i][0] );
+                size_t total_count = extract_result<tag::count>( velocity_accumulators[(int)i][0] );
                 if ( total_count > 0)
                         arrow_source_ids->SetTuple1(i, 0);
                 vec[0] = extract_result<tag::weighted_mean>( velocity_accumulators[(int)i][0] );
@@ -1843,6 +1843,7 @@ void FiniteVolumeGrid::savePlaneData()
     ofstream P_e_out(this->shared_objects->output_path + "P_e_XY.txt");
     ofstream P_l_out(this->shared_objects->output_path + "P_l_XY.txt");
     ofstream all_data_out(this->shared_objects->output_path + "all_data.txt");
+	ofstream axis(this->shared_objects->output_path + "axis.txt");
 
     U_out << header.str();
     U_out << "XY Plane Z = \t" << k << endl;
@@ -2093,6 +2094,25 @@ void FiniteVolumeGrid::savePlaneData()
         all_data_out << endl;
     }
     all_data_out.close();
+
+	array<int,3> ijk;
+	for (int i=0; i<this->params.grid_cell_counts[0]; i++) {
+		double max = std::numeric_limits<double>::lowest();
+		for (int j=0; j<this->params.grid_cell_counts[1]; j++) {
+			for (int k=0; k<this->params.grid_cell_counts[2]; k++) {
+				int cell_id = this->getGridIndex(i,j,k);
+				if (velocities[cell_id][0] > max) {
+					ijk[0] = i;
+					ijk[1] = j;
+					ijk[2] = k;
+					max = velocities[cell_id][0];
+				}
+			}
+		}
+		axis << ijk[0] << "\t" << ijk[1] << "\t" << ijk[2] << endl;
+	}
+	axis.close();
+	
     cout << "Done Saving data" << endl;
 }
 
@@ -2902,10 +2922,10 @@ void Visualizer::manageQueue()
                 X2 = iter_next->first->X;     // next particle, index 2
 
                 for (int d = 0; d < X0.size(); ++d) {
-                    object_iter->second.at(d) = X1[d];
+                    //object_iter->second.at(d) = X1[d];
                     U1[d] = ( ( X2[d] - X0[d] ) * frame_rate ) / 2.0 / 1000.0;                      // Velocity
                     object_iter->second.at(d+3) = U1[d] * 1000.0;
-                    A[d] = ( X2[d] - 2.0 * X1[d] + X0[d] ) * frame_rate * frame_rate / 1000.0;     // Acceleration
+					A[d] = ( X2[d] - 2*X1[d] + X0[d] ) * frame_rate * frame_rate / 1000.0;			// Acceleration
                     object_iter->second.at(d+6) = A[d] * 1000.0;
                 }
 
@@ -2915,7 +2935,9 @@ void Visualizer::manageQueue()
 
                     for (int d = 0; d < X0.size(); ++d) {
                         U0[d] =  ( X1[d] - Xm1[d] ) * frame_rate / 2.0 / 1000.0;
+                        //iter_previous->second.at(d+3) = U0[d] * 1000.0;
                         U2[d] =  ( X3[d] - X1[d] ) * frame_rate / 2.0 / 1000.0;
+                        //iter_next->second.at(d+3) = U2[d] * 1000.0;
                     }
                 }
 

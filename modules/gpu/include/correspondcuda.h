@@ -69,6 +69,7 @@ public:
 	}
     virtual void findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches);
     virtual void findEpipolarMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap);
+	virtual void find3WayMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches);
 
 private:
 	void findEpipolarMatchesStreams(lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap);

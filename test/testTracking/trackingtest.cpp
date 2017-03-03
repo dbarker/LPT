@@ -13,14 +13,14 @@ int main(int argc, char** argv) {
 		input_file = argv[1];
 	}
 	else{
-		input_file = "../../../data/tests/scaling/256p512f";
+		input_file = "../../../data/tests/synthetic.txt";
 	}
 
 	if (argc > 2) {
 		output_file = argv[2];
 	}
 	else{
-		output_file = "./output/out0";
+		output_file = "../../../data/output/";
 	}
 
 	cout << input_file << endl;
@@ -44,6 +44,14 @@ int main(int argc, char** argv) {
 		
 	cout << "--Tracking Started:" << endl;
 	lpt::Tracker tracker;
+	auto shared_objects = lpt::SharedObjects::create();
+	shared_objects->frame_rate = 60;
+	shared_objects->KF_isOn = true;
+	shared_objects->output_path = output_file;
+	tracker.setSharedObjects(shared_objects);
+	tracker.setCostCalculator(lpt::CostMinimumAcceleration::create());
+	tracker.params.KF_sigma_a = 1E-5;
+	tracker.params.KF_sigma_z = 1E-2;
 
 	tracker.params.alpha = 1.0;  	  //0.8 for pivSTD352       //0.8 for CFD 1000p4096f100fps         //1.0 for scaling data sets
 	tracker.params.max_radius = 50.0; 
@@ -51,9 +59,10 @@ int main(int argc, char** argv) {
 
 	//--Initialize Timing function
 	start = boost::chrono::system_clock::now();		
-
-	for (int f = 0; f < frames.size() - 1; ++f)
+	
+	for (int f = 0; f < frames.size() - 1; ++f) {
 		tracker.trackFrames(*frames[f], *frames[f+1]);
+	}
 	
 	stop = boost::chrono::system_clock::now();		
 	

@@ -63,7 +63,7 @@ public:
 
 class CirclesGrid : public CalibrationBoard {
 public:
-	CirclesGrid(cv::Size board_size = cv::Size(4, 11), double square_size = 16.62);
+	CirclesGrid(cv::Size board_size = cv::Size(4, 11), double square_size = 20.0);
 	bool find(lpt::ImageFrame& frame);
 	int find_circlesgrid_flags;
 };

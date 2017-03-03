@@ -392,7 +392,7 @@ Chessboard::Chessboard(cv::Size board_size, double square_size) {
 	this->object_type = lpt::CHESSBOARD;
 	for( int i = 0; i < board_size.height; ++i ) {
 		for( int j = 0; j < board_size.width; ++j ) {
-			object_points.push_back(cv::Point3d(double(j * square_size),
+			object_points.push_back(cv::Point3f(double(j * square_size),
 				double(i * square_size), 0));
 		}
 	}
@@ -417,7 +417,7 @@ CirclesGrid::CirclesGrid(cv::Size board_size, double square_size) {
 	cout << "Calib Board: height = " << board_size.height << " , width = " << board_size.width << endl; 
 	for( int i = 0; i < board_size.height; i++ ) {
 		for( int j = 0; j < board_size.width; j++ ) {
-			object_points.push_back(cv::Point3d(double( (2 * j + i % 2) * square_size),
+			object_points.push_back(cv::Point3f(double( (2 * j + i % 2) * square_size),
 				double(i * square_size), 0));
 		}
 	}
@@ -439,7 +439,6 @@ bool CirclesGrid::find(lpt::ImageFrame& frame) {
 void CalibrationBoard::draw(cv::Mat& image) {
 	cv::drawChessboardCorners( image, board_size, cv::Mat(image_points), true );
 }
-
 
 void Calibrator::addControls() {
 	void* calibrator_void_ptr = static_cast<void*> ( this );
@@ -544,9 +543,9 @@ void Calibrator::calibrateCamera() {
 		//double aperature_width, aperature_height;
 		double fovx, fovy, focal_length, aspect_ratio;
 		cv::Point2d principal_point;
-		cout << camera_matrix << endl;
+		cout << "camera_matrix" << endl;
 		cout << cameras[current_camera].getCameraMatrix() << endl;
-		cout << dist_coeffs << endl;
+		cout << "dist_coeffs" << endl;
 		cout << cameras[current_camera].getDistCoeffs() << endl;
 		cv::calibrationMatrixValues(camera_matrix, image_size,
 			cameras[current_camera].sensor_size[0], cameras[current_camera].sensor_size[1], fovx, fovy,
@@ -720,13 +719,12 @@ bool Calibrator::findGlobalReference(lpt::ImageFrameGroup& group) {
 			cv::Mat R = cv::Mat::zeros(3, 3, CV_64F); 
 			cv::Rodrigues(r_vec, R);
 
-			for (int i = 0; i < 3; ++i)
-				for (int j = 0; j < 3; ++j)
+			for (int i = 0; i < 3; ++i) {
+				for (int j = 0; j < 3; ++j) {
 					cameras[c].R[i][j] = R.at<double>(i,j);
-
-			cameras[c].T[0] = t_vec.at<double>(0);  
-			cameras[c].T[1] = t_vec.at<double>(1);  
-			cameras[c].T[2] = t_vec.at<double>(2);
+				}
+				cameras[c].T[i] = t_vec.at<double>(i);
+			}
 
 			vector<cv::Point2f> image_points2;
 			
