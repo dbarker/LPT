@@ -162,7 +162,7 @@ void Detector::drawResult(ImageFrame &frame)
     for (int i = 0; i < frame.particles.size(); i++) {
 		auto particle = frame.particles[i];
         cv::circle( frame.image, cv::Point( static_cast<int>(particle->x), static_cast<int>(particle->y) ), 
-			static_cast<int>(particle->radius), 255, -1);
+			static_cast<int>(particle->radius), 200, 1);
     }
 }
 

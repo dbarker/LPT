@@ -28,8 +28,8 @@ int main(int argc, char** argv) {
 	
 	string input = (argc > 1 ? argv[1] : "../../../data/input/");
 	string output = (argc > 2 ? argv[2] : "../../../data/output/");
-	string cameras_file = input + "012.yaml"; //"../../../data/pivstd/4cams/cameras.yaml"; //
-	string camera_pairs_file = input + "012_pairs.yaml"; //"../../../data/pivstd/4cams/camera_pairs.yaml"; //
+	string cameras_file = input + "8_cameras.yaml"; //"../../../data/pivstd/4cams/cameras.yaml"; //
+	string camera_pairs_file = input + "8_pairs.yaml"; //"../../../data/pivstd/4cams/camera_pairs.yaml"; //
 	
 	lpt::StreamingPipeline pipeline;
 	pipeline.setQueueCapacity(1000);
@@ -46,11 +46,11 @@ int main(int argc, char** argv) {
 
 	auto matcher = lpt::PointMatcher::create();
 	matcher->params.match_threshold = 2.0;
-	matcher->params.match_threshold = 20;
+	// matcher->params.match_thresh_level = 20;
 
 	auto matcher_cuda =  lpt::PointMatcherCUDA::create();
-	matcher_cuda->params.match_threshold = 2.0; //pixels
-	matcher_cuda->params.match_thresh_level = 20;
+	// matcher_cuda->params.match_threshold = 5.0; //pixels
+	// matcher_cuda->params.match_thresh_level = 20;
 
 	auto tracker = lpt::Tracker::create();
     tracker->setCostCalculator(lpt::CostMinimumAcceleration::create());

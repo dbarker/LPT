@@ -211,7 +211,7 @@ public:
 	class Parameters {
 	public:
         Parameters() : match_threshold(0.5), match_thresh_level(5) {}
-		double match_threshold;
+		float match_threshold;
 		int match_thresh_level;
 	} params;
 
@@ -220,7 +220,7 @@ public:
 		
     virtual void initialize();
 	virtual void initializeEpipolarMatchThread(int thread_id){}
-    virtual void addControls() ;
+    virtual void addControls();
 
 	virtual void findEpipolarMatches(const lpt::ImageFrameGroup& cameragroup, lpt::MatchMap& matchmap);
 	virtual void findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& MatchMap, vector<lpt::Match::Ptr>& matches);
@@ -228,7 +228,7 @@ public:
 
 	friend void callbackMatchThresh(int state, void* data) {
 		PointMatcher* matcher = static_cast<PointMatcher*>(data);
-		matcher->params.match_threshold = matcher->params.match_thresh_level / 10.0;
+		matcher->params.match_threshold = static_cast<float>(matcher->params.match_thresh_level) / 10.0;
 	}
 
 private:

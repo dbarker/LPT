@@ -91,6 +91,7 @@ public:
 			get_global_reference = false;
 			updated = false;
 			object = new lpt::ThreePointLine(); 
+			//board = new lpt::Chessboard(cv::Size(9, 6), 25.6);
 			board = new lpt::CirclesGrid();
 			calib_flags = CV_CALIB_FIX_ASPECT_RATIO | CV_CALIB_FIX_K3 | CV_CALIB_FIX_K4 | CV_CALIB_FIX_K5;
 		}

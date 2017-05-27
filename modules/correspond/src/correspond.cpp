@@ -17,7 +17,7 @@ void Correspondence::findMatches(const ImageFrameGroup &frame_group, vector<Matc
 {
     resetMatchMap(current_matchmap);
     findEpipolarMatches(frame_group, current_matchmap);
-    find3WayMatches(frame_group, current_matchmap, matches);
+    findUniqueMatches(frame_group, current_matchmap, matches);
 }
 
 void  Correspondence::run(
@@ -90,7 +90,7 @@ void Correspondence::runUniqueMatching(int thread_id, lpt::concurrent_queue<std:
 		
 		lpt::MatchMap& current_map = iter->second;
 		lpt::ImageFrameGroup& group = iter->first;
-		find3WayMatches(group, current_map, matches);
+		findUniqueMatches(group, current_map, matches);
 
 		// push frame_group and matches to internal match_queue for reordering and pushing to out_queue
 		
@@ -250,7 +250,7 @@ void PointMatcher::initialize()
 void PointMatcher::addControls()
 {
     void* matcher_void_ptr = static_cast<void*> (this);
-    cv::createTrackbar("Match Threshold", string(), &params.match_thresh_level, 50, callbackMatchThresh, matcher_void_ptr);
+    cv::createTrackbar("Match Threshold", string(), &params.match_thresh_level, 100, callbackMatchThresh, matcher_void_ptr);
 }
 
 void PointMatcher::findEpipolarMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap )
@@ -667,7 +667,7 @@ void Reconstruct3D::draw(lpt::Frame3d& frame)
 		cv::projectPoints(cv::Mat(object_points), r_vec, t_vec, cameras[i].getCameraMatrix(), cameras[i].getDistCoeffs(), image_points);
 
 		for (int p = 0; p < image_points.size(); ++p) 
-			cv::circle( frame.camera_frames[i].image, image_points[p], 5, 255, -1 );	
+			cv::circle( frame.camera_frames[i].image, image_points[p], 3, 255, -1 );	
 		
 	}
 }

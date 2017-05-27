@@ -230,6 +230,11 @@ void PointMatcherCUDA::initialize() {
 	this->initializeMatchMap();
 }
 
+void PointMatcherCUDA::addControls() {
+	void* matcher_void_ptr = static_cast<void*> ( this );
+	cv::createTrackbar("Match Thresh", string() , &params.match_thresh_level, 100, callbackMatchThreshcuda, matcher_void_ptr);
+}
+
 void PointMatcherCUDA::findEpipolarMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap) {
 	
 	thrust::fill(matches2way_d.begin(), matches2way_d.end(), match_initializer);

@@ -392,20 +392,27 @@ Chessboard::Chessboard(cv::Size board_size, double square_size) {
 	this->object_type = lpt::CHESSBOARD;
 	for( int i = 0; i < board_size.height; ++i ) {
 		for( int j = 0; j < board_size.width; ++j ) {
-			object_points.push_back(cv::Point3f(double(j * square_size),
-				double(i * square_size), 0));
+			object_points.push_back(cv::Point3f(float(j * square_size),
+				float(i * square_size), 0));
 		}
 	}
+	find_chessboard_flags = CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE;
 }
 
 bool Chessboard::find(lpt::ImageFrame& frame) {
 	frame.particles.clear();
-	vector<cv::Point2f> image_points;
+	//vector<cv::Point2f> image_points;
+	image_points.clear();
 	bool found = cv::findChessboardCorners( frame.image, board_size, image_points,
 							find_chessboard_flags);
-	if (found)
+	if (found) {
 		cv::cornerSubPix(frame.image, image_points, cv::Size(11,11), cv::Size(-1,-1),
 		cv::TermCriteria( CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1 ));
+		for (int j = 0; j < image_points.size(); ++j) {
+			ParticleImage::Ptr newparticle = ParticleImage::create(j, image_points[j].x, image_points[j].y);
+			frame.particles.push_back(newparticle);
+		}
+	}
 	return found;
 }
 
@@ -421,6 +428,7 @@ CirclesGrid::CirclesGrid(cv::Size board_size, double square_size) {
 				double(i * square_size), 0));
 		}
 	}
+	find_circlesgrid_flags = cv::CALIB_CB_ASYMMETRIC_GRID | cv::CALIB_CB_CLUSTERING;
 }
 
 bool CirclesGrid::find(lpt::ImageFrame& frame) {
@@ -1028,7 +1036,7 @@ void Calibrator::findFundamentalMatrices() {
 		}
 
 		if (pointsA.size() > 8 && pointsB.size() > 8 ) {
-			cv::Mat F = cv::findFundamentalMat(pointsA, pointsB);
+			cv::Mat F = cv::findFundamentalMat(pointsA, pointsB, CV_FM_LMEDS, 1.0, 1.0-1E-6);
 			F >> pair_it->F;
 			pair_it->epipolar_error = checkStereoCalibration( pointsA, pointsB, F ); 
 		}
