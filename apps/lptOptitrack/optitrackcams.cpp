@@ -64,17 +64,17 @@ int main(int argc, char** argv) {
     bool KalmanFilter = false;
 
 	auto visualizer = lpt::Visualizer::create();
-	double grid_side_length = 420;	// mm
+	double grid_size[3] = {2032, 1270, 1270};	// mm
 	double grid_width = 105;		// mm
-	int cell_counts[3] = {35, 9, 9};
-	visualizer->getVolumeGrid()->setGridOrigin(50, -grid_width/2+100, -grid_width/2+135);
+	int cell_counts[3] = {21,11,11};//{51, 31, 31};
+	visualizer->getVolumeGrid()->setGridOrigin(-grid_size[0]/2, 584, -grid_size[2]/2);
 	//visualizer->getVolumeGrid()->setGridOrigin(150,0,0);
 	visualizer->getVolumeGrid()->setGridCellCounts(cell_counts[0], cell_counts[1], cell_counts[2]);
-	visualizer->getVolumeGrid()->setGridDimensions(grid_side_length, grid_width, grid_width);
+	visualizer->getVolumeGrid()->setGridDimensions(grid_size[0], grid_size[1], grid_size[2]);
 	
 	pipeline.setInputDataPath(input);
 	pipeline.setOutputDataPath(output);
-	//pipeline.load_Rotation_Matrix();
+	pipeline.load_Rotation_Matrix();
     pipeline.setKalmanFilter(KalmanFilter);
 	pipeline.attachCameraSystem(camera_system);
 	pipeline.attachImageProcessor(processor);

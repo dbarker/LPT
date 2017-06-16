@@ -627,7 +627,7 @@ void Reconstruct3D::reconstruct3DFrame(vector<lpt::Match::Ptr>& matches, lpt::Fr
 struct myclass{
 	bool operator() (lpt::Particle3d_Ptr p1, lpt::Particle3d_Ptr p2)
 	{
-		return (p1->X[0] < p2->X[0]);
+		return (p1->X[1] < p2->X[1]);
 	}
 } mycomp;
 
