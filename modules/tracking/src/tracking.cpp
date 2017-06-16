@@ -83,8 +83,8 @@ Tracker::~Tracker()
 	cout << "particles detected: " << particle_count << endl;
 	
     cout << "Save trajectories? (1 for yes, 0 for no)" << endl;
-    //cin >> isSave;
-	isSave = false;
+    cin >> isSave;
+	//isSave = false;
     if (isSave) {
 		stringstream file_name;
 		file_name << shared_objects->output_path << "Trajectories.txt";
