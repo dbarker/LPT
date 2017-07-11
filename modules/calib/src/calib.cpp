@@ -392,20 +392,27 @@ Chessboard::Chessboard(cv::Size board_size, double square_size) {
 	this->object_type = lpt::CHESSBOARD;
 	for( int i = 0; i < board_size.height; ++i ) {
 		for( int j = 0; j < board_size.width; ++j ) {
-			object_points.push_back(cv::Point3d(double(j * square_size),
-				double(i * square_size), 0));
+			object_points.push_back(cv::Point3f(float(j * square_size),
+				float(i * square_size), 0));
 		}
 	}
+	find_chessboard_flags = CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FAST_CHECK | CV_CALIB_CB_NORMALIZE_IMAGE;
 }
 
 bool Chessboard::find(lpt::ImageFrame& frame) {
 	frame.particles.clear();
-	vector<cv::Point2f> image_points;
+	//vector<cv::Point2f> image_points;
+	image_points.clear();
 	bool found = cv::findChessboardCorners( frame.image, board_size, image_points,
 							find_chessboard_flags);
-	if (found)
+	if (found) {
 		cv::cornerSubPix(frame.image, image_points, cv::Size(11,11), cv::Size(-1,-1),
 		cv::TermCriteria( CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1 ));
+		for (int j = 0; j < image_points.size(); ++j) {
+			ParticleImage::Ptr newparticle = ParticleImage::create(j, image_points[j].x, image_points[j].y);
+			frame.particles.push_back(newparticle);
+		}
+	}
 	return found;
 }
 
@@ -417,10 +424,11 @@ CirclesGrid::CirclesGrid(cv::Size board_size, double square_size) {
 	cout << "Calib Board: height = " << board_size.height << " , width = " << board_size.width << endl; 
 	for( int i = 0; i < board_size.height; i++ ) {
 		for( int j = 0; j < board_size.width; j++ ) {
-			object_points.push_back(cv::Point3d(double( (2 * j + i % 2) * square_size),
+			object_points.push_back(cv::Point3f(double( (2 * j + i % 2) * square_size),
 				double(i * square_size), 0));
 		}
 	}
+	find_circlesgrid_flags = cv::CALIB_CB_ASYMMETRIC_GRID | cv::CALIB_CB_CLUSTERING;
 }
 
 bool CirclesGrid::find(lpt::ImageFrame& frame) {
@@ -439,7 +447,6 @@ bool CirclesGrid::find(lpt::ImageFrame& frame) {
 void CalibrationBoard::draw(cv::Mat& image) {
 	cv::drawChessboardCorners( image, board_size, cv::Mat(image_points), true );
 }
-
 
 void Calibrator::addControls() {
 	void* calibrator_void_ptr = static_cast<void*> ( this );
@@ -544,9 +551,9 @@ void Calibrator::calibrateCamera() {
 		//double aperature_width, aperature_height;
 		double fovx, fovy, focal_length, aspect_ratio;
 		cv::Point2d principal_point;
-		cout << camera_matrix << endl;
+		cout << "camera_matrix" << endl;
 		cout << cameras[current_camera].getCameraMatrix() << endl;
-		cout << dist_coeffs << endl;
+		cout << "dist_coeffs" << endl;
 		cout << cameras[current_camera].getDistCoeffs() << endl;
 		cv::calibrationMatrixValues(camera_matrix, image_size,
 			cameras[current_camera].sensor_size[0], cameras[current_camera].sensor_size[1], fovx, fovy,
@@ -720,13 +727,12 @@ bool Calibrator::findGlobalReference(lpt::ImageFrameGroup& group) {
 			cv::Mat R = cv::Mat::zeros(3, 3, CV_64F); 
 			cv::Rodrigues(r_vec, R);
 
-			for (int i = 0; i < 3; ++i)
-				for (int j = 0; j < 3; ++j)
+			for (int i = 0; i < 3; ++i) {
+				for (int j = 0; j < 3; ++j) {
 					cameras[c].R[i][j] = R.at<double>(i,j);
-
-			cameras[c].T[0] = t_vec.at<double>(0);  
-			cameras[c].T[1] = t_vec.at<double>(1);  
-			cameras[c].T[2] = t_vec.at<double>(2);
+				}
+				cameras[c].T[i] = t_vec.at<double>(i);
+			}
 
 			vector<cv::Point2f> image_points2;
 			
@@ -1030,7 +1036,7 @@ void Calibrator::findFundamentalMatrices() {
 		}
 
 		if (pointsA.size() > 8 && pointsB.size() > 8 ) {
-			cv::Mat F = cv::findFundamentalMat(pointsA, pointsB);
+			cv::Mat F = cv::findFundamentalMat(pointsA, pointsB, CV_FM_LMEDS, 1.0, 1.0-1E-6);
 			F >> pair_it->F;
 			pair_it->epipolar_error = checkStereoCalibration( pointsA, pointsB, F ); 
 		}

@@ -72,7 +72,7 @@ double CostMinimumAcceleration::calculate(const Trajectory3d &traj, const Partic
     return lpt::calculateDistance(traj.extrap_object, particle);
 }
 
-Tracker::Tracker() : clear_drawings(false)
+Tracker::Tracker() : clear_drawings(false), particle_count(0), traj_count(10)
 {
     cout << "Tracker constructed" << endl;
 }
@@ -80,23 +80,38 @@ Tracker::Tracker() : clear_drawings(false)
 Tracker::~Tracker()
 {
     cout << "Tracker destructed" << endl;
+	cout << "particles detected: " << particle_count << endl;
+	
     cout << "Save trajectories? (1 for yes, 0 for no)" << endl;
     cin >> isSave;
+	//isSave = false;
     if (isSave) {
 		stringstream file_name;
 		file_name << shared_objects->output_path << "Trajectories.txt";
 		ofstream output(file_name.str());
-		output << trajectories.size() << endl;
+		output << trajectories.size() + active_trajs.size() << endl;
 		output << endl;
 
         int id = 0;
+		size_t link_count = 0;
         for (auto traj_it = trajectories.begin(); traj_it != trajectories.end(); traj_it++) {
+			
 			if ( (*traj_it)->objects.size() >= 10 ) {
+				link_count += (*traj_it)->objects.size();
 				saveTrajectory(output, *traj_it, id);
 				id++;
 			}
         }
+		for (auto traj_it = active_trajs.begin(); traj_it != active_trajs.end(); traj_it++) {
+			
+			if ( (*traj_it)->objects.size() >= 10 ) {
+				link_count == (*traj_it)->objects.size();
+				saveTrajectory(output, *traj_it, id);
+				id++;
+			}
+		}
 		cout << id << endl;
+		cout << "links tracked: " << link_count << endl;
     }
 }
 
@@ -108,7 +123,10 @@ void Tracker::saveTrajectory(ofstream& output, Trajectory3d_Ptr traj, int id)
 
     for (size_t i=0; i<traj->objects.size(); i++) {
         output << traj->objects[i].first->frame_index << " ";
-        for (size_t j=0; j<traj->objects[i].second.size(); j++) {
+		for (size_t j=0; j<traj->objects[i].first->X.size(); j++) {
+			output << traj->objects[i].first->X[j] << " ";
+		}
+        for (size_t j=traj->objects[i].first->X.size(); j<traj->objects[i].second.size(); j++) {
             output << traj->objects[i].second[j] << " ";
 		}
 		output << endl;
@@ -118,6 +136,7 @@ void Tracker::saveTrajectory(ofstream& output, Trajectory3d_Ptr traj, int id)
 
 void Tracker::trackFrames(lpt::Frame3d& frame1, lpt::Frame3d& frame2 )
 {
+	particle_count += frame1.objects.size() + frame2.objects.size();
     list<lpt::Particle3d_Ptr> next_unmatched_particles;
     list<lpt::Trajectory3d_Ptr> new_trajs;
 
@@ -127,7 +146,7 @@ void Tracker::trackFrames(lpt::Frame3d& frame1, lpt::Frame3d& frame2 )
     {
         std::move(frame1.objects.begin(), frame1.objects.end(), std::back_inserter(unmatched_particles));
     }
-      
+	      
     // TODO: Maybe try parallelizing this loop for multi-core system
     // Extrapolate all active trajectories
     for (list<lpt::Trajectory3d_Ptr>::iterator traj_iter = active_trajs.begin(); traj_iter != active_trajs.end(); ++traj_iter)
@@ -135,12 +154,13 @@ void Tracker::trackFrames(lpt::Frame3d& frame1, lpt::Frame3d& frame2 )
         (*traj_iter)->candidates_costs.clear();
         lpt::extrapolatePosition( *(*traj_iter) );
     }
-		
+			
     // Loop over all particles in frame2
     for (int p2 = 0; p2 < frame2.objects.size(); ++p2) {
         lpt::Particle3d& particle2 = *frame2.objects[p2];
         double lowest_cost = std::numeric_limits<double>::max();
         lpt::Trajectory3d* traj_match = 0;
+		
         // Search among active trajectories
         for (list<lpt::Trajectory3d_Ptr>::iterator traj_iter = active_trajs.begin(); traj_iter != active_trajs.end(); ++traj_iter) {
             lpt::Trajectory3d& traj = *(*traj_iter);
@@ -154,7 +174,7 @@ void Tracker::trackFrames(lpt::Frame3d& frame1, lpt::Frame3d& frame2 )
                     traj_match = &traj;
                 }
             }
-        }
+        }		
 			
         // Candidate exists within search radius among active trajectories
         if ( traj_match ) {
@@ -184,16 +204,10 @@ void Tracker::trackFrames(lpt::Frame3d& frame1, lpt::Frame3d& frame2 )
 
                 if (this->shared_objects->KF_isOn) {
                     // Create Kalman filter
-                    cv::Mat stateIni(9, 1, CV_64F);
+                    cv::Mat stateIni = cv::Mat::zeros(9, 1, CV_64F);
 
-                    for (int i=0; i<9; i++) {
-                        if (i < 3) {
-                            stateIni.at<double>(i) = particle1.get()->X[i];
-                        }
-                        else {
-                            stateIni.at<double>(i) = 0;
-                        }
-
+                    for (int i=0; i<3; i++) {
+						stateIni.at<double>(i) = particle1.get()->X[i];
                     }
 
                     newtraj->initializeKF(stateIni, params.KF_sigma_a, params.KF_sigma_z);
@@ -284,6 +298,11 @@ void Tracker::trackFrames(lpt::Frame3d& frame1, lpt::Frame3d& frame2 )
     }
     // Add newly created trajectories to the active list
     std::move( new_trajs.begin(), new_trajs.end(), std::back_inserter(active_trajs) );
+
+	if (trajectories.size() / traj_count) {
+		cout << "Tracked " << traj_count << " trajectories" << endl;
+		traj_count *= 10;
+	}
 }
 
 void Tracker::addControls()

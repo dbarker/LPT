@@ -18,6 +18,9 @@ namespace lpt
 
 using namespace std;
 
+
+//typedef accumulator_set< double, features<tag::mean, tag::variance, tag::count, tag::max, tag::min> > boost_accumulator;
+
 /**
  * @brief MatchMap
  * Bookkeeping tool to identify 4-way unique matches from epipolar matches
@@ -105,6 +108,15 @@ public:
      */
 	virtual void findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches)=0;
 
+	/**
+	 * @brief Find 3-way unique matches
+	 *
+	 * @param frame_group
+     * @param matchmap
+     * @param matches The final match list
+     */
+	virtual void find3WayMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches)=0;
+
     /**
      * @brief Initialize MatchMap
      */
@@ -156,6 +168,8 @@ public:
      */
     void printMatchMap(const lpt::ImageFrameGroup& frame_group, string output_file_name) const;
 
+	void printMatchMap(const lpt::ImageFrameGroup& frame_group, const lpt::MatchMap& match_map, string output_file_name) const;
+
 protected:
     /**
      * @brief Reset MatchMap
@@ -197,7 +211,7 @@ public:
 	class Parameters {
 	public:
         Parameters() : match_threshold(0.5), match_thresh_level(5) {}
-		double match_threshold;
+		float match_threshold;
 		int match_thresh_level;
 	} params;
 
@@ -206,14 +220,15 @@ public:
 		
     virtual void initialize();
 	virtual void initializeEpipolarMatchThread(int thread_id){}
-    virtual void addControls() ;
+    virtual void addControls();
 
 	virtual void findEpipolarMatches(const lpt::ImageFrameGroup& cameragroup, lpt::MatchMap& matchmap);
 	virtual void findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& MatchMap, vector<lpt::Match::Ptr>& matches);
+	virtual void find3WayMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& MatchMap, vector<lpt::Match::Ptr>& matches);
 
 	friend void callbackMatchThresh(int state, void* data) {
 		PointMatcher* matcher = static_cast<PointMatcher*>(data);
-		matcher->params.match_threshold = matcher->params.match_thresh_level / 10.0;
+		matcher->params.match_threshold = static_cast<float>(matcher->params.match_thresh_level) / 10.0;
 	}
 
 private:
@@ -249,12 +264,15 @@ public:
      */
 	virtual void draw(lpt::Frame3d& frame);
 
-	inline void setSharedObjects( std::shared_ptr<SharedObjects> new_shared_objects) { shared_objects = new_shared_objects; }
+	inline void setSharedObjects( std::shared_ptr<SharedObjects> new_shared_objects) { shared_objects = new_shared_objects; axis.open(shared_objects->output_path + "axis.txt"); }
     inline std::shared_ptr<SharedObjects> getSharedObjects() const { return shared_objects; }
 protected:
 	std::shared_ptr < lpt::SharedObjects > shared_objects;
 private:
 	lpt::Regression solver;	
+	ofstream axis;
+	vector<array<double, 3>> positions;
+	size_t frame_count;
 };
 
 class Reconstruct3DwithSVD : public Reconstruct3D

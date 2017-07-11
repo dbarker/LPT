@@ -10,7 +10,7 @@ namespace lpt {
 using namespace std;
 
 void undistortPoints(const lpt::Camera& camera, lpt::ImageFrame& frame) {
-	if (frame.particles.size() > 0) {
+	if (!frame.particles.empty()) {
 		vector<cv::Point2d> image_points(frame.particles.size());
 		
 		for (int j = 0; j < frame.particles.size(); ++j) {
@@ -158,9 +158,11 @@ GaussianBlur::~GaussianBlur()
 
 void Detector::drawResult(ImageFrame &frame)
 {
-    cv::cvtColor(frame.image, frame.image, CV_GRAY2BGR);
+    //cv::cvtColor(frame.image, frame.image, CV_GRAY2BGR);
     for (int i = 0; i < frame.particles.size(); i++) {
-        cv::circle( frame.image, cv::Point( static_cast<int>(frame.particles[i]->x + 0.5), static_cast<int>(frame.particles[i]->y + 0.5)), 5, cv::Scalar(0, 255, 0), 1, 8, 2);
+		auto particle = frame.particles[i];
+        cv::circle( frame.image, cv::Point( static_cast<int>(particle->x), static_cast<int>(particle->y) ), 
+			static_cast<int>(particle->radius), 200, 1);
     }
 }
 
@@ -174,9 +176,9 @@ FindContoursDetector::FindContoursDetector()
     cout << "Find Contours detector constructed" << endl;
 }
 
-void FindContoursDetector::detectFeatures(const cv::Mat &image, vector<ParticleImage::Ptr> &features)
+void FindContoursDetector::detectFeatures(const cv::Mat &image, vector<ParticleImage::Ptr> &features, vector<vector<cv::Point>>& contours)
 {
-    vector<vector< cv::Point > > contours;
+    //vector<vector< cv::Point > > contours;
     cv::findContours(image, contours, params.mode, params.method);
     //double area;
     for(int c = 0; c < contours.size(); ++c) {
@@ -191,6 +193,22 @@ void FindContoursDetector::detectFeatures(const cv::Mat &image, vector<ParticleI
     }
 }
 
+//void FindContoursDetector::detectFeatures(const cv::Mat &image, vector<ParticleImage::Ptr> &features, vector<vector<cv::Point>>& contours)
+//{
+//    cv::findContours(image, contours, params.mode, params.method);
+//    //double area;
+//    for(int c = 0; c < contours.size(); ++c) {
+//        //area = cv::contourArea( contours[c] );
+//        if( contours[c].size() > (double)params.min_contour_area  && contours[c].size() < (double)params.max_contour_area) {
+//        //if( area > (double)params.min_contour_area  && area < (double)params.max_contour_area) {
+//            cv::Moments mom = cv::moments( cv::Mat(contours[c]) );
+//            if( mom.m00 > 0 ) {
+//                features.push_back( ParticleImage::create(static_cast<int>(features.size()), mom.m10 / mom.m00, mom.m01 / mom.m00) );
+//            }
+//        }
+//    }
+//}
+
 void FindContoursDetector::addControls()
 {
     cout << "\t--Adding Find Contours Detector Controls to window: " << endl;
@@ -198,9 +216,9 @@ void FindContoursDetector::addControls()
     cv::createTrackbar("Max Area", string(), &params.max_contour_area, 1000, 0, 0 );
 }
 
-void FindContoursDetector::drawContours(cv::Mat &result_image, vector<vector<cv::Point> > contours)
+void Detector::drawContours(cv::Mat &image, vector<vector<cv::Point> > contours)
 {
-    cv::drawContours( result_image, contours, -1, cv::Scalar(0), 1 );
+    cv::drawContours( image, contours, -1, cv::Scalar(0, 255, 0), 1 );
 }
 
 FindContoursDetector::~FindContoursDetector()
@@ -213,7 +231,7 @@ GoodFeaturesToTrackDetector::GoodFeaturesToTrackDetector()
     cout << "Good Features To Track (GFTT) detector constructed" << endl;
 }
 
-void GoodFeaturesToTrackDetector::detectFeatures(const cv::Mat &image, vector<ParticleImage::Ptr> &features)
+void GoodFeaturesToTrackDetector::detectFeatures(const cv::Mat &image, vector<ParticleImage::Ptr> &features, vector<vector<cv::Point>>& contours)
 {
     //CV_Assert(image.depth() != sizeof(uchar));
     if (! image.isContinuous())
@@ -293,7 +311,7 @@ void processImages( Camera& camera, ImageProcessor& processor, Detector& detecto
 		cv::Mat temp_image = camera.frames[i].image.clone();
 		processor.processImage( temp_image );
 		cv::imshow("processed image", temp_image );
-		detector.detectFeatures( temp_image, camera.frames[i].particles);
+		detector.detectFeatures( temp_image, camera.frames[i].particles, camera.frames[i].contours);
 		detector.drawResult( camera.frames[i] );
 		cv::imshow(result_window.str(), camera.frames[i].image);
 	}

@@ -211,10 +211,10 @@ void PointMatcherCUDA::initializeEpipolarMatchThread(int thread_id) {
 			
 	streams.clear();
 	for (int f = 2; f < camera_pairs_h.size(); ++f) {
-		if ( camera_pairs_h.size() % f == 0 ) {
+		//if ( camera_pairs_h.size() % f == 0 ) {
 			streams.resize(f);
-			break;
-		}
+			//break;
+		//}
 	}
 	cout << "Streams size = " << streams.size() << endl;
 	for(int i = 0; i < streams.size(); ++i) 
@@ -228,6 +228,11 @@ void PointMatcherCUDA::initializeEpipolarMatchThread(int thread_id) {
 
 void PointMatcherCUDA::initialize() {
 	this->initializeMatchMap();
+}
+
+void PointMatcherCUDA::addControls() {
+	void* matcher_void_ptr = static_cast<void*> ( this );
+	cv::createTrackbar("Match Thresh", string() , &params.match_thresh_level, 100, callbackMatchThreshcuda, matcher_void_ptr);
 }
 
 void PointMatcherCUDA::findEpipolarMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap) {
@@ -309,15 +314,85 @@ void PointMatcherCUDA::findEpipolarMatches(const lpt::ImageFrameGroup& frame_gro
 
 void PointMatcherCUDA::findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches) {
 	vector<int> num_particles(frame_group.size());
-		num_particles[0] = frame_group[0].particles.size();
-		for(int i = 1; i < frame_group.size(); ++i) 
-			num_particles[i] = frame_group[i].particles.size() + num_particles[i-1];
+	num_particles[0] = frame_group[0].particles.size();
+	for(int i = 1; i < frame_group.size(); ++i) 
+		num_particles[i] = frame_group[i].particles.size() + num_particles[i-1];
 
-        for (int cam_a = 0; cam_a < frame_group.size() - 1; ++cam_a) {
-			int a_start = (cam_a !=0 ? num_particles[cam_a - 1] : 0);
-			for (int a = 0; a < frame_group[cam_a].particles.size(); ++a) {
-                lpt::ParticleImage::Ptr Pa = frame_group[cam_a].particles[a];
-				if( ! Pa->is_4way_matched ) 
+    for (int cam_a = 0; cam_a < frame_group.size() - 3; ++cam_a) {
+		int a_start = (cam_a !=0 ? num_particles[cam_a - 1] : 0);
+		for (int a = 0; a < frame_group[cam_a].particles.size(); ++a) {
+            lpt::ParticleImage::Ptr Pa = frame_group[cam_a].particles[a];
+			if( ! Pa->is_4way_matched ) 
+            for (int cam_b = cam_a + 1; cam_b < frame_group.size() - 2; ++cam_b) {
+				int b_start = (cam_b !=0 ? num_particles[cam_b-1] : 0);
+                for(int match_ab = 0; match_ab < NUM_MATCHES; ++match_ab) { //loop through all A,B matches
+					int b = matchmap[a + a_start][cam_b][match_ab]; 
+					if (b < 0)
+						break;
+					lpt::ParticleImage::Ptr Pb = frame_group[cam_b].particles[b];
+						
+					if( ! Pb->is_4way_matched ) 
+					for (int cam_c = cam_b + 1; cam_c < frame_group.size() - 1; ++cam_c) {
+                        int c_start = (cam_c !=0 ? num_particles[cam_c-1] : 0);
+						for (int match_bc = 0; match_bc < NUM_MATCHES; ++match_bc) {
+                            int c = matchmap[b + b_start][cam_c][match_bc];
+							if (c < 0) 
+								break;
+								
+							lpt::ParticleImage::Ptr Pc = frame_group[cam_c].particles[c];
+
+							if( ! Pc->is_4way_matched && std::count(matchmap[a + a_start][cam_c].begin(), matchmap[a + a_start][cam_c].end(), c) )  
+                            for (int cam_d = cam_c + 1; cam_d < frame_group.size(); ++cam_d) {
+								vector<lpt::Match::Ptr> matches4way;
+                                int d_start = (cam_d !=0 ? num_particles[cam_d-1] : 0);
+								for (int match_cd = 0; match_cd < NUM_MATCHES; ++match_cd) {
+									int d = matchmap[c + c_start][cam_d][match_cd];
+									if (d < 0)
+										break;
+									lpt::ParticleImage::Ptr Pd = frame_group[cam_d].particles[d];
+									if( ! Pd->is_4way_matched && std::count(matchmap[a + a_start][cam_d].begin(), matchmap[a + a_start][cam_d].end(), d)  && std::count(matchmap[b + b_start][cam_d].begin(), matchmap[b+b_start][cam_d].end(), d)  ) {
+										if(! Pa->is_4way_matched && ! Pb->is_4way_matched && ! Pc->is_4way_matched && ! Pd->is_4way_matched) { 
+											lpt::Match::Ptr newmatch = lpt::Match::create();
+											newmatch->addParticle(Pa,cam_a);
+											newmatch->addParticle(Pb,cam_b);
+											newmatch->addParticle(Pc,cam_c);
+											newmatch->addParticle(Pd,cam_d);
+											matches4way.push_back(std::move(newmatch));
+											Pa->is_4way_matched = true;
+											Pb->is_4way_matched = true;
+											Pc->is_4way_matched = true;
+											Pd->is_4way_matched = true;
+											match_ab = NUM_MATCHES;
+											match_bc = NUM_MATCHES;
+											match_cd = NUM_MATCHES;
+												
+										}
+                                    } 
+                                }
+								std::move(matches4way.begin(), matches4way.end(), std::back_inserter(matches) );
+                            }
+                        }
+                    }
+                }
+            }
+		}
+    }
+}
+
+void PointMatcherCUDA::find3WayMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches) {
+	vector<int> num_particles(frame_group.size());
+	num_particles[0] = frame_group[0].particles.size();
+	for(int i = 1; i < frame_group.size(); ++i) 
+		num_particles[i] = frame_group[i].particles.size() + num_particles[i-1];
+	
+	int num_cameras = frame_group.size();
+	matches.clear();
+
+	for (int cam_a = 0; cam_a < frame_group.size() - 2; ++cam_a) {
+		int a_start = (cam_a !=0 ? num_particles[cam_a - 1] : 0);
+		for (int a = 0; a < frame_group[cam_a].particles.size(); ++a) {
+            lpt::ParticleImage::Ptr Pa = frame_group[cam_a].particles[a];
+			if( ! Pa->is_4way_matched ) {
                 for (int cam_b = cam_a + 1; cam_b < frame_group.size() - 1; ++cam_b) {
 					int b_start = (cam_b !=0 ? num_particles[cam_b-1] : 0);
                     for(int match_ab = 0; match_ab < NUM_MATCHES; ++match_ab) { //loop through all A,B matches
@@ -326,54 +401,44 @@ void PointMatcherCUDA::findUniqueMatches(const lpt::ImageFrameGroup& frame_group
 							break;
 						lpt::ParticleImage::Ptr Pb = frame_group[cam_b].particles[b];
 						
-						if( ! Pb->is_4way_matched ) 
-						for (int cam_c = cam_b + 1; cam_c < frame_group.size(); ++cam_c) {
-                            int c_start = (cam_c !=0 ? num_particles[cam_c-1] : 0);
-							for (int match_bc = 0; match_bc < NUM_MATCHES; ++match_bc) {
-                                int c = matchmap[b + b_start][cam_c][match_bc];
-								if (c < 0) 
-									break;
+						if( ! Pb->is_4way_matched ) {
+							for (int cam_c = cam_b + 1; cam_c < frame_group.size(); ++cam_c) {
+								int c_start = (cam_c !=0 ? num_particles[cam_c-1] : 0);
+								for (int match_bc = 0; match_bc < NUM_MATCHES; ++match_bc) {
+									int c = matchmap[b + b_start][cam_c][match_bc];
+									if (c < 0) 
+										break;
 								
-								lpt::ParticleImage::Ptr Pc = frame_group[cam_c].particles[c];
+									lpt::ParticleImage::Ptr Pc = frame_group[cam_c].particles[c];
 
-								if( ! Pc->is_4way_matched && std::count(matchmap[a + a_start][cam_c].begin(), matchmap[a + a_start][cam_c].end(), c) )  
-                                for (int cam_d = cam_c + 1; cam_d < frame_group.size(); ++cam_d) {
-									vector<lpt::Match::Ptr> matches4way;
-                                    int d_start = (cam_d !=0 ? num_particles[cam_d-1] : 0);
-									for (int match_cd = 0; match_cd < NUM_MATCHES; ++match_cd) {
-										int d = matchmap[c + c_start][cam_d][match_cd];
-										if (d < 0)
-											break;
-										lpt::ParticleImage::Ptr Pd = frame_group[cam_d].particles[d];
-										if( ! Pd->is_4way_matched && std::count(matchmap[a + a_start][cam_d].begin(), matchmap[a + a_start][cam_d].end(), d)  && std::count(matchmap[b + b_start][cam_d].begin(), matchmap[b+b_start][cam_d].end(), d)  ) {
-											if(! Pa->is_4way_matched && ! Pb->is_4way_matched && ! Pc->is_4way_matched && ! Pd->is_4way_matched) { 
-												lpt::Match::Ptr newmatch = lpt::Match::create();
-												newmatch->addParticle(Pa,cam_a);
-												newmatch->addParticle(Pb,cam_b);
-												newmatch->addParticle(Pc,cam_c);
-												newmatch->addParticle(Pd,cam_d);
-												matches4way.push_back(std::move(newmatch));
-												Pa->is_4way_matched = true;
-												Pb->is_4way_matched = true;
-												Pc->is_4way_matched = true;
-												Pd->is_4way_matched = true;
-												match_ab = NUM_MATCHES;
-												match_bc = NUM_MATCHES;
-												match_cd = NUM_MATCHES;
+									if( ! Pc->is_4way_matched && std::count(matchmap[a + a_start][cam_c].begin(), matchmap[a + a_start][cam_c].end(), c) ) {
+										lpt::Match::Ptr newmatch = lpt::Match::create();
+										newmatch->addParticle(Pa,cam_a);
+										newmatch->addParticle(Pb,cam_b);
+										newmatch->addParticle(Pc,cam_c);
+
+										matches.push_back(std::move(newmatch));
 												
-											}
-                                        } 
-                                    }
-									std::move(matches4way.begin(), matches4way.end(), std::back_inserter(matches) );
+										Pa->is_4way_matched = true;
+										Pb->is_4way_matched = true;
+										Pc->is_4way_matched = true;
+
+										match_ab = NUM_MATCHES;
+										match_bc = NUM_MATCHES;
+												
+										cam_b = num_cameras;
+										cam_c = num_cameras;
+									}
                                 }
                             }
                         }
                     }
                 }
 			}
-      }
+		}
+	}
+	//cout << matches.size() << endl;
 }
-
 
 void PointMatcherCUDA::findEpipolarMatchesStreams(lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap) {
 	thrust::fill(matches2way_d.begin(), matches2way_d.end(), match_initializer);

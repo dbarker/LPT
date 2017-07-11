@@ -46,15 +46,10 @@ class PointMatcherCUDA : public lpt::Correspondence {
 public:
 	typedef std::shared_ptr<lpt::PointMatcherCUDA> Ptr;
 	static inline lpt::PointMatcherCUDA::Ptr create() { return std::make_shared<lpt::PointMatcherCUDA>(); }
-	
-	friend void callbackMatchThreshcuda(int state, void* data) {
-		PointMatcherCUDA* matcher = static_cast<PointMatcherCUDA*>(data);
-		matcher->params.match_threshold = matcher->params.match_thresh_level / static_cast<float>(10.0);
-	}
 
 	class Parameters {
 	public:
-		Parameters() : match_thresh_level(5), match_threshold(0.5){}
+		Parameters() : match_thresh_level(10), match_threshold(0.5){}
 		float match_threshold;
 		int match_thresh_level;
 	} params;
@@ -63,12 +58,15 @@ public:
 
 	virtual void initialize();
 	virtual void initializeEpipolarMatchThread(int thread_id);
-	virtual void addControls() {
-		void* matcher_void_ptr = static_cast<void*> ( this );
-		cv::createTrackbar("Match Thresh", string() , &params.match_thresh_level, 50, callbackMatchThreshcuda, matcher_void_ptr);
-	}
+	virtual void addControls();
     virtual void findUniqueMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches);
     virtual void findEpipolarMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap);
+	virtual void find3WayMatches(const lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap, vector<lpt::Match::Ptr>& matches);
+
+	friend void callbackMatchThreshcuda(int state, void* data) {
+		PointMatcherCUDA* matcher = static_cast<PointMatcherCUDA*>(data);
+		matcher->params.match_threshold = static_cast<float>(matcher->params.match_thresh_level) / 10.0;
+	}
 
 private:
 	void findEpipolarMatchesStreams(lpt::ImageFrameGroup& frame_group, lpt::MatchMap& matchmap);
