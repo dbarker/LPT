@@ -75,11 +75,11 @@ namespace lpt {
 	class Recorder {
 	public:
 		typedef std::shared_ptr<lpt::Recorder> Ptr;
-		static inline lpt::Recorder::Ptr create(int num_cams, string path = "./", int length = 240) { 
+		static inline lpt::Recorder::Ptr create(int num_cams, string path = "./", int length = 900) { 
 			return lpt::Recorder::Ptr( new lpt::Recorder(num_cams, path, length) ); 
 		}
 
-		Recorder(int num_cams, string path = "./", int length = 240) 
+		Recorder(int num_cams, string path = "./", int length = 900) 
 			: number_of_cameras(num_cams), path(path), clip_length(length)
 		{ 
 			videos.resize( number_of_cameras ); 

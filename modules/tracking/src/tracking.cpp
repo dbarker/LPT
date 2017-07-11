@@ -72,7 +72,7 @@ double CostMinimumAcceleration::calculate(const Trajectory3d &traj, const Partic
     return lpt::calculateDistance(traj.extrap_object, particle);
 }
 
-Tracker::Tracker() : clear_drawings(false), particle_count(0)
+Tracker::Tracker() : clear_drawings(false), particle_count(0), traj_count(10)
 {
     cout << "Tracker constructed" << endl;
 }
@@ -298,6 +298,11 @@ void Tracker::trackFrames(lpt::Frame3d& frame1, lpt::Frame3d& frame2 )
     }
     // Add newly created trajectories to the active list
     std::move( new_trajs.begin(), new_trajs.end(), std::back_inserter(active_trajs) );
+
+	if (trajectories.size() / traj_count) {
+		cout << "Tracked " << traj_count << " trajectories" << endl;
+		traj_count *= 10;
+	}
 }
 
 void Tracker::addControls()

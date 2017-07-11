@@ -177,6 +177,7 @@ private:
     std::shared_ptr<lpt::SharedObjects>         shared_objects;
     bool                                        isSave;
 	size_t										particle_count;
+	size_t										traj_count;
 }; 
 
 /**
